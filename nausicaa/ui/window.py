@@ -97,7 +97,9 @@ class MainWindow(Adw.ApplicationWindow):
         self.set_size_request(480, 320)
         self._click_toggled = False
         self.pip = False                          # image dans l'image
-        self._pip_saved = (settings["window_width"], settings["window_height"], False, False)
+        self._pip_target = (0, 0)
+        self._pip_frame = (0, 0)
+        self._pip_saved =(settings["window_width"], settings["window_height"], False, False)
         self._wheel_acc = 0.0
         self._hide_timer = 0
         self._over_bars = False
@@ -448,11 +450,17 @@ class MainWindow(Adw.ApplicationWindow):
         self.controls.set_visible(False)
         # sans aucune décoration : ni ombre, ni bordure, ni coins du thème (window.csd), l'image seule
         self.set_decorated(False)
-        w = self._pip_width()
-        vw, vh = self.c.player.get("dwidth", 0), self.c.player.get("dheight", 0)
-        h = int(round(w * vh / vw)) if vw and vh else int(w * 9 / 16)
+        if settings["pip_width"] >= 160 and settings["pip_height"] >= 90:
+            w, h = settings["pip_width"], settings["pip_height"]      # taille retenue (Tof)
+        else:
+            # première fois : 16:9, quelle que soit l'image (un film en 2.39 a ses bandes noires, comme
+            # Firefox ; une fenêtre à la proportion du film était trop plate)
+            w = self._pip_width()
+            h = int(round(w * 9 / 16))
         self.set_size_request(160, 90)
         self.set_default_size(w, h)
+        self._pip_target = (w, h)
+        self._pip_frame = (0, 0)
         self.lookup_action("pip").set_state(GLib.Variant("b", True))
         # la fenêtre a pris sa nouvelle taille un peu plus tard : placée et mise au-dessus ensuite
         for ms in (150, 450):
@@ -462,6 +470,14 @@ class MainWindow(Adw.ApplicationWindow):
     def _place_pip(self):
         if not self.pip:
             return False
+        tw, th = self._pip_target
+        dw, dh = tw - self.get_width(), th - self.get_height()
+        if self._pip_frame == (0, 0) and (dw or dh) and 0 < dw < 60 and 0 < dh < 60:
+            # la taille par défaut compte une marge que la fenêtre n'a pas (10 px chez GTK 4.14 sans
+            # décoration) : 400 × 225 donnait 390 × 215, plus du 16:9 — compensée une fois, et gardée
+            # pour retenir la taille (sinon la fenêtre rétrécissait à chaque ouverture)
+            self._pip_frame = (dw, dh)
+            self.set_default_size(tw + dw, th + dh)
         from . import x11
         x11.set_above(self, True)
         area = x11.workarea(self)
@@ -472,13 +488,29 @@ class MainWindow(Adw.ApplicationWindow):
         ax, ay, aw, ah = area
         margin = 24 * scale
         w, h = self.get_width() * scale, self.get_height() * scale
-        x11.move(self, ax + aw - w - margin, ay + ah - h - margin)
+        x, y = settings["pip_x"], settings["pip_y"]
+        # position retenue, si la fenêtre y tient encore entière (autre écran, résolution changée : coin)
+        if not (x >= ax and y >= ay and x + w <= ax + aw and y + h <= ay + ah):
+            x, y = ax + aw - w - margin, ay + ah - h - margin
+        x11.move(self, x, y)
         return False
+
+    def remember_pip(self):
+        """Taille et position de l'image dans l'image, pour la prochaine fois (sortie, fermeture)."""
+        if not self.pip:
+            return
+        from . import x11
+        settings["pip_width"] = self.get_width()           # taille vue (sans la marge, réajoutée à l'ouverture)
+        settings["pip_height"] = self.get_height()
+        pos = x11.position(self)
+        if pos is not None:
+            settings["pip_x"], settings["pip_y"] = pos
 
     def leave_pip(self):
         if not self.pip:
             return
         from . import x11
+        self.remember_pip()
         self.pip = False
         self.remove_css_class("pip")
         self.header.set_visible(True)
@@ -1023,6 +1055,7 @@ class MainWindow(Adw.ApplicationWindow):
     # -- fermeture -----------------------------------------------------------------------------
     def _on_close_request(self, *_):
         if self.pip:                             # fermée en image dans l'image : la taille d'avant
+            self.remember_pip()
             settings["window_width"], settings["window_height"] = self._pip_saved[:2]
         elif not self.is_fullscreen() and not self.is_maximized():
             settings["window_width"] = self.get_width()

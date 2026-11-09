@@ -85,6 +85,12 @@ tests, paquet.
   coins — une priorité plus haute gagne, quelle que soit la spécificité). Bords à nous : 12 px près d'un
   bord / coin = curseur de redimensionnement et `begin_resize` (`_pip_edge`). Au survol : capsule
   précédent / lecture / suivant et bouton de retour en haut à gauche. Sortie : fenêtre recentrée.
+  Première fois en 16:9 (bandes noires pour un film en 2.39, comme Firefox) ; ensuite taille et position
+  retenues (`pip_width/height/x/y`, à la sortie et à la fermeture) — position gardée seulement si la fenêtre
+  y tient encore entière, sinon le coin. Taille par défaut ≠ taille vue sans décoration (400 × 225 →
+  390 × 215) : écart mesuré à la mise en place et compensé (`_pip_frame`). Déplacement : message EWMH
+  `_NET_MOVERESIZE_WINDOW` + XMoveWindow (`x11.move`) ; la mise en place (150 / 450 ms) passe après un
+  déplacement trop rapproché (le test attend 0,7 s).
   `translate_coordinates` : (x, y) dans le PyGObject de Zorin, (ok, x, y) ailleurs → `_to_window`.
   `ui/x11.py` (libX11 par ctypes, sa propre connexion) : `_NET_WM_STATE_ABOVE` par ClientMessage à la
   racine, `XMoveWindow` en bas à droite de la zone utile (`GdkX11.X11Monitor.get_workarea`), après le

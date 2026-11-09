@@ -31,7 +31,12 @@ DEFAULTS: dict[str, Any] = {
     "window_width": 960,
     "window_height": 600,
     "playlist_visible": False,
-    "show_remaining": False,        # à droite de la barre : temps restant (« -37:15 ») au lieu de la durée
+    "show_remaining": False,
+    # image dans l'image : taille (px logiques) et position (px de l'écran X11) retenues ; 0 / -1 : aucune
+    "pip_width": 0,
+    "pip_height": 0,
+    "pip_x": -1,
+    "pip_y": -1,        # à droite de la barre : temps restant (« -37:15 ») au lieu de la durée
     "features": {},                 # fonctionnalités activées / désactivées (voir features.py)
 }
 

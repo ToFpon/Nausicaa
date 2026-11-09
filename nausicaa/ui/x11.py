@@ -102,10 +102,26 @@ def set_above(window, above: bool) -> bool:
 
 
 def move(window, x: int, y: int) -> bool:
-    """Placer la fenêtre (coordonnées X11, en pixels de l'écran)."""
+    """Placer la fenêtre (coordonnées X11, en pixels de l'écran).
+
+    Demandé au gestionnaire de fenêtres (_NET_MOVERESIZE_WINDOW, source « application ») : un simple
+    XMoveWindow n'était suivi que la première fois (openbox ; Mutter applique aussi le message EWMH).
+    XMoveWindow en plus, pour un gestionnaire qui ne connaîtrait pas le message."""
     dpy, wid = _display(), xid(window)
     if dpy is None or wid is None:
         return False
+    ev = _XEvent()
+    ev.xclient.type = CLIENT_MESSAGE
+    ev.xclient.send_event = 1
+    ev.xclient.window = wid
+    ev.xclient.message_type = _lib.XInternAtom(dpy, b"_NET_MOVERESIZE_WINDOW", 0)
+    ev.xclient.format = 32
+    # gravité NorthWest (1), x et y fournis (bits 8 et 9), source : application (bit 12)
+    ev.xclient.l[0] = 1 | (1 << 8) | (1 << 9) | (1 << 12)
+    ev.xclient.l[1] = int(x)
+    ev.xclient.l[2] = int(y)
+    _lib.XSendEvent(dpy, _lib.XDefaultRootWindow(dpy), 0, SUBSTRUCTURE_REDIRECT | SUBSTRUCTURE_NOTIFY,
+                    ctypes.byref(ev))
     _lib.XMoveWindow(dpy, wid, int(x), int(y))
     _lib.XFlush(dpy)
     return True

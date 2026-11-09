@@ -278,6 +278,9 @@ def image_dans_l_image(win):
     yield Wait(3, until=lambda: win.get_width() <= 420)
     print("  taille :", win.get_width(), win.get_height(), win.get_default_size(), win.is_maximized())
     check(win.pip and win.get_width() <= 420, "image dans l'image : petite fenêtre")
+    yield pump(0.7)                              # mise en place terminée (150 et 450 ms)
+    check(abs(win.get_width() * 9 / 16 - win.get_height()) < 4,
+          f"première fois : 16:9 ({win.get_width()} × {win.get_height()})")
     check(not win.toolbar.get_reveal_top_bars() and not win.controls_visible(), "image seule, sans barres")
     yield Wait(2, until=lambda: "ABOVE" in _wm_state(win))
     check("ABOVE" in _wm_state(win), "toujours au-dessus (X11 : _NET_WM_STATE_ABOVE)")
@@ -315,6 +318,10 @@ def image_dans_l_image(win):
     win._on_click(None, 1, w - 2, h - 2)
     win._on_drag_begin(drag, w - 2, h - 2)
     check(win._dragging_window and c().playing == playing, "glisser un coin : redimensionner, pas de pause")
+    from nausicaa.ui import x11 as _x11
+    _x11.move(win, 100, 120)                     # comme si on l'avait glissée là
+    yield pump(0.5)
+    pip_size = (win.get_width(), win.get_height())
     win._on_click(None, 1, 10, 10)
     win._on_click(None, 2, 10, 10)               # double-clic : retour, sans pause
     yield Wait(3, until=lambda: win.get_width() > 420)
@@ -332,8 +339,13 @@ def image_dans_l_image(win):
         cx = pos[0] + win.get_width() / 2
         cy = pos[1] + win.get_height() / 2
         check(abs(cx - 640) < 60 and abs(cy - 400) < 60, f"fenêtre revenue au centre de l'écran ({pos})")
+    check((settings["pip_x"], settings["pip_y"]) == (100, 120)
+          and (settings["pip_width"], settings["pip_height"]) == pip_size, "taille et position retenues")
     win.activate_action("win.pip", None)
     yield Wait(3, until=lambda: win.pip and win.get_width() <= 420)
+    yield pump(0.6)
+    check(_x11.position(win) == (100, 120) and (win.get_width(), win.get_height()) == pip_size,
+          "rouverte au même endroit, à la même taille")
     win.activate_action("win.leave-fullscreen", None)          # Échap
     yield Wait(3, until=lambda: not win.pip)
     check(not win.pip, "Échap : quitte l'image dans l'image")
