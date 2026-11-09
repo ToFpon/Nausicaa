@@ -71,6 +71,7 @@ tests, paquet.
   lecteur MPRIS actif — Ithaca les recevait, Nausicaa 0.1.1 non. Pause / Stop = pause (vidéo gardée),
   Volume 0..1 = 0..100 %, Rate = vitesse de mpv, Fullscreen (racine) lu / changé par l'application.
   Démarré / arrêté en direct (`features` « mpris »), seulement avec un bus de session.
+  Validé chez Tof avec son casque Bluetooth (0.1.2).
 - Décodage matériel : sans `/proc/driver/nvidia`, `gpu_hwdec_interop=vaapi` — sinon mpv charge aussi
   l'interop CUDA à la création du contexte de rendu et écrit « Cannot load libcuda.so.1 » (vu chez Tof).
 - `app.py` : instance unique, HANDLES_OPEN + ligne de commande (`--enqueue`), fermer = quitter,
