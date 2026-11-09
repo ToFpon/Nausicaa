@@ -76,6 +76,17 @@ tests, paquet.
   window_bg_color seul = le gris des listes, refusé). Pas la classe « osd » de libadwaita (noir, barre
   blanche). En-tête du plein écran : style du thème, rien d'imposé. Validé chez Tof (0.1.4).
   `tools/screenshot.py --css=FICHIER` imite un thème (@define-color).
+- Image dans l'image (Ctrl+P, bouton à icône à nous `data/icons/…/nausicaa-pip-symbolic.svg` — Adwaita 46
+  n'en a pas —, menus ; demande de Tof, X11 seulement voulu) : `MainWindow.enter_pip / leave_pip`. En-tête et
+  barre de commandes `set_visible(False)` (un Gtk.Revealer fermé garde la LARGEUR minimale de son contenu :
+  la fenêtre ne descendait pas sous ~530 px), file cachée, 400 px de large à la proportion de l'image.
+  `ui/x11.py` (libX11 par ctypes, sa propre connexion) : `_NET_WM_STATE_ABOVE` par ClientMessage à la
+  racine, `XMoveWindow` en bas à droite de la zone utile (`GdkX11.X11Monitor.get_workarea`), après le
+  redimensionnement (150 et 450 ms) ; hors X11, rien. Clic = pause ; glisser (> 8 px) = `begin_move` et
+  pause du clic annulée ; double-clic / Échap = retour (taille, maximisée, file d'avant). Taille enregistrée
+  à la fermeture : celle d'avant (`_pip_saved`). Testé : `image_dans_l_image` d'ui_smoke (openbox, xprop).
+  `tools/screenshot.py --pip` capture l'écran réel.
+- Temps restant / durée totale (clic sur la durée) : réglage `show_remaining`, retenu (0.1.8).
 - `backend/mpris.py` (repris d'Ithaca, demandé par Tof) : `org.mpris.MediaPlayer2.nausicaa`. Le casque
   Bluetooth passe par là : BlueZ relaie l'AVRCP (double tape = PlayPause, écouteurs retirés = Pause) au
   lecteur MPRIS actif — Ithaca les recevait, Nausicaa 0.1.1 non. Pause / Stop = pause (vidéo gardée),

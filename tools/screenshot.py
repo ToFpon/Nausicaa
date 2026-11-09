@@ -5,6 +5,7 @@
 
 Options : --dark --size=LxH --delay=ms --welcome (page d'accueil) --playlist (file affichée)
           --volume (volume affiché sur l'image) --fullscreen (plein écran, barres affichées)
+          --pip (image dans l'image, écran réel)
           --prefs=page (general, features) --css=FICHIER (couleurs d'un thème à imiter)
 Vidéos d'exemple générées par ffmpeg (fractales), sortie son factice, configuration jetable.
 --fullscreen lance openbox et capture l'écran réel (`import -window root`) : la capture d'un widget
@@ -32,7 +33,8 @@ for a in sys.argv[2:]:
 delay = int(opts.get("delay", 4000))
 
 WM = None
-if "fullscreen" in opts and shutil.which("openbox"):
+SCREEN = "fullscreen" in opts or "pip" in opts       # capture de l'écran réel, gestionnaire de fenêtres
+if SCREEN and shutil.which("openbox"):
     import time
     WM = subprocess.Popen(["openbox", "--sm-disable"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(0.5)
@@ -73,7 +75,7 @@ def demo_series() -> str:
 
 def snap(win):
     def do():
-        if "fullscreen" in opts:
+        if SCREEN:
             subprocess.run(["import", "-window", "root", out], check=True)
             print("capture", out, "(écran)")
         else:
@@ -123,6 +125,8 @@ def on_ready(win):
     if "fullscreen" in opts:
         GLib.timeout_add(1800, lambda: (win.fullscreen(), False)[1])
         GLib.timeout_add(delay - 900, lambda: (win._reveal_bars(True), False)[1])
+    if "pip" in opts:
+        GLib.timeout_add(1800, lambda: (win.enter_pip(), False)[1])
     if "volume" in opts:
         GLib.timeout_add(delay - 600, lambda: (settings.__setitem__("volume", 70), win.show_volume(), False)[2])
     if "prefs" in opts:

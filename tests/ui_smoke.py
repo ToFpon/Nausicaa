@@ -257,6 +257,50 @@ def plein_ecran_barres(win):
           "Échap : commandes revenues dans la fenêtre")
 
 
+def _wm_state(win) -> str:
+    """_NET_WM_STATE de la fenêtre, lu par xprop (ce que voit le gestionnaire de fenêtres)."""
+    import subprocess
+    from nausicaa.ui import x11
+    wid = x11.xid(win)
+    if wid is None or not shutil.which("xprop"):
+        return ""
+    out = subprocess.run(["xprop", "-id", str(wid), "_NET_WM_STATE"], capture_output=True, text=True)
+    return out.stdout
+
+
+@step
+def image_dans_l_image(win):
+    if WM is None:
+        print("(pas d'openbox : image dans l'image sautée)")
+        return
+    width_before = win.get_width()
+    win.activate_action("win.pip", None)
+    yield Wait(3, until=lambda: win.get_width() <= 420)
+    print("  taille :", win.get_width(), win.get_height(), win.get_default_size(), win.is_maximized())
+    check(win.pip and win.get_width() <= 420, "image dans l'image : petite fenêtre")
+    check(not win.toolbar.get_reveal_top_bars() and not win.controls_visible(), "image seule, sans barres")
+    yield Wait(2, until=lambda: "ABOVE" in _wm_state(win))
+    check("ABOVE" in _wm_state(win), "toujours au-dessus (X11 : _NET_WM_STATE_ABOVE)")
+    check(c().playing, "la lecture continue")
+    win._last_motion = (0, 0)
+    win._on_motion(None, 30, 30)
+    check(not win.toolbar.get_reveal_top_bars(), "le pointeur ne fait pas revenir les barres")
+    win._on_click(None, 1, 10, 10)
+    win._on_click(None, 2, 10, 10)               # double-clic : retour, sans pause
+    yield Wait(3, until=lambda: win.get_width() > 420)
+    check(not win.pip and win.get_width() > 420, "double-clic : fenêtre d'avant")
+    check(abs(win.get_width() - width_before) < 40, "taille d'avant rendue")
+    check(c().playing, "double-clic : PAS de pause")
+    yield Wait(2, until=lambda: "ABOVE" not in _wm_state(win))
+    check("ABOVE" not in _wm_state(win), "plus au-dessus des autres")
+    check(win.toolbar.get_reveal_top_bars() and win.controls_visible(), "barres revenues")
+    win.activate_action("win.pip", None)
+    yield Wait(3, until=lambda: win.pip and win.get_width() <= 420)
+    win.activate_action("win.leave-fullscreen", None)          # Échap
+    yield Wait(3, until=lambda: not win.pip)
+    check(not win.pip, "Échap : quitte l'image dans l'image")
+
+
 @step
 def molette_volume(win):
     settings["volume"] = 50

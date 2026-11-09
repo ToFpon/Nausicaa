@@ -32,6 +32,8 @@ distribution's libmpv: no Flatpak. It follows your desktop's GTK theme (Adwaita,
   queue is offered again on the welcome page.
 - Full screen with bars that fade away, **audio tracks**, **subtitles** (files next to the video are found;
   preferred languages in Preferences), **speed**, frame by frame (`.` / `,`), **picture capture** (S).
+- **Picture in picture** (Ctrl+P): a small borderless window, always on top, in the bottom-right corner
+  (X11); drag to move it, double-click or Escape to come back.
 - No screen saver while a video plays.
 - **System controls (MPRIS)**: GNOME's media panel, keyboard media keys, and the buttons of a Bluetooth headset
   (double-tap to pause, earbuds taken off = pause).
@@ -72,6 +74,8 @@ d'accent).
 - Plein écran aux barres qui s'effacent, **pistes audio**, **sous-titres** (ceux posés à côté de la vidéo sont
   trouvés ; langues préférées dans les Préférences), **vitesse**, image par image (`.` / `,`), **capture de
   l'image** (S).
+- **Image dans l'image** (Ctrl+P) : une petite fenêtre sans bordure, toujours au-dessus, en bas à droite de
+  l'écran (X11) ; on la glisse pour la déplacer, double-clic ou Échap pour revenir.
 - Pas d'économiseur d'écran pendant la lecture.
 - **Contrôle depuis le système (MPRIS)** : panneau multimédia de GNOME, touches multimédia du clavier, et boutons
   d'un casque Bluetooth (double tape pour la pause, écouteurs retirés = pause).

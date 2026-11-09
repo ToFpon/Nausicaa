@@ -96,6 +96,8 @@ class MainWindow(Adw.ApplicationWindow):
         self.set_default_size(settings["window_width"], settings["window_height"])
         self.set_size_request(480, 320)
         self._click_toggled = False
+        self.pip = False                          # image dans l'image
+        self._pip_saved = (settings["window_width"], settings["window_height"], False, False)
         self._wheel_acc = 0.0
         self._hide_timer = 0
         self._over_bars = False
@@ -191,6 +193,7 @@ class MainWindow(Adw.ApplicationWindow):
         files.append(tr("Ouvrir une adresse…"), "win.open-location")
         menu.append_section(None, files)
         tools = Gio.Menu()
+        tools.append(tr("Image dans l'image"), "win.pip")
         tools.append(tr("Capture de l'image"), "win.screenshot")
         tools.append(tr("Afficher la file de lecture"), "win.playlist")
         menu.append_section(None, tools)
@@ -243,6 +246,10 @@ class MainWindow(Adw.ApplicationWindow):
             not a.get_state().get_boolean()))
         self.add_action(self.playlist_action)
         app.set_accels_for_action("win.playlist", ["F9", "<Control>l"])
+        pip = Gio.SimpleAction.new_stateful("pip", None, GLib.Variant("b", False))
+        pip.connect("activate", lambda *_: self.toggle_pip())
+        self.add_action(pip)
+        app.set_accels_for_action("win.pip", ["<Control>p"])
         for name, cb in (("audio-track", self._on_audio_track), ("subtitle-track", self._on_subtitle_track),
                          ("speed", self._on_speed)):
             a = Gio.SimpleAction.new_stateful(name, GLib.VariantType.new("s"), GLib.Variant("s", ""))
@@ -254,6 +261,12 @@ class MainWindow(Adw.ApplicationWindow):
         click = Gtk.GestureClick(button=Gdk.BUTTON_PRIMARY)
         click.connect("pressed", self._on_click)
         self.picture.add_controller(click)
+        drag = Gtk.GestureDrag(button=Gdk.BUTTON_PRIMARY)
+        drag.connect("drag-begin", self._on_drag_begin)
+        drag.connect("drag-update", self._on_drag_update)
+        self.picture.add_controller(drag)
+        self._drag_start = (0.0, 0.0)
+        self._dragging_window = False
         right = Gtk.GestureClick(button=Gdk.BUTTON_SECONDARY)
         right.connect("pressed", self._on_right_click)
         self.picture.add_controller(right)
@@ -336,14 +349,98 @@ class MainWindow(Adw.ApplicationWindow):
         self.c.toggle()
 
     def toggle_fullscreen(self):
+        if self.pip:                             # de l'image dans l'image au plein écran : d'abord revenir
+            self.leave_pip()
+            GLib.timeout_add(250, lambda: (self.fullscreen(), False)[1])
+            return
         if self.is_fullscreen():
             self.unfullscreen()
         else:
             self.fullscreen()
 
     def leave_fullscreen(self):
-        if self.is_fullscreen():
+        """Échap : quitte le plein écran, ou l'image dans l'image."""
+        if self.pip:
+            self.leave_pip()
+        elif self.is_fullscreen():
             self.unfullscreen()
+
+    # -- image dans l'image -----------------------------------------------------------------------
+    # Petite fenêtre sans en-tête ni barre, l'image seule, toujours au-dessus des autres et calée en
+    # bas à droite de l'écran (X11 : ui/x11.py ; GTK 4 ne sait plus faire ni l'un ni l'autre ; sous
+    # Wayland, interdit aux applications). Clic : pause ; molette : volume ; glisser : déplacer ;
+    # double-clic, Échap ou le menu : retour à la fenêtre d'avant (taille, file, maximisée).
+    PIP_WIDTH = 400                              # px (logiques), hauteur d'après l'image
+
+    def toggle_pip(self):
+        if self.pip:
+            self.leave_pip()
+        else:
+            self.enter_pip()
+
+    def enter_pip(self):
+        if self.pip or self.c.player.path is None:
+            return
+        if self.is_fullscreen():                 # d'abord sortir du plein écran, puis réduire
+            self.unfullscreen()
+            GLib.timeout_add(250, lambda: (self.enter_pip(), False)[1])
+            return
+        self._pip_saved = (self.get_width(), self.get_height(), self.is_maximized(), self.split.get_show_sidebar())
+        self.pip = True
+        self.add_css_class("pip")
+        self.split.set_show_sidebar(False)
+        if self.is_maximized():
+            self.unmaximize()
+        self._reveal_bars(False)
+        # vraiment cachées : un Gtk.Revealer fermé garde la largeur minimale de son contenu (~530 px pour
+        # la barre de commandes), la fenêtre ne descendait pas sous cette largeur
+        self.header.set_visible(False)
+        self.controls.set_visible(False)
+        w = self.PIP_WIDTH
+        vw, vh = self.c.player.get("dwidth", 0), self.c.player.get("dheight", 0)
+        h = int(round(w * vh / vw)) if vw and vh else int(w * 9 / 16)
+        self.set_size_request(160, 90)
+        self.set_default_size(w, h)
+        self.lookup_action("pip").set_state(GLib.Variant("b", True))
+        # la fenêtre a pris sa nouvelle taille un peu plus tard : placée et mise au-dessus ensuite
+        for ms in (150, 450):
+            GLib.timeout_add(ms, self._place_pip)
+        self.osd.show("nausicaa-pip-symbolic", tr("Image dans l'image"))
+
+    def _place_pip(self):
+        if not self.pip:
+            return False
+        from . import x11
+        x11.set_above(self, True)
+        area = x11.workarea(self)
+        surface = self.get_surface()
+        if area is None or surface is None:
+            return False
+        scale = surface.get_scale_factor() or 1
+        ax, ay, aw, ah = area
+        margin = 24 * scale
+        w, h = self.get_width() * scale, self.get_height() * scale
+        x11.move(self, ax + aw - w - margin, ay + ah - h - margin)
+        return False
+
+    def leave_pip(self):
+        if not self.pip:
+            return
+        from . import x11
+        self.pip = False
+        self.remove_css_class("pip")
+        self.header.set_visible(True)
+        self.controls.set_visible(True)
+        x11.set_above(self, False)
+        self.set_size_request(480, 320)
+        w, h, maximized, sidebar = self._pip_saved
+        self.set_default_size(w, h)
+        if maximized:
+            self.maximize()
+        self.split.set_show_sidebar(sidebar)
+        self.lookup_action("pip").set_state(GLib.Variant("b", False))
+        self._reveal_bars(True)
+        self._sync_page()
 
     def seek(self, seconds: float):
         if self.c.player.path is None:
@@ -417,16 +514,42 @@ class MainWindow(Adw.ApplicationWindow):
                 self.c.toggle()
                 self._click_toggled = True
         elif n_press == 2:
-            if self._click_toggled:              # double-clic : la pause du 1er clic est annulée
-                self.c.toggle()
-                self._click_toggled = False
-            self.toggle_fullscreen()
+            self._undo_click_pause()             # double-clic : la pause du 1er clic est annulée
+            if self.pip:
+                self.leave_pip()                 # image dans l'image : double-clic = retour
+            else:
+                self.toggle_fullscreen()
+
+    def _undo_click_pause(self):
+        if self._click_toggled:
+            self.c.toggle()
+            self._click_toggled = False
+
+    # -- image dans l'image : glisser l'image déplace la fenêtre (elle n'a plus d'en-tête) --------
+    def _on_drag_begin(self, gesture, x, y):
+        self._drag_start = (x, y)
+        self._dragging_window = False
+
+    def _on_drag_update(self, gesture, dx, dy):
+        if not self.pip or self._dragging_window or (dx * dx + dy * dy) < 64:
+            return
+        self._dragging_window = True
+        self._undo_click_pause()                 # c'était un glisser, pas un clic
+        surface = self.get_surface()
+        ok, sx, sy = gesture.get_widget().translate_coordinates(self, *self._drag_start)
+        if surface is None or not ok:
+            return
+        gesture.set_state(Gtk.EventSequenceState.CLAIMED)
+        surface.begin_move(gesture.get_device(), Gdk.BUTTON_PRIMARY, sx, sy, gesture.get_current_event_time())
 
     def _on_right_click(self, gesture, _n, x, y):
         menu = Gio.Menu()
         play = Gio.Menu()
         play.append(tr("Pause") if self.c.playing else tr("Lire"), "win.toggle")
-        play.append(tr("Quitter le plein écran") if self.is_fullscreen() else tr("Plein écran"), "win.fullscreen")
+        if not self.pip:
+            play.append(tr("Quitter le plein écran") if self.is_fullscreen() else tr("Plein écran"),
+                        "win.fullscreen")
+        play.append(tr("Quitter l'image dans l'image") if self.pip else tr("Image dans l'image"), "win.pip")
         menu.append_section(None, play)
         menu.append_section(None, self._tracks_menu())
         more = Gio.Menu()
@@ -460,6 +583,12 @@ class MainWindow(Adw.ApplicationWindow):
 
     # -- barres en plein écran -------------------------------------------------------------
     def _reveal_bars(self, reveal: bool):
+        if self.pip:                             # image dans l'image : l'image seule, rien autour
+            self.toolbar.set_reveal_top_bars(False)
+            self.toolbar.set_reveal_bottom_bars(False)
+            self.float_revealer.set_reveal_child(False)
+            self.picture.set_cursor_from_name(None)
+            return
         fullscreen = self.is_fullscreen()
         self.toolbar.set_reveal_top_bars(reveal or not fullscreen)
         show = (reveal or not fullscreen) and self.picture.get_visible_child_name() != "welcome"
@@ -682,7 +811,9 @@ class MainWindow(Adw.ApplicationWindow):
             self._sync_resume_button()
         self.picture.set_visible_child_name(name)
         # accueil : pas de commandes de lecture (il n'y a rien à lire)
-        if not self.is_fullscreen():
+        if self.pip:
+            pass                                 # image dans l'image : aucune barre
+        elif not self.is_fullscreen():
             self.toolbar.set_reveal_bottom_bars(name != "welcome")
         else:
             self.float_revealer.set_reveal_child(name != "welcome" and self.float_revealer.get_reveal_child())
@@ -746,7 +877,7 @@ class MainWindow(Adw.ApplicationWindow):
         shown_now = self.split.get_show_sidebar()
         self.playlist_action.set_state(GLib.Variant("b", shown_now))
         self.controls.playlist.set_active(shown_now)
-        if not self.is_fullscreen():
+        if not self.is_fullscreen() and not self.pip:
             settings["playlist_visible"] = shown_now
 
     def _on_setting(self, key, _value):
@@ -755,7 +886,9 @@ class MainWindow(Adw.ApplicationWindow):
 
     # -- fermeture -----------------------------------------------------------------------------
     def _on_close_request(self, *_):
-        if not self.is_fullscreen() and not self.is_maximized():
+        if self.pip:                             # fermée en image dans l'image : la taille d'avant
+            settings["window_width"], settings["window_height"] = self._pip_saved[:2]
+        elif not self.is_fullscreen() and not self.is_maximized():
             settings["window_width"] = self.get_width()
             settings["window_height"] = self.get_height()
         return False

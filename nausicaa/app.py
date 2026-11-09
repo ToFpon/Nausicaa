@@ -151,8 +151,10 @@ class NausicaaApp(Adw.Application):
                 ctx.iteration(False)
 
     def _quit(self):
-        if self.window is not None and not self.window.is_fullscreen() and not self.window.is_maximized():
-            from .settings import settings
+        from .settings import settings
+        if self.window is not None and self.window.pip:          # quitté en image dans l'image
+            settings["window_width"], settings["window_height"] = self.window._pip_saved[:2]
+        elif self.window is not None and not self.window.is_fullscreen() and not self.window.is_maximized():
             settings["window_width"] = self.window.get_width()
             settings["window_height"] = self.window.get_height()
         self.sync_inhibit(False)

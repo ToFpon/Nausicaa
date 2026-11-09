@@ -32,6 +32,7 @@ def _groups():
             ("f F11", tr("Plein écran")),
             ("Escape", tr("Quitter le plein écran")),
             ("F9", tr("Afficher la file de lecture")),
+            ("<Control>p", tr("Image dans l'image")),
             ("<Control>o", tr("Ouvrir des vidéos")),
             ("<Control>u", tr("Ouvrir une adresse")),
             ("<Control>s", tr("Enregistrer la file")),

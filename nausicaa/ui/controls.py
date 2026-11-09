@@ -100,6 +100,9 @@ class Controls(Gtk.Box):
                                          valign=Gtk.Align.CENTER, action_name="win.playlist")
         self.playlist.add_css_class("flat")
         self.append(self.playlist)
+        # icône à nous (data/icons) : Adwaita 46 n'a pas d'icône « image dans l'image »
+        self.pip = _button("nausicaa-pip-symbolic", tr("Image dans l'image"), "win.pip")
+        self.append(self.pip)
         self.fullscreen = _button("view-fullscreen-symbolic", tr("Plein écran"), "win.fullscreen")
         self.append(self.fullscreen)
         self.dragging = False
