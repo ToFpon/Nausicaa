@@ -127,6 +127,7 @@ def on_ready(win):
         GLib.timeout_add(delay - 900, lambda: (win._reveal_bars(True), False)[1])
     if "pip" in opts:
         GLib.timeout_add(1800, lambda: (win.enter_pip(), False)[1])
+        GLib.timeout_add(delay - 700, lambda: (win._reveal_bars(True), False)[1])     # commandes au survol
     if "volume" in opts:
         GLib.timeout_add(delay - 600, lambda: (settings.__setitem__("volume", 70), win.show_volume(), False)[2])
     if "prefs" in opts:

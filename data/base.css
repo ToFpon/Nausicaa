@@ -27,6 +27,11 @@
   box-shadow: 0 2px 12px alpha(black, 0.35);
 }
 
+/* Image dans l'image : fond noir sous l'image (aucun bord du thème), petite capsule et bouton de retour
+   au survol */
+window.pip, window.pip.background { background-color: black; box-shadow: none; border-radius: 0; }
+.nausicaa-controls.floating-controls.pip-controls { padding: 2px 6px; border-radius: 99px; }
+
 /* Barre de commandes */
 .nausicaa-controls { padding: 2px 6px; }
 .nausicaa-controls scale.seek { margin: 0 4px; }

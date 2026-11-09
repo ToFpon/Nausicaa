@@ -282,9 +282,28 @@ def image_dans_l_image(win):
     yield Wait(2, until=lambda: "ABOVE" in _wm_state(win))
     check("ABOVE" in _wm_state(win), "toujours au-dessus (X11 : _NET_WM_STATE_ABOVE)")
     check(c().playing, "la lecture continue")
+    check(not win.get_decorated(), "aucune décoration (ni ombre, ni bordure)")
+    win._on_pointer_leave()                      # (sous Xvfb, le pointeur est déjà sur la fenêtre)
+    check(not win.pip_controls.get_reveal_child(), "commandes cachées tant que la souris n'est pas là")
     win._last_motion = (0, 0)
     win._on_motion(None, 30, 30)
     check(not win.toolbar.get_reveal_top_bars(), "le pointeur ne fait pas revenir les barres")
+    check(win.pip_controls.get_reveal_child() and win.pip_leave.get_reveal_child(),
+          "souris : capsule de commandes et bouton de retour")
+    win._over_bars = False
+    win._hide_bars()
+    check(not win.pip_controls.get_reveal_child(), "souris immobile : commandes effacées")
+    win._on_motion(None, 40, 40)
+    win._on_pointer_leave()
+    check(not win.pip_leave.get_reveal_child(), "souris partie : commandes effacées")
+    # glisser l'image : la fenêtre se déplace (plus d'erreur), la pause du clic est annulée
+    playing = c().playing
+    from gi.repository import Gtk as _Gtk
+    drag = [g for g in win.picture.observe_controllers() if isinstance(g, _Gtk.GestureDrag)][0]
+    win._on_click(None, 1, 20, 20)
+    win._on_drag_begin(drag, 20, 20)
+    win._on_drag_update(drag, 30, 30)
+    check(c().playing == playing, "glisser : pas de pause")
     win._on_click(None, 1, 10, 10)
     win._on_click(None, 2, 10, 10)               # double-clic : retour, sans pause
     yield Wait(3, until=lambda: win.get_width() > 420)
@@ -294,6 +313,7 @@ def image_dans_l_image(win):
     yield Wait(2, until=lambda: "ABOVE" not in _wm_state(win))
     check("ABOVE" not in _wm_state(win), "plus au-dessus des autres")
     check(win.toolbar.get_reveal_top_bars() and win.controls_visible(), "barres revenues")
+    check(win.get_decorated(), "décorations revenues")
     win.activate_action("win.pip", None)
     yield Wait(3, until=lambda: win.pip and win.get_width() <= 420)
     win.activate_action("win.leave-fullscreen", None)          # Échap

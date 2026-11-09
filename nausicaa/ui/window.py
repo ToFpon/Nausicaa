@@ -126,6 +126,7 @@ class MainWindow(Adw.ApplicationWindow):
                                            transition_duration=200, valign=Gtk.Align.END,
                                            halign=Gtk.Align.CENTER, margin_bottom=32, reveal_child=False)
         overlay.add_overlay(self.float_revealer)
+        self._build_pip_overlays(overlay)
 
         # -- barres ----------------------------------------------------------------------
         self.header = Adw.HeaderBar()
@@ -170,6 +171,43 @@ class MainWindow(Adw.ApplicationWindow):
         self._sync_all()
 
     # -- construction -----------------------------------------------------------------------
+    def _build_pip_overlays(self, overlay: Gtk.Overlay):
+        """Image dans l'image, au passage de la souris : petite capsule (précédent, lecture, suivant) en
+        bas, bouton pour revenir en haut à gauche (demande de Tof)."""
+        def button(icon, tooltip, action):
+            b = Gtk.Button(icon_name=icon, tooltip_text=tooltip, action_name=action, valign=Gtk.Align.CENTER)
+            b.add_css_class("flat")
+            b.add_css_class("circular")
+            return b
+        box = Gtk.Box(spacing=4)
+        for cls in ("nausicaa-controls", "floating-controls", "pip-controls"):
+            box.add_css_class(cls)
+        box.append(button("media-skip-backward-symbolic", tr("Précédent"), "win.previous"))
+        self.pip_play = button("media-playback-start-symbolic", tr("Lire"), "win.toggle")
+        box.append(self.pip_play)
+        box.append(button("media-skip-forward-symbolic", tr("Suivant"), "win.next"))
+        self.pip_controls = Gtk.Revealer(transition_type=Gtk.RevealerTransitionType.CROSSFADE,
+                                         transition_duration=150, valign=Gtk.Align.END,
+                                         halign=Gtk.Align.CENTER, margin_bottom=10, reveal_child=False,
+                                         child=box)
+        leave = button("nausicaa-pip-symbolic", tr("Quitter l'image dans l'image"), "win.pip")
+        for cls in ("nausicaa-controls", "floating-controls", "pip-controls"):
+            leave.add_css_class(cls)
+        self.pip_leave = Gtk.Revealer(transition_type=Gtk.RevealerTransitionType.CROSSFADE,
+                                      transition_duration=150, valign=Gtk.Align.START,
+                                      halign=Gtk.Align.START, margin_top=8, margin_start=8,
+                                      reveal_child=False, child=leave)
+        for r in (self.pip_controls, self.pip_leave):
+            overlay.add_overlay(r)
+            hover = Gtk.EventControllerMotion()
+            hover.connect("enter", lambda *_: setattr(self, "_over_bars", True))
+            hover.connect("leave", lambda *_: setattr(self, "_over_bars", False))
+            r.add_controller(hover)
+
+    def _reveal_pip_overlays(self, reveal: bool):
+        self.pip_controls.set_reveal_child(reveal and self.pip)
+        self.pip_leave.set_reveal_child(reveal and self.pip)
+
     def _build_welcome(self) -> Gtk.Widget:
         page = Adw.StatusPage(icon_name=APP_ID, title=APP_NAME,
                               description=tr("Déposez des vidéos ici, ou ouvrez-les"))
@@ -275,6 +313,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.picture_overlay.add_controller(wheel)
         motion = Gtk.EventControllerMotion()
         motion.connect("motion", self._on_motion)
+        motion.connect("leave", self._on_pointer_leave)
         self.toolbar.add_controller(motion)
 
     def _install_drop(self):
@@ -396,6 +435,8 @@ class MainWindow(Adw.ApplicationWindow):
         # la barre de commandes), la fenêtre ne descendait pas sous cette largeur
         self.header.set_visible(False)
         self.controls.set_visible(False)
+        # sans aucune décoration : ni ombre, ni bordure, ni coins du thème (window.csd), l'image seule
+        self.set_decorated(False)
         w = self.PIP_WIDTH
         vw, vh = self.c.player.get("dwidth", 0), self.c.player.get("dheight", 0)
         h = int(round(w * vh / vw)) if vw and vh else int(w * 9 / 16)
@@ -431,6 +472,8 @@ class MainWindow(Adw.ApplicationWindow):
         self.remove_css_class("pip")
         self.header.set_visible(True)
         self.controls.set_visible(True)
+        self.set_decorated(True)
+        self._reveal_pip_overlays(False)
         x11.set_above(self, False)
         self.set_size_request(480, 320)
         w, h, maximized, sidebar = self._pip_saved
@@ -536,11 +579,23 @@ class MainWindow(Adw.ApplicationWindow):
         self._dragging_window = True
         self._undo_click_pause()                 # c'était un glisser, pas un clic
         surface = self.get_surface()
-        ok, sx, sy = gesture.get_widget().translate_coordinates(self, *self._drag_start)
-        if surface is None or not ok:
+        if surface is None:
+            return
+        # PyGObject (Zorin) renvoie (x, y) seuls, sans le booléen ; d'autres versions (ok, x, y)
+        coords = gesture.get_widget().translate_coordinates(self, *self._drag_start)
+        if coords is None:
+            return
+        if len(coords) == 3:
+            ok, sx, sy = coords
+            if not ok:
+                return
+        else:
+            sx, sy = coords
+        device = gesture.get_device()
+        if device is None:                       # glisser simulé (tests) : pas de souris à confier au WM
             return
         gesture.set_state(Gtk.EventSequenceState.CLAIMED)
-        surface.begin_move(gesture.get_device(), Gdk.BUTTON_PRIMARY, sx, sy, gesture.get_current_event_time())
+        surface.begin_move(device, Gdk.BUTTON_PRIMARY, sx, sy, gesture.get_current_event_time())
 
     def _on_right_click(self, gesture, _n, x, y):
         menu = Gio.Menu()
@@ -583,12 +638,14 @@ class MainWindow(Adw.ApplicationWindow):
 
     # -- barres en plein écran -------------------------------------------------------------
     def _reveal_bars(self, reveal: bool):
-        if self.pip:                             # image dans l'image : l'image seule, rien autour
+        if self.pip:                             # image dans l'image : l'image seule, commandes au survol
             self.toolbar.set_reveal_top_bars(False)
             self.toolbar.set_reveal_bottom_bars(False)
             self.float_revealer.set_reveal_child(False)
+            self._reveal_pip_overlays(reveal)
             self.picture.set_cursor_from_name(None)
             return
+        self._reveal_pip_overlays(False)
         fullscreen = self.is_fullscreen()
         self.toolbar.set_reveal_top_bars(reveal or not fullscreen)
         show = (reveal or not fullscreen) and self.picture.get_visible_child_name() != "welcome"
@@ -604,8 +661,20 @@ class MainWindow(Adw.ApplicationWindow):
     def _menu_open(self) -> bool:
         return any(b.get_active() for b in (self.controls.volume, self.controls.tracks))
 
+    def _on_pointer_leave(self, *_):
+        """La souris quitte la fenêtre : en image dans l'image, les commandes s'effacent tout de suite."""
+        if self.pip:
+            self._over_bars = False
+            self._reveal_pip_overlays(False)
+
     def _hide_bars(self):
         self._hide_timer = 0
+        if self.pip:                             # souris immobile : commandes effacées (pas sur elles)
+            if self._over_bars:
+                self._schedule_hide()
+            else:
+                self._reveal_pip_overlays(False)
+            return False
         if not self.is_fullscreen():
             return False
         if self._over_bars or self._menu_open() or not self.c.playing:
@@ -865,6 +934,8 @@ class MainWindow(Adw.ApplicationWindow):
     def _sync_state(self):
         playing = self.c.playing
         self.controls.set_playing(playing)
+        self.pip_play.set_icon_name("media-playback-pause-symbolic" if playing else "media-playback-start-symbolic")
+        self.pip_play.set_tooltip_text(tr("Pause") if playing else tr("Lire"))
         self.app.sync_inhibit(playing)
         if self.is_fullscreen():
             if playing:
