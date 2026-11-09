@@ -23,7 +23,7 @@ import mpv
 
 OBSERVED = ("pause", "time-pos", "duration", "eof-reached", "volume", "mute", "track-list",
             "media-title", "vid", "dwidth", "dheight", "seekable", "paused-for-cache", "chapter-list",
-            "sub-visibility")
+            "sub-visibility", "speed")
 
 
 class Player:

@@ -39,6 +39,9 @@ FEATURES = [
             tr("Ouvrir une seule vidéo ajoute à la file les autres vidéos de son dossier, dans l'ordre "
                "des noms (« Épisode 2 » avant « Épisode 10 »)"),
             "view-list-symbolic"),
+    Feature("mpris", tr("Contrôle depuis le système"),
+            tr("Panneau de GNOME, touches multimédia du clavier et boutons d'un casque Bluetooth (MPRIS)"),
+            "input-keyboard-symbolic"),
     Feature("hwdec", tr("Décodage matériel"),
             tr("La carte graphique décode la vidéo quand elle le peut : moins de travail pour le processeur"),
             "video-display-symbolic"),

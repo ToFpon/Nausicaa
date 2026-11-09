@@ -16,27 +16,27 @@ msgstr "Show the version"
 msgid "Ajouter à la file au lieu de la remplacer"
 msgstr "Add to the queue instead of replacing it"
 
-#: nausicaa/app.py:156
+#: nausicaa/app.py:188
 msgid "Inspiré de"
 msgstr "Inspired by"
 
-#: nausicaa/app.py:157
+#: nausicaa/app.py:189
 msgid "Moteurs"
 msgstr "Engines"
 
-#: nausicaa/app.py:135
+#: nausicaa/app.py:167
 msgid "Lecture d'une vidéo"
 msgstr "Playing a video"
 
-#: nausicaa/app.py:151
+#: nausicaa/app.py:183
 msgid "Un petit lecteur vidéo pour GNOME, qui lit vos vidéos et rien d'autre."
 msgstr "A small video player for GNOME that plays your videos, and nothing else."
 
-#: nausicaa/backend/controller.py:322
+#: nausicaa/backend/controller.py:328
 msgid "Ce fichier ne peut pas être lu."
 msgstr "This file cannot be played."
 
-#: nausicaa/backend/controller.py:324
+#: nausicaa/backend/controller.py:330
 msgid "Le fichier n'existe plus."
 msgstr "The file no longer exists."
 
@@ -81,10 +81,18 @@ msgid "Ouvrir une seule vidéo ajoute à la file les autres vidéos de son dossi
 msgstr "Opening a single video adds the other videos of its folder to the queue, in name order (“Episode 2” before “Episode 10”)"
 
 #: nausicaa/features.py:42
+msgid "Contrôle depuis le système"
+msgstr "System controls"
+
+#: nausicaa/features.py:43
+msgid "Panneau de GNOME, touches multimédia du clavier et boutons d'un casque Bluetooth (MPRIS)"
+msgstr "GNOME panel, keyboard media keys and the buttons of a Bluetooth headset (MPRIS)"
+
+#: nausicaa/features.py:45
 msgid "Décodage matériel"
 msgstr "Hardware decoding"
 
-#: nausicaa/features.py:43
+#: nausicaa/features.py:46
 msgid "La carte graphique décode la vidéo quand elle le peut : moins de travail pour le processeur"
 msgstr "The graphics card decodes the video when it can: less work for the processor"
 
@@ -98,7 +106,7 @@ msgstr[1] "{0} minutes"
 msgid "Précédent"
 msgstr "Previous"
 
-#: nausicaa/ui/controls.py:40 nausicaa/ui/controls.py:158 nausicaa/ui/playlist_panel.py:195 nausicaa/ui/window.py:413
+#: nausicaa/ui/controls.py:40 nausicaa/ui/controls.py:158 nausicaa/ui/playlist_panel.py:194 nausicaa/ui/window.py:418
 msgid "Lire"
 msgstr "Play"
 
@@ -106,7 +114,7 @@ msgstr "Play"
 msgid "Suivant"
 msgstr "Next"
 
-#: nausicaa/ui/controls.py:103 nausicaa/ui/shortcuts.py:32 nausicaa/ui/window.py:414 nausicaa/ui/window.py:477
+#: nausicaa/ui/controls.py:103 nausicaa/ui/shortcuts.py:32 nausicaa/ui/window.py:419 nausicaa/ui/window.py:513
 msgid "Plein écran"
 msgstr "Full screen"
 
@@ -130,7 +138,7 @@ msgstr "Audio tracks and subtitles"
 msgid "File de lecture"
 msgstr "Play queue"
 
-#: nausicaa/ui/controls.py:158 nausicaa/ui/window.py:413
+#: nausicaa/ui/controls.py:158 nausicaa/ui/window.py:418
 msgid "Pause"
 msgstr "Pause"
 
@@ -154,19 +162,19 @@ msgstr "Save the queue…"
 msgid "Vider la file"
 msgstr "Clear the queue"
 
-#: nausicaa/ui/playlist_panel.py:196
+#: nausicaa/ui/playlist_panel.py:195
 msgid "Retirer de la file"
 msgstr "Remove from the queue"
 
-#: nausicaa/ui/playlist_panel.py:244 nausicaa/ui/playlist_panel.py:68
+#: nausicaa/ui/playlist_panel.py:243 nausicaa/ui/playlist_panel.py:68
 msgid "Ajouter des vidéos à la file"
 msgstr "Add videos to the queue"
 
-#: nausicaa/ui/playlist_panel.py:254
+#: nausicaa/ui/playlist_panel.py:253
 msgid "Liste de lecture"
 msgstr "Playlist"
 
-#: nausicaa/ui/playlist_panel.py:263 nausicaa/ui/shortcuts.py:37
+#: nausicaa/ui/playlist_panel.py:262 nausicaa/ui/shortcuts.py:37
 msgid "Enregistrer la file"
 msgstr "Save the queue"
 
@@ -182,13 +190,13 @@ msgstr "Drop videos here to add them"
 msgid "Mélanger"
 msgstr "Shuffle"
 
-#: nausicaa/ui/playlist_panel.py:148
+#: nausicaa/ui/playlist_panel.py:147
 msgid "{0} vidéo"
 msgid_plural "{0} vidéos"
 msgstr[0] "{0} video"
 msgstr[1] "{0} videos"
 
-#: nausicaa/ui/playlist_panel.py:198
+#: nausicaa/ui/playlist_panel.py:197
 msgid "Afficher dans le dossier"
 msgstr "Show in folder"
 
@@ -196,15 +204,15 @@ msgstr "Show in folder"
 msgid "Menu de la file"
 msgstr "Queue menu"
 
-#: nausicaa/ui/playlist_panel.py:260
+#: nausicaa/ui/playlist_panel.py:259
 msgid "Liste de lecture non enregistrée"
 msgstr "Playlist not saved"
 
-#: nausicaa/ui/playlist_panel.py:262
+#: nausicaa/ui/playlist_panel.py:261
 msgid "Liste enregistrée : {0}"
 msgstr "Playlist saved: {0}"
 
-#: nausicaa/ui/playlist_panel.py:237
+#: nausicaa/ui/playlist_panel.py:236
 msgid "{0} vidéo ajoutée à la file"
 msgid_plural "{0} vidéos ajoutées à la file"
 msgstr[0] "{0} video added to the queue"
@@ -214,7 +222,7 @@ msgstr[1] "{0} videos added to the queue"
 msgid "Style"
 msgstr "Style"
 
-#: nausicaa/ui/preferences.py:33 nausicaa/ui/shortcuts.py:38 nausicaa/ui/window.py:183
+#: nausicaa/ui/preferences.py:33 nausicaa/ui/shortcuts.py:38 nausicaa/ui/window.py:188
 msgid "Préférences"
 msgstr "Preferences"
 
@@ -278,11 +286,11 @@ msgstr "Preferred languages"
 msgid "Codes de langue séparés par des virgules, dans l'ordre de préférence (par exemple « fr,fre,fra,en »). Vide : le choix du fichier."
 msgstr "Language codes separated by commas, in order of preference (for instance “en,eng,fr”). Empty: the file's choice."
 
-#: nausicaa/ui/preferences.py:60 nausicaa/ui/window.py:544
+#: nausicaa/ui/preferences.py:60 nausicaa/ui/window.py:585
 msgid "Piste audio"
 msgstr "Audio track"
 
-#: nausicaa/ui/preferences.py:60 nausicaa/ui/window.py:552 nausicaa/ui/window.py:308
+#: nausicaa/ui/preferences.py:60 nausicaa/ui/window.py:593 nausicaa/ui/window.py:313
 msgid "Sous-titres"
 msgstr "Subtitles"
 
@@ -340,27 +348,27 @@ msgstr "Volume up / down"
 msgid "Afficher / masquer les sous-titres"
 msgstr "Show / hide subtitles"
 
-#: nausicaa/ui/shortcuts.py:29 nausicaa/ui/window.py:179 nausicaa/ui/window.py:419
+#: nausicaa/ui/shortcuts.py:29 nausicaa/ui/window.py:184 nausicaa/ui/window.py:424
 msgid "Capture de l'image"
 msgstr "Picture capture"
 
-#: nausicaa/ui/shortcuts.py:33 nausicaa/ui/window.py:414 nausicaa/ui/window.py:477
+#: nausicaa/ui/shortcuts.py:33 nausicaa/ui/window.py:419 nausicaa/ui/window.py:513
 msgid "Quitter le plein écran"
 msgstr "Leave full screen"
 
-#: nausicaa/ui/shortcuts.py:34 nausicaa/ui/window.py:180 nausicaa/ui/window.py:420
+#: nausicaa/ui/shortcuts.py:34 nausicaa/ui/window.py:185 nausicaa/ui/window.py:425
 msgid "Afficher la file de lecture"
 msgstr "Show the play queue"
 
-#: nausicaa/ui/shortcuts.py:35 nausicaa/ui/window.py:274 nausicaa/ui/window.py:117
+#: nausicaa/ui/shortcuts.py:35 nausicaa/ui/window.py:279 nausicaa/ui/window.py:122
 msgid "Ouvrir des vidéos"
 msgstr "Open videos"
 
-#: nausicaa/ui/shortcuts.py:36 nausicaa/ui/window.py:298
+#: nausicaa/ui/shortcuts.py:36 nausicaa/ui/window.py:303
 msgid "Ouvrir une adresse"
 msgstr "Open an address"
 
-#: nausicaa/ui/shortcuts.py:39 nausicaa/ui/window.py:186
+#: nausicaa/ui/shortcuts.py:39 nausicaa/ui/window.py:191
 msgid "Quitter"
 msgstr "Quit"
 
@@ -388,59 +396,59 @@ msgstr "Videos and sounds"
 msgid "Listes de lecture"
 msgstr "Playlists"
 
-#: nausicaa/ui/window.py:51 nausicaa/ui/window.py:308
+#: nausicaa/ui/window.py:51 nausicaa/ui/window.py:313
 msgid "Tous les fichiers"
 msgstr "All files"
 
-#: nausicaa/ui/window.py:174 nausicaa/ui/window.py:418 nausicaa/ui/window.py:161
+#: nausicaa/ui/window.py:179 nausicaa/ui/window.py:423 nausicaa/ui/window.py:166
 msgid "Ouvrir des vidéos…"
 msgstr "Open videos…"
 
-#: nausicaa/ui/window.py:175
+#: nausicaa/ui/window.py:180
 msgid "Ouvrir un dossier…"
 msgstr "Open a folder…"
 
-#: nausicaa/ui/window.py:176
+#: nausicaa/ui/window.py:181
 msgid "Ouvrir une adresse…"
 msgstr "Open an address…"
 
-#: nausicaa/ui/window.py:184
+#: nausicaa/ui/window.py:189
 msgid "Raccourcis clavier"
 msgstr "Keyboard shortcuts"
 
-#: nausicaa/ui/window.py:185
+#: nausicaa/ui/window.py:190
 msgid "À propos de Nausicaa"
 msgstr "About Nausicaa"
 
-#: nausicaa/ui/window.py:278
+#: nausicaa/ui/window.py:283
 msgid "Ouvrir un dossier"
 msgstr "Open a folder"
 
-#: nausicaa/ui/window.py:298
+#: nausicaa/ui/window.py:303
 msgid "Adresse d'une vidéo, d'un flux ou d'une liste de lecture"
 msgstr "Address of a video, a stream or a playlist"
 
-#: nausicaa/ui/window.py:306
+#: nausicaa/ui/window.py:311
 msgid "Ajouter des sous-titres"
 msgstr "Add subtitles"
 
-#: nausicaa/ui/window.py:355
+#: nausicaa/ui/window.py:360
 msgid "Muet"
 msgstr "Muted"
 
-#: nausicaa/ui/window.py:386
+#: nausicaa/ui/window.py:391
 msgid "Image enregistrée"
 msgstr "Picture saved"
 
-#: nausicaa/ui/window.py:546
+#: nausicaa/ui/window.py:587
 msgid "Aucun"
 msgstr "None"
 
-#: nausicaa/ui/window.py:550
+#: nausicaa/ui/window.py:591
 msgid "Ajouter des sous-titres…"
 msgstr "Add subtitles…"
 
-#: nausicaa/ui/window.py:556
+#: nausicaa/ui/window.py:597
 msgid "Vitesse"
 msgstr "Speed"
 
@@ -448,84 +456,84 @@ msgstr "Speed"
 msgid "Déposez pour lire"
 msgstr "Drop to play"
 
-#: nausicaa/ui/window.py:158
+#: nausicaa/ui/window.py:163
 msgid "Déposez des vidéos ici, ou ouvrez-les"
 msgstr "Drop videos here, or open them"
 
-#: nausicaa/ui/window.py:366
+#: nausicaa/ui/window.py:371
 msgid "Sous-titres affichés"
 msgstr "Subtitles shown"
 
-#: nausicaa/ui/window.py:366
+#: nausicaa/ui/window.py:371
 msgid "Sous-titres masqués"
 msgstr "Subtitles hidden"
 
-#: nausicaa/ui/window.py:534
+#: nausicaa/ui/window.py:575
 msgid "fichier"
 msgstr "file"
 
-#: nausicaa/ui/window.py:582
+#: nausicaa/ui/window.py:623
 msgid "Vitesse normale"
 msgstr "Normal speed"
 
-#: nausicaa/ui/window.py:121
+#: nausicaa/ui/window.py:126
 msgid "Menu principal"
 msgstr "Main menu"
 
-#: nausicaa/ui/window.py:263
+#: nausicaa/ui/window.py:268
 msgid "Aucune vidéo trouvée"
 msgstr "No video found"
 
-#: nausicaa/ui/window.py:355
+#: nausicaa/ui/window.py:360
 msgid "Volume {0} %"
 msgstr "Volume {0} %"
 
-#: nausicaa/ui/window.py:384
+#: nausicaa/ui/window.py:389
 msgid "Capture impossible"
 msgstr "Capture failed"
 
-#: nausicaa/ui/window.py:387
+#: nausicaa/ui/window.py:392
 msgid "Image enregistrée : {0}"
 msgstr "Picture saved: {0}"
 
-#: nausicaa/ui/window.py:535
+#: nausicaa/ui/window.py:576
 msgid "Piste {0}"
 msgstr "Track {0}"
 
-#: nausicaa/ui/window.py:555
+#: nausicaa/ui/window.py:596
 msgid "Normale"
 msgstr "Normal"
 
-#: nausicaa/ui/window.py:643
+#: nausicaa/ui/window.py:686
 msgid "Reprendre « {0} »"
 msgstr "Resume “{0}”"
 
-#: nausicaa/ui/window.py:299
+#: nausicaa/ui/window.py:304
 msgid "Annuler"
 msgstr "Cancel"
 
-#: nausicaa/ui/window.py:299
+#: nausicaa/ui/window.py:304
 msgid "Ouvrir"
 msgstr "Open"
 
-#: nausicaa/ui/window.py:582
+#: nausicaa/ui/window.py:623
 msgid "Vitesse {0}"
 msgstr "Speed {0}"
 
-#: nausicaa/ui/window.py:645
+#: nausicaa/ui/window.py:688
 msgid "(+ {0} autre)"
 msgid_plural "(+ {0} autres)"
 msgstr[0] "(+ {0} more)"
 msgstr[1] "(+ {0} more)"
 
-#: nausicaa/ui/window.py:605
+#: nausicaa/ui/window.py:646
 msgid "Depuis le début"
 msgstr "From the start"
 
-#: nausicaa/ui/window.py:605
+#: nausicaa/ui/window.py:646
 msgid "Reprise à {0}"
 msgstr "Resumed at {0}"
 
-#: nausicaa/ui/window.py:609
+#: nausicaa/ui/window.py:650
 msgid "« {0} » : {1}"
 msgstr "“{0}”: {1}"

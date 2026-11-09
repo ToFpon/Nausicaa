@@ -1,3 +1,12 @@
+nausicaa (0.1.2~noble1) noble; urgency=medium
+
+  * Contrôle depuis le système (MPRIS) : panneau multimédia de GNOME,
+    touches multimédia du clavier et boutons d'un casque Bluetooth
+    (double tape pour la pause, écouteurs retirés = pause).
+  * Plus de message « Cannot load libcuda.so.1 » sans carte NVIDIA.
+
+ -- Tof <nourpon@gmail.com>  Mon, 09 Nov 2026 15:00:00 +0000
+
 nausicaa (0.1.1~noble1) noble; urgency=medium
 
   * Plein écran : commandes compactes, centrées et arrondies, posées sur

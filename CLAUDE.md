@@ -16,7 +16,7 @@ tests, paquet.
 - Dialogues : de vraies fenêtres (`common.AlertDialog`, `common.DialogWindow`, `Adw.PreferencesWindow`,
   `Adw.AboutWindow`).
 - Chaque fonctionnalité facultative est dans `nausicaa/features.py` (click_pause, wheel_volume,
-  minimize_pause, resume, next_episodes, hwdec) et se consulte au moment de l'usage.
+  minimize_pause, resume, next_episodes, mpris, hwdec) et se consulte au moment de l'usage.
 - Tout texte visible passe par `tr()` / `ntr()`. Après modification : `python3.12 tools/update-pot.py`,
   compléter `data/locale/en.po` et `de.po`, puis `msgfmt -c --statistics` et `msgcmp`.
 - Toute fonction passée à `idle_add` / `timeout_add` renvoie False (sauf répétition voulue).
@@ -66,6 +66,13 @@ tests, paquet.
   sur l'image, centré en bas, classe « osd » du thème, 60 % de l'écran entre 480 et 820 px) — demande
   de Tof (comme Celluloid / VLC) ; dans la zone du bas de la ToolbarView, coins et ombre étaient rognés.
   `controls_visible()` pour les tests.
+- `backend/mpris.py` (repris d'Ithaca, demandé par Tof) : `org.mpris.MediaPlayer2.nausicaa`. Le casque
+  Bluetooth passe par là : BlueZ relaie l'AVRCP (double tape = PlayPause, écouteurs retirés = Pause) au
+  lecteur MPRIS actif — Ithaca les recevait, Nausicaa 0.1.1 non. Pause / Stop = pause (vidéo gardée),
+  Volume 0..1 = 0..100 %, Rate = vitesse de mpv, Fullscreen (racine) lu / changé par l'application.
+  Démarré / arrêté en direct (`features` « mpris »), seulement avec un bus de session.
+- Décodage matériel : sans `/proc/driver/nvidia`, `gpu_hwdec_interop=vaapi` — sinon mpv charge aussi
+  l'interop CUDA à la création du contexte de rendu et écrit « Cannot load libcuda.so.1 » (vu chez Tof).
 - `app.py` : instance unique, HANDLES_OPEN + ligne de commande (`--enqueue`), fermer = quitter,
   inhibition IDLE | SUSPEND pendant la lecture.
 
@@ -73,6 +80,7 @@ tests, paquet.
 
 ```sh
 python3.12 -m unittest discover -s tests            # moteur (vrai mpv, vo/ao factices)
+dbus-run-session -- python3.12 -m unittest discover -s tests   # + MPRIS (vrai client D-Bus)
 xvfb-run -a -s "-screen 0 1280x800x24" python3.12 tests/ui_smoke.py   # doit finir par « Aucune erreur. »
 LANGUAGE=en … ; LANGUAGE=de …
 python3 -m pyflakes nausicaa tests tools

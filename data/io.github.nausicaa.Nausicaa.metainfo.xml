@@ -73,6 +73,14 @@
   </requires>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.1.2" date="2026-11-09">
+      <description>
+        <ul>
+          <li>System controls (MPRIS): GNOME media panel, keyboard media keys and Bluetooth headset buttons (double-tap to pause, earbuds taken off pause the video)</li>
+          <li>No more “Cannot load libcuda.so.1” message on computers without an NVIDIA card</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.1.1" date="2026-11-09">
       <description>
         <ul>

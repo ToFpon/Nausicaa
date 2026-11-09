@@ -514,6 +514,8 @@ class MainWindow(Adw.ApplicationWindow):
         self._float_controls(full)
         # plein écran : l'en-tête est posé sur l'image, l'encart du volume passe en dessous
         self.osd.set_margin_top(84 if full else 24)
+        if getattr(self.app, "mpris", None) is not None:
+            self.app.mpris.fullscreen_changed()
         if full:
             self.add_css_class("fullscreen-video")
             self.split.set_show_sidebar(False)

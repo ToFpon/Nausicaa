@@ -58,8 +58,40 @@ class NausicaaApp(Adw.Application):
             self.add_action(a)
             if accels:
                 self.set_accels_for_action(f"app.{name}", accels)
+        self.mpris = None
+        self._sync_mpris()
+        from .settings import settings
+        settings.connect(self._on_setting)
+
+    # -- MPRIS : panneau de GNOME, touches multimédia, casque Bluetooth --------------------------
+    def _sync_mpris(self):
+        from . import features
+        on = features.enabled("mpris") and self.get_dbus_connection() is not None
+        if on and self.mpris is None:
+            from .backend.mpris import Mpris
+            self.mpris = Mpris(self.controller, self.present, self._quit, self._mpris_fullscreen)
+            self.mpris.start()
+        elif not on and self.mpris is not None:
+            self.mpris.stop()
+            self.mpris = None
+
+    def _mpris_fullscreen(self, value):
+        """value None : lire l'état ; sinon passer en plein écran ou en sortir."""
+        win = self.window
+        if value is None:
+            return win is not None and win.is_fullscreen()
+        if win is not None:
+            GLib.idle_add(lambda: ((win.fullscreen() if value else win.unfullscreen()), False)[1])
+        return value
+
+    def _on_setting(self, key, _value):
+        if key == "features":
+            self._sync_mpris()
 
     def do_shutdown(self):
+        if self.mpris is not None:
+            self.mpris.stop()
+            self.mpris = None
         self._close_window()
         if self.controller is not None:
             self.controller.shutdown()          # contexte de rendu déjà libéré : mpv peut s'arrêter

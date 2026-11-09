@@ -50,6 +50,10 @@ class Controller:
     @staticmethod
     def _mpv_options() -> dict:
         opts = {"hwdec": "auto-safe" if features.enabled("hwdec") else "no"}
+        if not os.path.exists("/proc/driver/nvidia"):
+            # sans pilote NVIDIA : décodage matériel par VA-API seulement (Intel, AMD). Sinon mpv cherche
+            # aussi CUDA à la création du contexte de rendu et écrit « Cannot load libcuda.so.1 »
+            opts["gpu_hwdec_interop"] = "vaapi"
         if os.environ.get("NAUSICAA_AO"):              # tests : sortie son factice (« null »)
             opts["ao"] = os.environ["NAUSICAA_AO"]
         if settings["audio_language"]:
@@ -291,6 +295,8 @@ class Controller:
             self._emit("title")
         elif name in ("volume", "mute"):
             pass                                     # c'est nous qui les réglons
+        elif name == "speed":
+            self._emit("speed")
         elif name == "file-loaded":
             self._errors = 0
             self._emit("video")
