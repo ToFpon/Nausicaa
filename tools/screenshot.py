@@ -5,7 +5,7 @@
 
 Options : --dark --size=LxH --delay=ms --welcome (page d'accueil) --playlist (file affichée)
           --volume (volume affiché sur l'image) --fullscreen (plein écran, barres affichées)
-          --prefs=page (general, features)
+          --prefs=page (general, features) --css=FICHIER (couleurs d'un thème à imiter)
 Vidéos d'exemple générées par ffmpeg (fractales), sortie son factice, configuration jetable.
 --fullscreen lance openbox et capture l'écran réel (`import -window root`) : la capture d'un widget
 peut rendre une image en retard pour la barre flottante.
@@ -105,6 +105,13 @@ def on_ready(win):
     app._shot = True
     if "dark" in opts:
         Adw.StyleManager.get_default().set_color_scheme(Adw.ColorScheme.FORCE_DARK)
+    if opts.get("css"):
+        # imiter un thème (couleurs redéfinies par @define-color, comme un gtk.css d'utilisateur)
+        from gi.repository import Gdk
+        provider = Gtk.CssProvider()
+        provider.load_from_path(opts["css"])
+        Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), provider,
+                                                  Gtk.STYLE_PROVIDER_PRIORITY_USER)
     w, _, h = opts.get("size", "1000x620").partition("x")
     win.set_default_size(int(w), int(h))
     win.split.set_show_sidebar("playlist" in opts)
