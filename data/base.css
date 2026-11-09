@@ -5,9 +5,6 @@
 .video-area > .welcome,
 .video-area > .audio-only { background-color: @window_bg_color; }
 
-/* Plein écran : barres posées sur l'image, translucides */
-.fullscreen-video headerbar { background-color: alpha(@window_bg_color, 0.85); }
-
 /* Plein écran : commandes compactes, centrées, arrondies, flottant au-dessus de l'image ; fond et texte
    de la fenêtre du thème (transparence comprise), barre d'avance en couleur d'accent comme en fenêtré */
 .nausicaa-controls.floating-controls {
