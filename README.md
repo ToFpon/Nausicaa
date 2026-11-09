@@ -7,9 +7,9 @@
 
 ![Nausicaa](docs/captures/lecture.png)
 
-| Welcome / Accueil |
-|---|
-| ![Welcome](docs/captures/accueil.png) |
+| Full screen / Plein écran | Welcome / Accueil |
+|---|---|
+| ![Full screen](docs/captures/plein-ecran.png) | ![Welcome](docs/captures/accueil.png) |
 
 ---
 

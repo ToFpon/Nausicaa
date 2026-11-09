@@ -62,6 +62,10 @@ tests, paquet.
   Réduction : X11 MINIMIZED, Wayland SUSPENDED (`_hidden_flags`) ; reprise seulement si c'est nous qui
   avons mis en pause. `ui/osd.py` : encart « osd » du thème. `ui/controls.py`, `ui/playlist_panel.py`
   (ListBox, glisser pour réordonner), `ui/shortcuts.py` (ShortcutsWindow en XML).
+  Plein écran : la barre de commandes QUITTE l'Adw.ToolbarView pour `float_revealer` (Gtk.Revealer posé
+  sur l'image, centré en bas, classe « osd » du thème, 60 % de l'écran entre 480 et 820 px) — demande
+  de Tof (comme Celluloid / VLC) ; dans la zone du bas de la ToolbarView, coins et ombre étaient rognés.
+  `controls_visible()` pour les tests.
 - `app.py` : instance unique, HANDLES_OPEN + ligne de commande (`--enqueue`), fermer = quitter,
   inhibition IDLE | SUSPEND pendant la lecture.
 
@@ -76,8 +80,15 @@ python3 -m pyflakes nausicaa tests tools
 
 ui_smoke lance openbox s'il existe (plein écran et réduction passent par le gestionnaire de fenêtres ;
 sans lui, réduction simulée). Vidéos de test : `tests/media.py` (ffmpeg, x264 ultrafast).
+Captures : `Gtk.WidgetPaintable` de la FENÊTRE peut rendre une image en retard (barre flottante
+absente alors qu'elle est affichée) ; pour une capture fidèle, `import -window root` (ImageMagick)
+sous Xvfb + openbox.
 
-## Publication (comme Ithaca, pas encore en place)
+## Publication (comme Ithaca)
 
-PPA à créer (`ppa:nourpon/nausicaa`, `tools/ppa.sh`), workflow `release-deb.yml` repris d'Ithaca.
+PPA `ppa:nourpon/nausicaa` (https://launchpad.net/~nourpon/+archive/ubuntu/nausicaa, créé par Tof) :
+`tools/ppa.sh` chez Tof. Nouvelle version : version dans `nausicaa/__init__.py`, `debian/nausicaa.1`,
+`<release>` de la fiche AppStream, entrée de `debian/changelog` (« X~noble1 »), commit « Version X »,
+push sur main (le workflow `release-deb.yml` publie le .deb dans les Releases), puis Tof lance
+`tools/ppa.sh`.
 Paquet vérifié ici : dpkg-buildpackage, lintian sans remarque, appstreamcli validate (note pédante).

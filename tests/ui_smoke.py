@@ -179,7 +179,7 @@ def frame_has_colour(win) -> bool:
 def accueil(win):
     yield pump(0.3)
     check(win.picture.get_visible_child_name() == "welcome", "page d'accueil au démarrage")
-    check(not win.toolbar.get_reveal_bottom_bars(), "accueil : pas de commandes de lecture")
+    check(not win.controls_visible(), "accueil : pas de commandes de lecture")
     check(not win.resume_button.get_visible(), "aucune file à reprendre au premier lancement")
 
 
@@ -191,7 +191,7 @@ def ouvrir_un_episode(win):
     check([os.path.basename(i.path) for i in c().queue.items] == ["Épisode 1.mp4", "Épisode 2.mp4", "Épisode 10.mp4"],
           "épisodes suivants : tout le dossier, ordre naturel")
     check(win.picture.get_visible_child_name() == "video", "page vidéo")
-    check(win.toolbar.get_reveal_bottom_bars(), "commandes affichées")
+    check(win.controls_visible(), "commandes affichées")
     check(win.title_widget.get_title() == "Épisode 2" and win.title_widget.get_subtitle() == "2 / 3",
           "titre : nom de la vidéo et place dans la file")
     yield Wait(3, until=lambda: frame_has_colour(win))
@@ -233,22 +233,26 @@ def clic_pause_double_clic(win):
 @step
 def plein_ecran_barres(win):
     check(win.toolbar.get_extend_content_to_bottom_edge(), "plein écran : l'image va jusqu'en bas")
+    check(win.float_revealer.get_child() is win.controls and "osd" in win.controls.get_css_classes(),
+          "plein écran : commandes compactes, flottantes, centrées")
     check(not win.split.get_show_sidebar(), "plein écran : pas de file à côté")
     win._over_bars = False
     win._hide_bars()
-    check(not win.toolbar.get_reveal_bottom_bars() and not win.toolbar.get_reveal_top_bars(),
+    check(not win.controls_visible() and not win.toolbar.get_reveal_top_bars(),
           "plein écran : barres effacées pendant la lecture")
     win._last_motion = (0, 0)
     win._on_motion(None, 50, 60)
-    check(win.toolbar.get_reveal_bottom_bars(), "mouvement de la souris : barres revenues")
+    check(win.controls_visible(), "mouvement de la souris : barres revenues")
     c().set_paused(True)
     yield pump(0.2)
     win._hide_bars()
-    check(win.toolbar.get_reveal_bottom_bars(), "en pause : les barres restent")
+    check(win.controls_visible(), "en pause : les barres restent")
     c().set_paused(False)
     win.activate_action("win.leave-fullscreen", None)
     yield Wait(2, until=lambda: not win.is_fullscreen())
-    check(not win.is_fullscreen() and win.toolbar.get_reveal_bottom_bars(), "Échap : fenêtre, barres visibles")
+    check(not win.is_fullscreen() and win.controls_visible(), "Échap : fenêtre, barres visibles")
+    check(win.controls.get_parent() is not win.float_revealer and "osd" not in win.controls.get_css_classes(),
+          "Échap : commandes revenues dans la fenêtre")
 
 
 @step

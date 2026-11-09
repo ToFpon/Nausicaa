@@ -6,8 +6,14 @@
 .video-area > .audio-only { background-color: @window_bg_color; }
 
 /* Plein écran : barres posées sur l'image, translucides */
-.fullscreen-video .nausicaa-controls,
 .fullscreen-video headerbar { background-color: alpha(@window_bg_color, 0.85); }
+
+/* Plein écran : commandes compactes, centrées, arrondies, flottant au-dessus de l'image */
+.nausicaa-controls.floating-controls {
+  border-radius: 18px;
+  padding: 6px 12px;
+  box-shadow: 0 2px 12px alpha(black, 0.35);
+}
 
 /* Barre de commandes */
 .nausicaa-controls { padding: 2px 6px; }

@@ -109,6 +109,11 @@ class MainWindow(Adw.ApplicationWindow):
         self.drop_hint.add_css_class("drop-hint")
         overlay.add_overlay(self.drop_hint)
         self.picture_overlay = overlay
+        # plein écran : la barre de commandes vient ici, flottante, centrée en bas de l'image
+        self.float_revealer = Gtk.Revealer(transition_type=Gtk.RevealerTransitionType.CROSSFADE,
+                                           transition_duration=200, valign=Gtk.Align.END,
+                                           halign=Gtk.Align.CENTER, margin_bottom=32, reveal_child=False)
+        overlay.add_overlay(self.float_revealer)
 
         # -- barres ----------------------------------------------------------------------
         self.header = Adw.HeaderBar()
@@ -447,8 +452,9 @@ class MainWindow(Adw.ApplicationWindow):
     def _reveal_bars(self, reveal: bool):
         fullscreen = self.is_fullscreen()
         self.toolbar.set_reveal_top_bars(reveal or not fullscreen)
-        self.toolbar.set_reveal_bottom_bars((reveal or not fullscreen)
-                                            and self.picture.get_visible_child_name() != "welcome")
+        show = (reveal or not fullscreen) and self.picture.get_visible_child_name() != "welcome"
+        self.toolbar.set_reveal_bottom_bars(show)
+        self.float_revealer.set_reveal_child(show and fullscreen)
         self.picture.set_cursor_from_name(None if reveal or not fullscreen else "none")
 
     def _schedule_hide(self):
@@ -469,12 +475,43 @@ class MainWindow(Adw.ApplicationWindow):
         self._reveal_bars(False)
         return False
 
+    def _float_controls(self, floating: bool):
+        """Plein écran : commandes compactes, centrées en bas, arrondies, posées sur l'image (comme
+        Celluloid / VLC) — classe « osd » du thème : fond sombre translucide, icônes claires. La barre
+        quitte alors l'Adw.ToolbarView (sa zone du bas rognait les coins arrondis et l'ombre) pour un
+        Gtk.Revealer posé sur l'image. Fenêtré : barre ordinaire sur toute la largeur."""
+        c = self.controls
+        if floating and c.get_parent() is not None and self.float_revealer.get_child() is not c:
+            self.toolbar.remove(c)
+            self.float_revealer.set_child(c)
+        elif not floating and self.float_revealer.get_child() is c:
+            self.float_revealer.set_child(None)
+            self.toolbar.add_bottom_bar(c)
+        for cls in ("osd", "floating-controls"):
+            if floating:
+                c.add_css_class(cls)
+            else:
+                c.remove_css_class(cls)
+        if floating:
+            surface = self.get_surface()
+            monitor = self.get_display().get_monitor_at_surface(surface) if surface is not None else None
+            width = monitor.get_geometry().width if monitor is not None else self.get_width()
+            c.set_size_request(max(480, min(820, int(width * 0.6))), -1)
+        else:
+            c.set_size_request(-1, -1)
+
+    def controls_visible(self) -> bool:
+        if self.float_revealer.get_child() is self.controls:
+            return self.float_revealer.get_reveal_child()
+        return self.toolbar.get_reveal_bottom_bars()
+
     def _on_fullscreen(self, *_):
         full = self.is_fullscreen()
         self.toolbar.set_extend_content_to_top_edge(full)
         self.toolbar.set_extend_content_to_bottom_edge(full)
         self.controls.fullscreen.set_icon_name("view-restore-symbolic" if full else "view-fullscreen-symbolic")
         self.controls.fullscreen.set_tooltip_text(tr("Quitter le plein écran") if full else tr("Plein écran"))
+        self._float_controls(full)
         if full:
             self.add_css_class("fullscreen-video")
             self.split.set_show_sidebar(False)
@@ -633,6 +670,8 @@ class MainWindow(Adw.ApplicationWindow):
         # accueil : pas de commandes de lecture (il n'y a rien à lire)
         if not self.is_fullscreen():
             self.toolbar.set_reveal_bottom_bars(name != "welcome")
+        else:
+            self.float_revealer.set_reveal_child(name != "welcome" and self.float_revealer.get_reveal_child())
 
     def _sync_resume_button(self):
         data = self.c.saved_queue(self.c.queue_file) if self.c.player.path is None else None
