@@ -41,6 +41,9 @@ class NausicaaApp(Adw.Application):
         css = Gtk.CssProvider()
         css.load_from_path(os.path.join(DATA_DIR, "base.css"))
         Gtk.StyleContext.add_provider_for_display(display, css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        pip_css = Gtk.CssProvider()                 # au-dessus du gtk.css de l'utilisateur (data/pip.css)
+        pip_css.load_from_path(os.path.join(DATA_DIR, "pip.css"))
+        Gtk.StyleContext.add_provider_for_display(display, pip_css, Gtk.STYLE_PROVIDER_PRIORITY_USER + 1)
         icons = os.path.join(DATA_DIR, "icons")
         if os.path.isdir(icons):
             Gtk.IconTheme.get_for_display(display).add_search_path(icons)

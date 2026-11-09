@@ -304,6 +304,17 @@ def image_dans_l_image(win):
     win._on_drag_begin(drag, 20, 20)
     win._on_drag_update(drag, 30, 30)
     check(c().playing == playing, "glisser : pas de pause")
+    # redimensionner : les bords de la fenêtre sont à nous (plus de décorations)
+    w, h = win.picture.get_width(), win.picture.get_height()
+    check(win._pip_edge(3, 3) == Gdk.SurfaceEdge.NORTH_WEST and win._pip_edge(w - 2, h / 2) == Gdk.SurfaceEdge.EAST
+          and win._pip_edge(w / 2, h / 2) is None, "bords et coins reconnus pour redimensionner")
+    win._on_picture_motion(None, w - 2, h - 2)
+    cursor = win.picture.get_cursor()
+    check(cursor is not None and cursor.get_name() == "se-resize", "curseur de redimensionnement dans le coin")
+    win._on_picture_motion(None, w / 2, h / 2)
+    win._on_click(None, 1, w - 2, h - 2)
+    win._on_drag_begin(drag, w - 2, h - 2)
+    check(win._dragging_window and c().playing == playing, "glisser un coin : redimensionner, pas de pause")
     win._on_click(None, 1, 10, 10)
     win._on_click(None, 2, 10, 10)               # double-clic : retour, sans pause
     yield Wait(3, until=lambda: win.get_width() > 420)

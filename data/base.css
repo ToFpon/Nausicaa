@@ -29,7 +29,7 @@
 
 /* Image dans l'image : fond noir sous l'image (aucun bord du thème), petite capsule et bouton de retour
    au survol */
-window.pip, window.pip.background { background-color: black; box-shadow: none; border-radius: 0; }
+/* (fond, coins et bordure de la fenêtre elle-même : data/pip.css, priorité au-dessus du gtk.css) */
 .nausicaa-controls.floating-controls.pip-controls { padding: 2px 6px; border-radius: 99px; }
 
 /* Barre de commandes */

@@ -1,0 +1,16 @@
+/* Image dans l'image : fenêtre à coins carrés, sans ombre ni bordure, fond noir — comme Firefox.
+   Chargé à la priorité USER + 1 (app.py) : un gtk.css d'utilisateur (priorité USER) qui arrondit les
+   fenêtres (window.csd { border-radius: 12px; box-shadow: … }, chez Tof) passait devant base.css
+   (priorité APPLICATION) et laissait des restes violets aux quatre coins. */
+window.pip,
+window.pip.background,
+window.pip.csd,
+window.pip.csd.background,
+window.pip.csd:backdrop,
+window.pip.csd.background:backdrop {
+  background-color: black;
+  box-shadow: none;
+  border-radius: 0;
+  border: none;
+  outline: none;
+}

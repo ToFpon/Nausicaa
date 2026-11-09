@@ -79,7 +79,13 @@ tests, paquet.
 - Image dans l'image (Ctrl+P, bouton à icône à nous `data/icons/…/nausicaa-pip-symbolic.svg` — Adwaita 46
   n'en a pas —, menus ; demande de Tof, X11 seulement voulu) : `MainWindow.enter_pip / leave_pip`. En-tête et
   barre de commandes `set_visible(False)` (un Gtk.Revealer fermé garde la LARGEUR minimale de son contenu :
-  la fenêtre ne descendait pas sous ~530 px), file cachée, 400 px de large à la proportion de l'image.
+  la fenêtre ne descendait pas sous ~530 px), file cachée, 28 % de l'écran (400 à 640 px) à la proportion
+  de l'image. Sans décoration (`set_decorated(False)`), coins carrés et fond noir par `data/pip.css` chargé
+  à USER + 1 (le gtk.css de Tof, priorité USER, arrondissait `window.csd` et laissait des restes violets aux
+  coins — une priorité plus haute gagne, quelle que soit la spécificité). Bords à nous : 12 px près d'un
+  bord / coin = curseur de redimensionnement et `begin_resize` (`_pip_edge`). Au survol : capsule
+  précédent / lecture / suivant et bouton de retour en haut à gauche. Sortie : fenêtre recentrée.
+  `translate_coordinates` : (x, y) dans le PyGObject de Zorin, (ok, x, y) ailleurs → `_to_window`.
   `ui/x11.py` (libX11 par ctypes, sa propre connexion) : `_NET_WM_STATE_ABOVE` par ClientMessage à la
   racine, `XMoveWindow` en bas à droite de la zone utile (`GdkX11.X11Monitor.get_workarea`), après le
   redimensionnement (150 et 450 ms) ; hors X11, rien. Clic = pause ; glisser (> 8 px) = `begin_move` et

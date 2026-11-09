@@ -303,6 +303,9 @@ class MainWindow(Adw.ApplicationWindow):
         drag.connect("drag-begin", self._on_drag_begin)
         drag.connect("drag-update", self._on_drag_update)
         self.picture.add_controller(drag)
+        edges = Gtk.EventControllerMotion()            # image dans l'image : curseur près des bords
+        edges.connect("motion", self._on_picture_motion)
+        self.picture.add_controller(edges)
         self._drag_start = (0.0, 0.0)
         self._dragging_window = False
         right = Gtk.GestureClick(button=Gdk.BUTTON_SECONDARY)
@@ -409,7 +412,15 @@ class MainWindow(Adw.ApplicationWindow):
     # bas à droite de l'écran (X11 : ui/x11.py ; GTK 4 ne sait plus faire ni l'un ni l'autre ; sous
     # Wayland, interdit aux applications). Clic : pause ; molette : volume ; glisser : déplacer ;
     # double-clic, Échap ou le menu : retour à la fenêtre d'avant (taille, file, maximisée).
-    PIP_WIDTH = 400                              # px (logiques), hauteur d'après l'image
+    PIP_SHARE, PIP_MIN, PIP_MAX = 0.28, 400, 640  # largeur : 28 % de l'écran, entre 400 et 640 px
+    PIP_EDGE = 12                                # px près d'un bord : redimensionner (pas de décoration)
+
+    def _pip_width(self) -> int:
+        surface = self.get_surface()
+        display = self.get_display()
+        monitor = display.get_monitor_at_surface(surface) if surface is not None and display else None
+        screen = monitor.get_geometry().width if monitor is not None else 1280
+        return int(max(self.PIP_MIN, min(self.PIP_MAX, screen * self.PIP_SHARE)))
 
     def toggle_pip(self):
         if self.pip:
@@ -437,7 +448,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.controls.set_visible(False)
         # sans aucune décoration : ni ombre, ni bordure, ni coins du thème (window.csd), l'image seule
         self.set_decorated(False)
-        w = self.PIP_WIDTH
+        w = self._pip_width()
         vw, vh = self.c.player.get("dwidth", 0), self.c.player.get("dheight", 0)
         h = int(round(w * vh / vw)) if vw and vh else int(w * 9 / 16)
         self.set_size_request(160, 90)
@@ -586,33 +597,71 @@ class MainWindow(Adw.ApplicationWindow):
             self._click_toggled = False
 
     # -- image dans l'image : glisser l'image déplace la fenêtre (elle n'a plus d'en-tête) --------
+    def _pip_edge(self, x: float, y: float):
+        """Bord ou coin de la fenêtre sous le point (coordonnées de l'image), None au milieu."""
+        w, h, m = self.picture.get_width(), self.picture.get_height(), self.PIP_EDGE
+        left, right, top, bottom = x < m, x > w - m, y < m, y > h - m
+        E = Gdk.SurfaceEdge
+        for cond, edge in ((top and left, E.NORTH_WEST), (top and right, E.NORTH_EAST),
+                           (bottom and left, E.SOUTH_WEST), (bottom and right, E.SOUTH_EAST),
+                           (top, E.NORTH), (bottom, E.SOUTH), (left, E.WEST), (right, E.EAST)):
+            if cond:
+                return edge
+        return None
+
+    _EDGE_CURSORS = {"NORTH_WEST": "nw-resize", "NORTH_EAST": "ne-resize", "SOUTH_WEST": "sw-resize",
+                     "SOUTH_EAST": "se-resize", "NORTH": "n-resize", "SOUTH": "s-resize",
+                     "WEST": "w-resize", "EAST": "e-resize"}
+
+    def _on_picture_motion(self, _ctl, x, y):
+        """Image dans l'image : curseur de redimensionnement près des bords."""
+        if not self.pip:
+            return
+        edge = self._pip_edge(x, y)
+        self.picture.set_cursor_from_name(self._EDGE_CURSORS[edge.value_nick.upper().replace("-", "_")]
+                                          if edge is not None else None)
+
     def _on_drag_begin(self, gesture, x, y):
         self._drag_start = (x, y)
         self._dragging_window = False
+        if not self.pip:
+            return
+        edge = self._pip_edge(x, y)
+        if edge is None:
+            return
+        # près d'un bord : redimensionner (la fenêtre n'a plus de bords à elle, décorations coupées)
+        self._undo_click_pause()
+        self._dragging_window = True
+        surface, device = self.get_surface(), gesture.get_device()
+        coords = self._to_window(gesture.get_widget(), x, y)
+        if surface is None or device is None or coords is None:
+            return
+        gesture.set_state(Gtk.EventSequenceState.CLAIMED)
+        surface.begin_resize(edge, device, Gdk.BUTTON_PRIMARY, coords[0], coords[1],
+                             gesture.get_current_event_time())
+
+    def _to_window(self, widget, x, y):
+        """Coordonnées d'un widget vers la fenêtre. PyGObject (Zorin) renvoie (x, y) seuls, sans le
+        booléen ; d'autres versions (ok, x, y)."""
+        coords = widget.translate_coordinates(self, x, y)
+        if coords is None:
+            return None
+        if len(coords) == 3:
+            ok, sx, sy = coords
+            return (sx, sy) if ok else None
+        return coords
 
     def _on_drag_update(self, gesture, dx, dy):
         if not self.pip or self._dragging_window or (dx * dx + dy * dy) < 64:
             return
         self._dragging_window = True
         self._undo_click_pause()                 # c'était un glisser, pas un clic
-        surface = self.get_surface()
-        if surface is None:
-            return
-        # PyGObject (Zorin) renvoie (x, y) seuls, sans le booléen ; d'autres versions (ok, x, y)
-        coords = gesture.get_widget().translate_coordinates(self, *self._drag_start)
-        if coords is None:
-            return
-        if len(coords) == 3:
-            ok, sx, sy = coords
-            if not ok:
-                return
-        else:
-            sx, sy = coords
-        device = gesture.get_device()
-        if device is None:                       # glisser simulé (tests) : pas de souris à confier au WM
+        surface, device = self.get_surface(), gesture.get_device()
+        coords = self._to_window(gesture.get_widget(), *self._drag_start)
+        if surface is None or device is None or coords is None:      # (glisser simulé : pas de souris)
             return
         gesture.set_state(Gtk.EventSequenceState.CLAIMED)
-        surface.begin_move(device, Gdk.BUTTON_PRIMARY, sx, sy, gesture.get_current_event_time())
+        surface.begin_move(device, Gdk.BUTTON_PRIMARY, coords[0], coords[1], gesture.get_current_event_time())
 
     def _on_right_click(self, gesture, _n, x, y):
         menu = Gio.Menu()
@@ -660,8 +709,7 @@ class MainWindow(Adw.ApplicationWindow):
             self.toolbar.set_reveal_bottom_bars(False)
             self.float_revealer.set_reveal_child(False)
             self._reveal_pip_overlays(reveal)
-            self.picture.set_cursor_from_name(None)
-            return
+            return                               # (curseur : celui des bords, _on_picture_motion)
         self._reveal_pip_overlays(False)
         fullscreen = self.is_fullscreen()
         self.toolbar.set_reveal_top_bars(reveal or not fullscreen)
