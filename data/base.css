@@ -11,7 +11,10 @@
    Adwaita : view_bg_color opaque, on voit la couleur des vues). Barre d'avance en couleur d'accent. */
 .nausicaa-controls.floating-controls,
 .nausicaa-osd {
-  background-color: @window_bg_color;
+  /* translucide : l'image se devine derrière (aucun flou possible ici : Blur my Shell floute ce qu'il y a
+     DERRIÈRE la fenêtre, le bureau, pas la vidéo dessinée DANS la fenêtre ; GTK 4.14 n'a pas de
+     backdrop-filter) */
+  background-color: alpha(@window_bg_color, 0.72);
   background-image: linear-gradient(@view_bg_color, @view_bg_color);
   color: @view_fg_color;
 }
