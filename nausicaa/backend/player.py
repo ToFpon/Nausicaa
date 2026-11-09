@@ -23,7 +23,8 @@ import mpv
 
 OBSERVED = ("pause", "time-pos", "duration", "eof-reached", "volume", "mute", "track-list",
             "media-title", "vid", "dwidth", "dheight", "seekable", "paused-for-cache", "chapter-list",
-            "sub-visibility", "speed")
+            "sub-visibility", "speed", "ao-volume")
+CLIENT_NAME = "Nausicaa"          # nom du flux dans PipeWire / PulseAudio (sinon « mpv »)
 
 
 class Player:
@@ -34,8 +35,7 @@ class Player:
                     input_default_bindings=False, input_vo_keyboard=False, osc=False, osd_level=0,
                     sub_auto="fuzzy", audio_file_auto="fuzzy", ytdl=False,
                     screenshot_format="png", hr_seek="yes", force_seekable="yes",
-                    # une seule voix pour tout le volume (volume du système inchangé)
-                    volume_max=150)
+                    volume_max=150, audio_client_name=CLIENT_NAME)
         if audio_output:
             opts["ao"] = audio_output
         opts.update(options)
@@ -46,6 +46,7 @@ class Player:
         self._scheduled = False
         self._listeners: list[Callable] = []
         self.path: Optional[str] = None          # fichier chargé (None : rien)
+        self._stream_reset_for: Optional[str] = None
         self._closed = False
         for name in OBSERVED:
             self.mpv.observe_property(name, self._on_property)
@@ -74,9 +75,23 @@ class Player:
             value = pending[name]
             if name not in ("end-file", "file-loaded"):
                 self.values[name] = value
+            if name == "ao-volume":
+                self._reset_stream_volume(value)
             for cb in list(self._listeners):
                 cb(name, value)
         return False
+
+    def _reset_stream_volume(self, value):
+        """Volume du flux côté système (PipeWire / PulseAudio, « ao-volume ») remis à 100 % une fois par
+        vidéo, dès que la sortie son est ouverte. Le volume de Nausicaa (logiciel, celui de la molette)
+        est alors le seul qui compte. Sans ça, PipeWire gardait d'une fois sur l'autre le volume du flux
+        (75 % chez Tof, invisible dans l'appli) : 120 % dans Nausicaa ≈ 75 % dans VLC, dont le curseur
+        EST le volume du flux. Un réglage du flux dans pavucontrol vaut jusqu'à la vidéo suivante."""
+        if value is None or self.path is None or self._stream_reset_for == self.path:
+            return
+        self._stream_reset_for = self.path
+        if abs(float(value) - 100.0) > 0.5:
+            self.set_property("ao-volume", 100.0)
 
     def _on_property(self, name, value):
         self._post(name, value)
@@ -165,8 +180,8 @@ class Player:
     def set_property(self, name: str, value):
         try:
             self.mpv[name] = value
-        except (SystemError, TypeError, AttributeError):
-            pass
+        except (SystemError, TypeError, AttributeError, RuntimeError):
+            pass                                   # propriété absente (ao-volume sans sortie son…)
 
     def select_track(self, kind: str, track_id):
         """kind : « aid », « sid » ; track_id : numéro de piste ou « no »."""
