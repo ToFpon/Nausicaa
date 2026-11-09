@@ -73,6 +73,13 @@
   </requires>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.1.5" date="2026-11-09">
+      <description>
+        <ul>
+          <li>Full screen: the controls and the volume display are translucent, the picture shows through</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.1.4" date="2026-11-09">
       <description>
         <ul>

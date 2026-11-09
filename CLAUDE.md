@@ -66,7 +66,9 @@ tests, paquet.
   sur l'image, centré en bas, 60 % de l'écran entre 480 et 820 px) — demande
   de Tof (comme Celluloid / VLC) ; dans la zone du bas de la ToolbarView, coins et ombre étaient rognés.
   `controls_visible()` pour les tests. Capsule (`.floating-controls`) et encart du volume (`.nausicaa-osd`) :
-  `@window_bg_color` opaque + `@view_bg_color` posé dessus (dégradé uni), texte `@view_fg_color`, barres en
+  `alpha(@window_bg_color, 0.72)` (translucide : l'image se devine, validé chez Tof en 0.1.5 ; aucun flou
+  possible — Blur my Shell floute le bureau DERRIÈRE la fenêtre, pas la vidéo dedans, et GTK 4.14 n'a pas
+  de backdrop-filter) + `@view_bg_color` posé dessus (dégradé uni), texte `@view_fg_color`, barres en
   couleur d'accent — comme les Propriétés d'Odysseus chez Tof (son thème : view_bg_color = violet à 20 % ;
   window_bg_color seul = le gris des listes, refusé). Pas la classe « osd » de libadwaita (noir, barre
   blanche). En-tête du plein écran : style du thème, rien d'imposé. Validé chez Tof (0.1.4).

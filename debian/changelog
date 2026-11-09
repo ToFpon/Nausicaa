@@ -1,3 +1,10 @@
+nausicaa (0.1.5~noble1) noble; urgency=medium
+
+  * Plein écran : capsule des commandes et affichage du volume
+    translucides, l'image se devine derrière (teinte du thème gardée).
+
+ -- Tof <nourpon@gmail.com>  Mon, 09 Nov 2026 20:00:00 +0000
+
 nausicaa (0.1.4~noble1) noble; urgency=medium
 
   * Plein écran : capsule des commandes et affichage du volume teintés
