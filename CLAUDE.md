@@ -33,7 +33,10 @@ tests, paquet.
   - mpv (vo=libmpv) refuse d'ouvrir une vidéo tant que le contexte de rendu n'existe pas (le fichier
     « ne peut pas être lu ») : `VideoView.when_ready(cb)` ; la fenêtre ouvre tout par là. La vidéo est
     donc TOUJOURS réalisée : l'accueil et la page « son seul » sont posés dessus (`PictureArea`,
-    Gtk.Overlay), jamais un Gtk.Stack (il ne réalise que la page affichée).
+    Gtk.Overlay), jamais un Gtk.Stack (il ne réalise que la page affichée). Sur ces pages : vidéo à
+    opacité 0, classe `.page` (fond transparent) → le fond de fenêtre du thème se voit, comme Ithaca
+    (validé chez Tof, 0.1.7 ; sous Xvfb sans compositeur, `window.csd` ne s'applique pas : tester avec
+    `--css` sur `window.background`).
   - Fermeture : contexte de rendu libéré (fenêtre détruite) AVANT `mpv.terminate()`, sinon « Aborted ».
     `app._close_window` : stop, teardown, destroy, boucle vidée, puis `controller.shutdown()`.
   - Rendu logiciel (llvmpipe : machine virtuelle, Xvfb) : les filtres d'échelle par défaut de mpv

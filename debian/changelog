@@ -1,3 +1,10 @@
+nausicaa (0.1.7~noble1) noble; urgency=medium
+
+  * Accueil et page « son seul » : le fond de fenêtre du thème se voit
+    (thèmes translucides compris), comme dans Ithaca.
+
+ -- Tof <nourpon@gmail.com>  Tue, 10 Nov 2026 19:00:00 +0000
+
 nausicaa (0.1.6~noble1) noble; urgency=medium
 
   * Son : le volume de Nausicaa est le seul qui compte. Le volume de son
