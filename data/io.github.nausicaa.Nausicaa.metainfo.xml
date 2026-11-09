@@ -73,6 +73,14 @@
   </requires>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.1.6" date="2026-11-10">
+      <description>
+        <ul>
+          <li>Sound: Nausicaa's volume is now the only one that counts — its stream volume in the sound settings is set back to 100 %, so 75 % in Nausicaa sounds like 75 % in VLC</li>
+          <li>The sound stream is named “Nausicaa” in the volume control (it was “mpv”)</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.1.5" date="2026-11-09">
       <description>
         <ul>

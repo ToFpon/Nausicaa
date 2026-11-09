@@ -79,6 +79,14 @@ tests, paquet.
   Volume 0..1 = 0..100 %, Rate = vitesse de mpv, Fullscreen (racine) lu / changé par l'application.
   Démarré / arrêté en direct (`features` « mpris »), seulement avec un bus de session.
   Validé chez Tof avec son casque Bluetooth (0.1.2).
+- Son (validé chez Tof, 0.1.6) : flux nommé « Nausicaa » (`audio_client_name`). Volume de Nausicaa = volume
+  logiciel de mpv ; le volume du FLUX côté PipeWire (`ao-volume`, ce que montre pavucontrol) est remis à
+  100 % à l'ouverture de la sortie son (`audio-out-params`), puis après 1 s et 2,5 s (PipeWire restaure tard).
+  Avant : flux resté à 75 % (invisible), 120 % dans Nausicaa ≈ 75 % dans VLC (dont le curseur EST le volume
+  du flux). mpv ne prévient pas des changements d'ao-volume : on le lit nous-mêmes. PIÈGE python-mpv :
+  `mpv["nom"]` = OPTION (`options/nom`), `mpv.nom_souligné` = PROPRIÉTÉ — ao-volume n'est qu'une propriété
+  (premier essai muet). `Player.set_property` passe par l'attribut. ao-volume est linéaire (75 % du
+  mélangeur = 42,19). `NAUSICAA_DEBUG=1` : diagnostic sur la sortie d'erreur.
 - Décodage matériel : sans `/proc/driver/nvidia`, `gpu_hwdec_interop=vaapi` — sinon mpv charge aussi
   l'interop CUDA à la création du contexte de rendu et écrit « Cannot load libcuda.so.1 » (vu chez Tof).
 - `app.py` : instance unique, HANDLES_OPEN + ligne de commande (`--enqueue`), fermer = quitter,
