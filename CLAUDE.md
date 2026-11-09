@@ -63,9 +63,11 @@ tests, paquet.
   avons mis en pause. `ui/osd.py` : encart « osd » du thème. `ui/controls.py`, `ui/playlist_panel.py`
   (ListBox, glisser pour réordonner), `ui/shortcuts.py` (ShortcutsWindow en XML).
   Plein écran : la barre de commandes QUITTE l'Adw.ToolbarView pour `float_revealer` (Gtk.Revealer posé
-  sur l'image, centré en bas, classe « osd » du thème, 60 % de l'écran entre 480 et 820 px) — demande
+  sur l'image, centré en bas, 60 % de l'écran entre 480 et 820 px) — demande
   de Tof (comme Celluloid / VLC) ; dans la zone du bas de la ToolbarView, coins et ombre étaient rognés.
-  `controls_visible()` pour les tests.
+  `controls_visible()` pour les tests. Capsule (`.floating-controls`) et encart du volume (`.nausicaa-osd`) :
+  fond / texte de la fenêtre du thème (transparence comprise, comme les Propriétés d'Odysseus), barres en
+  couleur d'accent — pas la classe « osd » de libadwaita (noir, barre blanche), choix de Tof (0.1.3).
 - `backend/mpris.py` (repris d'Ithaca, demandé par Tof) : `org.mpris.MediaPlayer2.nausicaa`. Le casque
   Bluetooth passe par là : BlueZ relaie l'AVRCP (double tape = PlayPause, écouteurs retirés = Pause) au
   lecteur MPRIS actif — Ithaca les recevait, Nausicaa 0.1.1 non. Pause / Stop = pause (vidéo gardée),

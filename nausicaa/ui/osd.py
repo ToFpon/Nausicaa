@@ -1,8 +1,9 @@
 """Affichage par-dessus la vidéo (volume à la molette, avance, vitesse…), comme VLC.
 
 Un seul encart, au milieu en haut de l'image : icône, texte et, pour le volume, une jauge. Il
-s'efface tout seul après DELAY ms ; chaque nouvel affichage relance le délai. Couleurs : la classe
-« osd » de libadwaita (fond sombre translucide du thème), aucune couleur fixe.
+s'efface tout seul après DELAY ms ; chaque nouvel affichage relance le délai. Couleurs : fond et texte
+de la fenêtre du thème (transparence comprise), jauge en couleur d'accent, comme la capsule de commandes
+du plein écran (demande de Tof) ; aucune couleur fixe.
 """
 
 from __future__ import annotations
@@ -23,8 +24,7 @@ class Osd(Gtk.Revealer):
                          halign=Gtk.Align.CENTER, valign=Gtk.Align.START, margin_top=24,
                          can_target=False, reveal_child=False)
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        box.add_css_class("osd")
-        box.add_css_class("nausicaa-osd")
+        box.add_css_class("nausicaa-osd")         # fond de fenêtre du thème (base.css), comme la capsule
         line = Gtk.Box(spacing=10, halign=Gtk.Align.CENTER)
         self.icon = Gtk.Image(pixel_size=24)
         self.label = Gtk.Label()

@@ -8,8 +8,12 @@
 /* Plein écran : barres posées sur l'image, translucides */
 .fullscreen-video headerbar { background-color: alpha(@window_bg_color, 0.85); }
 
-/* Plein écran : commandes compactes, centrées, arrondies, flottant au-dessus de l'image */
+/* Plein écran : commandes compactes, centrées, arrondies, flottant au-dessus de l'image ; fond et texte
+   de la fenêtre du thème (transparence comprise), barre d'avance en couleur d'accent comme en fenêtré */
 .nausicaa-controls.floating-controls {
+  background-color: @window_bg_color;
+  color: @window_fg_color;
+  border: 1px solid alpha(currentColor, 0.08);
   border-radius: 18px;
   padding: 6px 12px;
   box-shadow: 0 2px 12px alpha(black, 0.35);
@@ -22,7 +26,14 @@
 .numeric { font-feature-settings: "tnum"; }
 
 /* Affichage par-dessus l'image (volume, avance…) */
-.nausicaa-osd { padding: 14px 22px; border-radius: 14px; }
+.nausicaa-osd {
+  padding: 14px 22px;
+  border-radius: 14px;
+  background-color: @window_bg_color;
+  color: @window_fg_color;
+  border: 1px solid alpha(currentColor, 0.08);
+  box-shadow: 0 2px 12px alpha(black, 0.35);
+}
 .nausicaa-osd .osd-text { font-size: 1.25em; font-weight: 700; }
 .nausicaa-osd levelbar.osd-level trough { min-height: 6px; }
 .nausicaa-osd levelbar.osd-level block.filled { background-color: @accent_bg_color; }

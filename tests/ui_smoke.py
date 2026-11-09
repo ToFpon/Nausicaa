@@ -233,7 +233,9 @@ def clic_pause_double_clic(win):
 @step
 def plein_ecran_barres(win):
     check(win.toolbar.get_extend_content_to_bottom_edge(), "plein écran : l'image va jusqu'en bas")
-    check(win.float_revealer.get_child() is win.controls and "osd" in win.controls.get_css_classes(),
+    check(win.float_revealer.get_child() is win.controls
+          and "floating-controls" in win.controls.get_css_classes()
+          and "osd" not in win.controls.get_css_classes(),
           "plein écran : commandes compactes, flottantes, centrées")
     check(not win.split.get_show_sidebar(), "plein écran : pas de file à côté")
     win._over_bars = False
@@ -251,7 +253,7 @@ def plein_ecran_barres(win):
     win.activate_action("win.leave-fullscreen", None)
     yield Wait(2, until=lambda: not win.is_fullscreen())
     check(not win.is_fullscreen() and win.controls_visible(), "Échap : fenêtre, barres visibles")
-    check(win.controls.get_parent() is not win.float_revealer and "osd" not in win.controls.get_css_classes(),
+    check(win.controls.get_parent() is not win.float_revealer and "floating-controls" not in win.controls.get_css_classes(),
           "Échap : commandes revenues dans la fenêtre")
 
 

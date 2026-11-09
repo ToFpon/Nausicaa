@@ -477,8 +477,9 @@ class MainWindow(Adw.ApplicationWindow):
 
     def _float_controls(self, floating: bool):
         """Plein écran : commandes compactes, centrées en bas, arrondies, posées sur l'image (comme
-        Celluloid / VLC) — classe « osd » du thème : fond sombre translucide, icônes claires. La barre
-        quitte alors l'Adw.ToolbarView (sa zone du bas rognait les coins arrondis et l'ombre) pour un
+        Celluloid / VLC). Couleurs du thème, comme en fenêtré : fond de fenêtre (celui des Propriétés
+        d'Odysseus, transparence du thème comprise), barre d'avance en couleur d'accent — demande de
+        Tof ; la classe « osd » de libadwaita imposait du noir et une barre blanche. La barre quitte alors l'Adw.ToolbarView (sa zone du bas rognait les coins arrondis et l'ombre) pour un
         Gtk.Revealer posé sur l'image. Fenêtré : barre ordinaire sur toute la largeur."""
         c = self.controls
         if floating and c.get_parent() is not None and self.float_revealer.get_child() is not c:
@@ -487,11 +488,10 @@ class MainWindow(Adw.ApplicationWindow):
         elif not floating and self.float_revealer.get_child() is c:
             self.float_revealer.set_child(None)
             self.toolbar.add_bottom_bar(c)
-        for cls in ("osd", "floating-controls"):
-            if floating:
-                c.add_css_class(cls)
-            else:
-                c.remove_css_class(cls)
+        if floating:
+            c.add_css_class("floating-controls")
+        else:
+            c.remove_css_class("floating-controls")
         if floating:
             surface = self.get_surface()
             monitor = self.get_display().get_monitor_at_surface(surface) if surface is not None else None

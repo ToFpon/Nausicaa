@@ -1,3 +1,11 @@
+nausicaa (0.1.3~noble1) noble; urgency=medium
+
+  * Plein écran : la capsule des commandes et l'affichage du volume
+    prennent les couleurs du thème (fond de fenêtre, couleur d'accent
+    pour les barres), comme en fenêtré.
+
+ -- Tof <nourpon@gmail.com>  Mon, 09 Nov 2026 18:00:00 +0000
+
 nausicaa (0.1.2~noble1) noble; urgency=medium
 
   * Contrôle depuis le système (MPRIS) : panneau multimédia de GNOME,
