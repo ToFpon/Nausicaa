@@ -66,8 +66,11 @@ tests, paquet.
   sur l'image, centré en bas, 60 % de l'écran entre 480 et 820 px) — demande
   de Tof (comme Celluloid / VLC) ; dans la zone du bas de la ToolbarView, coins et ombre étaient rognés.
   `controls_visible()` pour les tests. Capsule (`.floating-controls`) et encart du volume (`.nausicaa-osd`) :
-  fond / texte de la fenêtre du thème (transparence comprise, comme les Propriétés d'Odysseus), barres en
-  couleur d'accent — pas la classe « osd » de libadwaita (noir, barre blanche), choix de Tof (0.1.3).
+  `@window_bg_color` opaque + `@view_bg_color` posé dessus (dégradé uni), texte `@view_fg_color`, barres en
+  couleur d'accent — comme les Propriétés d'Odysseus chez Tof (son thème : view_bg_color = violet à 20 % ;
+  window_bg_color seul = le gris des listes, refusé). Pas la classe « osd » de libadwaita (noir, barre
+  blanche). En-tête du plein écran : style du thème, rien d'imposé. Validé chez Tof (0.1.4).
+  `tools/screenshot.py --css=FICHIER` imite un thème (@define-color).
 - `backend/mpris.py` (repris d'Ithaca, demandé par Tof) : `org.mpris.MediaPlayer2.nausicaa`. Le casque
   Bluetooth passe par là : BlueZ relaie l'AVRCP (double tape = PlayPause, écouteurs retirés = Pause) au
   lecteur MPRIS actif — Ithaca les recevait, Nausicaa 0.1.1 non. Pause / Stop = pause (vidéo gardée),
