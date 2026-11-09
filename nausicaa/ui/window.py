@@ -56,11 +56,15 @@ class PictureArea(Gtk.Overlay):
 
     Pas un Gtk.Stack : un Stack ne réalise que la page affichée, et sans GLArea réalisée mpv n'a pas
     de contexte de rendu — le premier fichier ouvert depuis l'accueil échouait (« ne peut pas être
-    lu »). La vidéo reste donc toujours en place, dessous."""
+    lu »). La vidéo reste donc toujours en place, dessous.
+
+    Accueil et « son seul » : ni fond noir ni image (vidéo à opacité 0, toujours réalisée), le fond de
+    la fenêtre du thème se voit — comme Ithaca (demande de Tof : son violet translucide / flouté)."""
 
     def __init__(self, video: Gtk.Widget, pages: dict):
         super().__init__(hexpand=True, vexpand=True)
         self.add_css_class("video-area")
+        self.video = video
         self.set_child(video)
         self.pages = pages
         for page in pages.values():
@@ -75,6 +79,12 @@ class PictureArea(Gtk.Overlay):
         self._name = name
         for key, page in self.pages.items():
             page.set_visible(key == name)
+        on_page = name in self.pages
+        self.video.set_opacity(0 if on_page else 1)
+        if on_page:
+            self.add_css_class("page")
+        else:
+            self.remove_css_class("page")
 
 
 class MainWindow(Adw.ApplicationWindow):

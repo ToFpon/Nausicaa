@@ -2,8 +2,10 @@
    tout lecteur vidéo (les bandes autour d'un film ne prennent pas la couleur de la fenêtre). */
 
 .video-area { background-color: black; }
+/* accueil, son seul : rien de peint, le fond de la fenêtre du thème se voit (comme Ithaca) */
+.video-area.page { background-color: transparent; }
 .video-area > .welcome,
-.video-area > .audio-only { background-color: @window_bg_color; }
+.video-area > .audio-only { background: none; }
 
 /* Plein écran : commandes compactes, centrées, arrondies, flottant au-dessus de l'image. Fond = fond de
    fenêtre (opaque : lisible sur n'importe quelle image) + teinte des vues du thème posée dessus, comme
