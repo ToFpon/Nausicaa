@@ -14,6 +14,8 @@ nous qui enchaînons (file, répétition, reprise), pas la liste interne de mpv 
 from __future__ import annotations
 
 import locale
+import os
+import sys
 import threading
 from typing import Callable, Optional
 
@@ -23,8 +25,15 @@ import mpv
 
 OBSERVED = ("pause", "time-pos", "duration", "eof-reached", "volume", "mute", "track-list",
             "media-title", "vid", "dwidth", "dheight", "seekable", "paused-for-cache", "chapter-list",
-            "sub-visibility", "speed", "ao-volume")
+            "sub-visibility", "speed", "audio-out-params")
 CLIENT_NAME = "Nausicaa"          # nom du flux dans PipeWire / PulseAudio (sinon « mpv »)
+STREAM_CHECKS_MS = (150, 1000, 2500)   # après l'ouverture de la sortie son (PipeWire restaure tard)
+DEBUG = bool(os.environ.get("NAUSICAA_DEBUG"))
+
+
+def _debug(*args):
+    if DEBUG:
+        print("nausicaa:", *args, file=sys.stderr, flush=True)
 
 
 class Player:
@@ -46,7 +55,7 @@ class Player:
         self._scheduled = False
         self._listeners: list[Callable] = []
         self.path: Optional[str] = None          # fichier chargé (None : rien)
-        self._stream_reset_for: Optional[str] = None
+        self._stream_gen = 0
         self._closed = False
         for name in OBSERVED:
             self.mpv.observe_property(name, self._on_property)
@@ -75,23 +84,46 @@ class Player:
             value = pending[name]
             if name not in ("end-file", "file-loaded"):
                 self.values[name] = value
-            if name == "ao-volume":
-                self._reset_stream_volume(value)
+            if name == "audio-out-params" and value:
+                self._schedule_stream_checks()
             for cb in list(self._listeners):
                 cb(name, value)
         return False
 
-    def _reset_stream_volume(self, value):
-        """Volume du flux côté système (PipeWire / PulseAudio, « ao-volume ») remis à 100 % une fois par
-        vidéo, dès que la sortie son est ouverte. Le volume de Nausicaa (logiciel, celui de la molette)
-        est alors le seul qui compte. Sans ça, PipeWire gardait d'une fois sur l'autre le volume du flux
-        (75 % chez Tof, invisible dans l'appli) : 120 % dans Nausicaa ≈ 75 % dans VLC, dont le curseur
-        EST le volume du flux. Un réglage du flux dans pavucontrol vaut jusqu'à la vidéo suivante."""
-        if value is None or self.path is None or self._stream_reset_for == self.path:
-            return
-        self._stream_reset_for = self.path
-        if abs(float(value) - 100.0) > 0.5:
-            self.set_property("ao-volume", 100.0)
+    # -- volume du flux côté système ------------------------------------------------------------
+    def _schedule_stream_checks(self):
+        """Volume du flux côté système (PipeWire / PulseAudio, « ao-volume ») remis à 100 % quand la
+        sortie son s'ouvre : le volume de Nausicaa (logiciel, celui de la molette) est alors le seul qui
+        compte. Sans ça, PipeWire gardait le volume du flux (75 % chez Tof, invisible dans l'appli) :
+        120 % dans Nausicaa ≈ 75 % dans VLC, dont le curseur EST le volume du flux.
+
+        mpv ne PRÉVIENT PAS des changements d'ao-volume (observer la propriété ne donnait rien : premier
+        essai raté chez Tof) : on le lit nous-mêmes, à l'ouverture de la sortie (audio-out-params), puis
+        après 1 s et 2,5 s — PipeWire (restauration du volume mémorisé) peut passer après nous."""
+        # pas de source_remove (une source déjà passée ferait un avertissement) : une génération, les
+        # contrôles d'une ouverture précédente ne font plus rien
+        self._stream_gen += 1
+        for ms in STREAM_CHECKS_MS:
+            GLib.timeout_add(ms, self._check_stream_volume, ms, self._stream_gen)
+
+    def _check_stream_volume(self, ms, gen):
+        if self._closed or gen != self._stream_gen:
+            return False
+        # PROPRIÉTÉ ao-volume (attribut ao_volume) : mpv["ao-volume"] de python-mpv lit l'OPTION
+        # « options/ao-volume », qui n'existe pas — premier essai muet chez Tof
+        try:
+            volume = self.mpv.ao_volume
+        except Exception as e:  # noqa: BLE001 — sortie sans volume (null, ALSA brut…)
+            _debug(f"ao-volume illisible ({ms} ms) : {e}")
+            return False
+        _debug(f"volume du flux : {volume} ({ms} ms)")
+        if volume is not None and abs(float(volume) - 100.0) > 0.5:
+            try:
+                self.mpv.ao_volume = 100.0
+                _debug("volume du flux remis à 100", "→", self.mpv.ao_volume)
+            except Exception as e:  # noqa: BLE001
+                _debug(f"ao-volume non modifiable : {e}")
+        return False
 
     def _on_property(self, name, value):
         self._post(name, value)
@@ -179,7 +211,8 @@ class Player:
 
     def set_property(self, name: str, value):
         try:
-            self.mpv[name] = value
+            # attribut = PROPRIÉTÉ de mpv ; self.mpv[name] passerait par « options/<name> » (python-mpv)
+            setattr(self.mpv, name.replace("-", "_"), value)
         except (SystemError, TypeError, AttributeError, RuntimeError):
             pass                                   # propriété absente (ao-volume sans sortie son…)
 
