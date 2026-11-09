@@ -137,9 +137,8 @@ class PlaylistPanel(Gtk.Box):
         current = self.controller.item
         for row in self._rows:
             row.set_current(row.item is current)
-        n = len(self._rows)
-        pos = self.controller.queue.pos
-        self.heading.set_subtitle(f"{pos + 1} / {n}" if n and pos >= 0 else "")
+        # « 2 / 6 » : déjà sous le titre de la fenêtre ; ici le titre seul, que les boutons de la
+        # fenêtre (mis au bord droit, donc dans cet en-tête) ne coupent pas
 
     def sync_summary(self):
         n = len(self._rows)

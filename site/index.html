@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nausicaa — a small video player for GNOME</title>
+<meta name="description" content="Nausicaa is a small GTK4 / libadwaita video player for GNOME built on mpv: click to pause, double-click for full screen without pausing, mouse wheel volume with an on-screen display, pause when minimised, resume where you left off, following episodes queued. No Flatpak. For Ubuntu 24.04 and 26.04, Zorin OS 18 and Linux Mint 22.">
+<link rel="icon" href="img/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --desk-0:#120a05;
+    --desk-1:#1c110a;
+    --desk-2:#3a1d0c;
+    --orange:#f97316;
+    --orange-bright:#fdba74;
+    --orange-deep:#c2410c;
+    --sun:#fbbf24;
+
+    --bg:#140d09;
+    --surface:#1d1410;
+    --surface-2:#271b15;
+    --line:rgba(255,255,255,.08);
+    --line-strong:rgba(255,255,255,.14);
+    --text:#fbf3ec;
+    --text-dim:rgba(251,243,236,.62);
+    --text-faint:rgba(251,243,236,.40);
+
+    --green:#4ade80;
+
+    --display:'Space Grotesk',sans-serif;
+    --body:'Inter',sans-serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%;height:auto}
+  ::selection{background:var(--orange);color:#fff}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+
+  /* ───────────────── NAV ───────────────── */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(14px);background:rgba(20,13,9,.72);border-bottom:1px solid transparent;transition:border-color .3s}
+  nav.scrolled{border-bottom-color:var(--line)}
+  .nav-in{max-width:1180px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:11px;font-family:var(--display);font-weight:600;font-size:1.05rem;letter-spacing:-.01em}
+  .brand img{width:30px;height:30px;filter:drop-shadow(0 3px 10px rgba(249,115,22,.45))}
+  .nav-links{display:flex;gap:30px;align-items:center;font-size:.92rem}
+  .nav-links a{color:var(--text-dim);transition:color .2s}
+  .nav-links a:hover{color:var(--text)}
+  .get-pill{font-family:var(--mono);font-size:.74rem;letter-spacing:.04em;color:var(--green);border:1px solid rgba(74,222,128,.35);background:rgba(74,222,128,.08);padding:6px 14px;border-radius:999px;white-space:nowrap;transition:background .2s}
+  .get-pill:hover{background:rgba(74,222,128,.16)}
+  @media(max-width:720px){.nav-links a:not(.get-pill){display:none}}
+
+  /* ───────────────── HERO ───────────────── */
+  .hero{position:relative;padding:150px 0 90px;overflow:hidden}
+  .hero-bg{position:absolute;inset:0;z-index:0;background:
+      radial-gradient(1200px 600px at 70% -5%,rgba(249,115,22,.30),transparent 60%),
+      radial-gradient(900px 500px at 15% 10%,rgba(251,191,36,.14),transparent 55%),
+      linear-gradient(180deg,var(--desk-1),var(--bg) 70%)}
+  .hero-bg::after{content:"";position:absolute;inset:0;background-image:
+      linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+    background-size:54px 54px;mask-image:radial-gradient(900px 500px at 50% 0%,#000,transparent 75%)}
+  .hero-in{position:relative;z-index:1;text-align:center}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.78rem;letter-spacing:.04em;color:var(--orange-bright);border:1px solid rgba(253,186,116,.3);background:rgba(249,115,22,.08);padding:6px 14px;border-radius:999px;margin-bottom:28px}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+  .hero-icon{width:92px;height:92px;margin:0 auto 26px;filter:drop-shadow(0 12px 30px rgba(249,115,22,.45))}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(2.4rem,6vw,4.4rem);line-height:1.03;letter-spacing:-.03em;margin-bottom:22px}
+  h1 .accent{background:linear-gradient(120deg,var(--sun),var(--orange) 55%,#fb7185);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{font-size:clamp(1.05rem,2vw,1.26rem);color:var(--text-dim);max-width:680px;margin:0 auto 36px}
+  .hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .btn{font-family:var(--body);font-weight:600;font-size:.96rem;padding:13px 26px;border-radius:12px;transition:all .2s;display:inline-flex;align-items:center;gap:9px;border:1px solid transparent}
+  .btn-primary{background:linear-gradient(120deg,var(--sun),var(--orange));color:#1c0f05;box-shadow:0 10px 30px -10px rgba(249,115,22,.7)}
+  .btn-primary:hover{filter:brightness(1.08)}
+  .btn-ghost{border-color:var(--line-strong);color:var(--text)}
+  .btn-ghost:hover{border-color:var(--orange);background:rgba(249,115,22,.1)}
+
+  /* film strip under the title */
+  .strip{display:flex;gap:6px;justify-content:center;margin:0 auto 30px;height:14px}
+  .strip i{width:22px;border-radius:3px;background:linear-gradient(90deg,var(--orange-deep),var(--orange),var(--sun));opacity:.35}
+  .js .strip i{animation:roll 2.4s ease-in-out infinite;animation-delay:var(--d)}
+  @keyframes roll{0%,100%{opacity:.25}50%{opacity:.95}}
+
+  /* ───────── screenshots ───────── */
+  .stage{position:relative;margin-top:64px;display:flex;justify-content:center}
+  .stage-bg{position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:min(1040px,96vw);height:108%;border-radius:24px;z-index:0;
+    background:radial-gradient(120% 90% at 30% 0%,rgba(253,186,116,.35),transparent 60%),linear-gradient(160deg,var(--orange-deep),var(--desk-2) 70%,var(--desk-0));
+    filter:blur(2px);opacity:.55}
+  .shot{position:relative;z-index:1;border-radius:13px;overflow:hidden;border:1px solid rgba(0,0,0,.5);
+    box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 32px 70px -20px rgba(0,0,0,.8),0 0 0 1px rgba(0,0,0,.4);background:#242424}
+  .shot img{width:100%}
+  .hero .shot{width:min(1020px,95vw)}
+  .caption{font-family:var(--mono);font-size:.74rem;color:var(--text-faint);margin-top:14px;text-align:center}
+
+  .tabs{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);padding:4px;border-radius:11px;width:max-content;max-width:100%;margin:0 auto 16px;flex-wrap:wrap}
+  .tabs button{font-family:var(--body);font-size:.8rem;font-weight:500;color:var(--text-dim);background:none;border:0;padding:6px 14px;border-radius:8px;cursor:pointer;transition:all .2s}
+  .tabs button:hover{color:var(--text)}
+  .tabs button.active{background:var(--orange);color:#1c0f05}
+  .tabbed .shot img{display:none}
+  .tabbed .shot img.active{display:block}
+
+  .compare{position:relative;z-index:1;border-radius:13px;overflow:hidden;border:1px solid rgba(0,0,0,.5);box-shadow:0 32px 70px -20px rgba(0,0,0,.8);user-select:none;touch-action:pan-y;cursor:ew-resize}
+  .compare img{width:100%}
+  .compare .top{position:absolute;inset:0;clip-path:inset(0 50% 0 0)}
+  .compare .handle{position:absolute;top:0;bottom:0;left:50%;width:2px;background:#fff;box-shadow:0 0 12px rgba(0,0,0,.6)}
+  .compare .handle::after{content:"⇆";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;background:var(--orange);color:#1c0f05;display:grid;place-items:center;font-size:17px;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+  .compare .lbl{position:absolute;top:12px;font-family:var(--mono);font-size:.7rem;padding:3px 9px;border-radius:6px;background:rgba(0,0,0,.55);color:#fff}
+  .compare .lbl.l{left:12px}.compare .lbl.r{right:12px}
+
+  /* ───────────────── SECTIONS ───────────────── */
+  section{position:relative}
+  .stats{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface)}
+  .stats-in{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line)}
+  .stat{background:var(--surface);padding:30px 22px;text-align:center}
+  .stat .n{font-family:var(--display);font-size:2.1rem;font-weight:700;color:var(--text);line-height:1}
+  .stat .n .u{color:var(--orange)}
+  .stat .l{font-size:.82rem;color:var(--text-dim);margin-top:8px}
+  @media(max-width:680px){.stats-in{grid-template-columns:repeat(2,1fr)}}
+
+  .sec-head{text-align:center;max-width:660px;margin:0 auto 64px}
+  .sec-tag{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--orange-bright);margin-bottom:14px}
+  .sec-head h2{font-family:var(--display);font-weight:700;font-size:clamp(1.8rem,3.4vw,2.6rem);letter-spacing:-.02em;line-height:1.1;margin-bottom:14px}
+  .sec-head p{color:var(--text-dim);font-size:1.04rem}
+
+  .feature{padding:100px 0}
+  .feature .wrap{display:grid;grid-template-columns:5fr 7fr;gap:56px;align-items:center}
+  .feature.flip .wrap{grid-template-columns:7fr 5fr}
+  .feature.flip .copy{order:2}
+  .feature.flip .visual{order:1}
+  .ftag{font-family:var(--mono);font-size:.76rem;letter-spacing:.08em;text-transform:uppercase;color:var(--orange-bright);margin-bottom:16px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .kbd{font-family:var(--mono);font-size:.7rem;background:var(--surface-2);border:1px solid var(--line-strong);border-bottom-width:2px;padding:2px 7px;border-radius:5px;color:var(--text);letter-spacing:0;text-transform:none}
+  .feature h3{font-family:var(--display);font-weight:700;font-size:clamp(1.6rem,2.8vw,2.1rem);letter-spacing:-.02em;line-height:1.12;margin-bottom:18px}
+  .feature p.intro{color:var(--text-dim);font-size:1.04rem;margin-bottom:24px}
+  .flist{display:flex;flex-direction:column;gap:13px}
+  .flist .fi{display:flex;gap:13px;align-items:flex-start;font-size:.95rem}
+  .flist .fi .chk{color:var(--orange);flex-shrink:0;margin-top:2px}
+  .flist .fi b{color:var(--text);font-weight:600}
+  .flist .fi span{color:var(--text-dim)}
+  @media(max-width:900px){
+    .feature .wrap,.feature.flip .wrap{grid-template-columns:1fr;gap:40px}
+    .feature.flip .copy{order:1}.feature.flip .visual{order:2}
+  }
+  .feature.alt{background:var(--surface)}
+
+  /* mouse gestures */
+  .gestures{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+  @media(max-width:520px){.gestures{grid-template-columns:1fr}}
+  .g{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+  .g .gi{font-size:22px;margin-bottom:6px}
+  .g b{display:block;font-family:var(--display);font-size:.95rem}
+  .g span{font-size:.8rem;color:var(--text-dim)}
+
+  /* ───────────────── GRID ───────────────── */
+  .grid-sec{padding:100px 0}
+  .egrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:860px){.egrid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.egrid{grid-template-columns:1fr}}
+  .ecard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;transition:all .25s;position:relative;overflow:hidden}
+  .ecard::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 100% 0%,rgba(249,115,22,.1),transparent 60%);opacity:0;transition:opacity .25s}
+  .ecard:hover{border-color:var(--line-strong);transform:translateY(-3px)}
+  .ecard:hover::before{opacity:1}
+  .ecard .ei{width:44px;height:44px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;font-size:21px;margin-bottom:16px}
+  .ecard h4{font-family:var(--display);font-weight:600;font-size:1.08rem;margin-bottom:7px}
+  .ecard p{font-size:.88rem;color:var(--text-dim);margin-bottom:14px}
+  .ecard code{font-family:var(--mono);font-size:.74rem;color:var(--orange-bright);background:rgba(249,115,22,.1);padding:3px 8px;border-radius:6px}
+
+  /* ───────────────── INSTALL ───────────────── */
+  .soon{padding:100px 0;background:var(--surface);border-top:1px solid var(--line)}
+  .soon-card{max-width:760px;margin:0 auto;background:#0f0905;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px -24px rgba(0,0,0,.7)}
+  .soon-top{display:flex;align-items:center;justify-content:center;padding:11px 12px;border-bottom:1px solid var(--line);background:var(--surface-2);font-weight:600;font-size:.84rem}
+  .soon-body{padding:8px 22px}
+  .soon-row{display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}
+  .soon-row:last-child{border-bottom:0}
+  .soon-row .ri{font-size:20px;width:28px;text-align:center}
+  .soon-row .rt{flex:1;min-width:0}
+  .soon-row .rt b{display:block;font-weight:600}
+  .soon-row .rt span{font-size:.86rem;color:var(--text-dim)}
+  .badge{font-family:var(--mono);font-size:.7rem;padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .badge.ok{color:var(--green);background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.3)}
+  .cmd{position:relative;margin:0;padding:18px 22px;font-family:var(--mono);font-size:.86rem;line-height:1.9;color:var(--text);overflow-x:auto;white-space:pre}
+  .cmd .p{color:var(--orange-bright);user-select:none}
+  .copy-btn{position:absolute;top:50%;right:10px;transform:translateY(-50%);font-family:var(--mono);font-size:.72rem;cursor:pointer;color:var(--text-dim);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:8px;padding:5px 10px}
+  .copy-btn:hover{color:var(--text);border-color:var(--orange)}
+  .soon-row .row-cmd{display:block;width:fit-content;max-width:100%;margin-top:6px;font-family:var(--mono);font-size:.8rem;color:var(--orange-bright);background:rgba(249,115,22,.1);padding:3px 8px;border-radius:6px;white-space:nowrap;overflow-x:auto}
+  .soon-row a{color:var(--orange-bright)}
+  .soon-row a:hover{text-decoration:underline}
+  .reqs{max-width:760px;margin:30px auto 0;font-size:.9rem;color:var(--text-dim);text-align:center}
+  .reqs a{color:var(--orange-bright)}
+
+  /* ───────────────── FOOTER ───────────────── */
+  footer{padding:70px 0 50px;border-top:1px solid var(--line);text-align:center}
+  .foot-brand{display:inline-flex;align-items:center;gap:11px;font-family:var(--display);font-weight:600;font-size:1.1rem;margin-bottom:18px}
+  .foot-brand img{width:30px;height:30px}
+  .foot-links{display:flex;gap:26px;justify-content:center;margin-bottom:26px;flex-wrap:wrap;font-size:.92rem}
+  .foot-links a{color:var(--text-dim);transition:color .2s}
+  .foot-links a:hover{color:var(--orange-bright)}
+  .foot-meta{font-family:var(--mono);font-size:.76rem;color:var(--text-faint)}
+  .foot-meta .sep{margin:0 10px;opacity:.5}
+
+  .js .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .js .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none}
+    .js .strip i{animation:none}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add('js')</script>
+
+<nav id="nav">
+  <div class="nav-in">
+    <a href="#" class="brand"><img src="img/icon.svg" alt=""> Nausicaa</a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#all">Everything</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/ToFpon/Nausicaa">GitHub</a>
+      <a href="#install" class="get-pill">v0.1.1 · available</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ───────────── HERO ───────────── -->
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="wrap hero-in">
+    <img class="hero-icon" src="img/icon.svg" alt="Nausicaa icon">
+    <span class="eyebrow"><span class="dot"></span> Version 0.1.1 · GTK4 · libadwaita · mpv · GPL-3.0</span>
+    <h1>Plays your videos.<br>And <span class="accent">nothing else</span>.</h1>
+    <p class="lede">Nausicaa is a small video player for GNOME, built on the mpv engine. A simple window like Celluloid, the mouse habits of VLC — done right — and a queue that remembers where you stopped. No Flatpak.</p>
+    <div class="strip" id="strip" aria-hidden="true"></div>
+    <div class="hero-actions">
+      <a href="#install" class="btn btn-primary">Install on Ubuntu / Zorin</a>
+      <a href="https://github.com/ToFpon/Nausicaa" class="btn btn-ghost">Source code on GitHub</a>
+    </div>
+    <div class="stage reveal">
+      <div class="stage-bg"></div>
+      <div class="shot"><img src="img/dark.png" alt="Nausicaa playing episode 2 of a series, with the play queue on the right" width="990" height="610"></div>
+    </div>
+    <p class="caption">Real screenshot · play queue (F9) · Adwaita dark</p>
+  </div>
+</header>
+
+<!-- ───────────── STATS ───────────── -->
+<section class="stats">
+  <div class="wrap"><div class="stats-in">
+    <div class="stat"><div class="n">1</div><div class="l">click to pause — at once</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">pause on double-click</div></div>
+    <div class="stat"><div class="n">3<span class="u">×</span></div><div class="l">Languages — EN · FR · DE</div></div>
+    <div class="stat"><div class="n">0<span class="u">%</span></div><div class="l">Telemetry, ads, nonsense</div></div>
+  </div></div>
+</section>
+
+<div id="features"></div>
+
+<!-- Mouse -->
+<section class="feature">
+  <div class="wrap">
+    <div class="copy">
+      <div class="ftag">Mouse <span class="kbd">F</span><span class="kbd">↑</span><span class="kbd">↓</span></div>
+      <h3>Your hand already knows what to do.</h3>
+      <p class="intro">The gestures you learned with VLC, without its quirks. A click pauses right away; a double-click goes full screen and the video keeps playing.</p>
+      <div class="gestures">
+        <div class="g"><div class="gi">🖱️</div><b>Click</b><span>pause / play</span></div>
+        <div class="g"><div class="gi">⛶</div><b>Double-click</b><span>full screen, no pause</span></div>
+        <div class="g"><div class="gi">🔊</div><b>Wheel</b><span>volume, shown on the picture</span></div>
+      </div>
+      <div class="flist">
+        <div class="fi"><span class="chk">✓</span><span><b>Compact controls in full screen</b>, centred and rounded, fading away when the mouse rests.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>Up to 150 %</b> for a video that is too quiet — if you allow it.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>Minimise the window, the video waits.</b> Bring it back, it plays again.</span></div>
+      </div>
+    </div>
+    <div class="visual reveal">
+      <div class="shot"><img src="img/fullscreen.png" alt="Full screen with compact rounded controls and the volume shown over the picture" width="1280" height="800" loading="lazy"></div>
+      <p class="caption">Full screen · volume shown over the picture</p>
+    </div>
+  </div>
+</section>
+
+<!-- Series -->
+<section class="feature alt flip">
+  <div class="wrap">
+    <div class="copy">
+      <div class="ftag">Series <span class="kbd">N</span><span class="kbd">P</span><span class="kbd">F9</span></div>
+      <h3>Open one episode. The rest follows.</h3>
+      <p class="intro">Double-click “Episode 2” in your file manager: the other episodes of the folder join the queue, in the right order, and playback starts where you asked.</p>
+      <div class="flist">
+        <div class="fi"><span class="chk">✓</span><span><b>Natural order</b> — Episode 2 before Episode 10, like in your file manager.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>Resume where you left off</b>, for every video. “From the start” is one click away.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>A real queue</b>: shuffle, repeat, drag to reorder, Delete to remove, drop files to add.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>Playlists</b> — M3U, M3U8, XSPF, PLS, and the queue saved as a playlist with relative paths.</span></div>
+      </div>
+    </div>
+    <div class="visual reveal">
+      <div class="shot"><img src="img/dark.png" alt="The play queue with six episodes in natural order" width="990" height="610" loading="lazy"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Theme -->
+<section class="feature">
+  <div class="wrap">
+    <div class="copy">
+      <div class="ftag">Your theme</div>
+      <h3>Looks like your desktop, not like an app.</h3>
+      <p class="intro">Nausicaa has no colours of its own: it follows your GTK4 theme, light or dark, with your accent colour. Only the bands around a film stay black — as they should.</p>
+      <div class="flist">
+        <div class="fi"><span class="chk">✓</span><span><b>Light and dark</b>, switched live with the system.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>Made on Zorin OS</b>, for GNOME 46, GTK 4.14 and the distribution's mpv.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>X11 and Wayland</b> — the picture is an ordinary GTK widget.</span></div>
+      </div>
+    </div>
+    <div class="visual reveal">
+      <div class="compare" id="compare">
+        <img src="img/dark.png" alt="Nausicaa with the dark theme" width="990" height="610" loading="lazy">
+        <div class="top"><img src="img/light.png" alt="Nausicaa with the light theme" width="990" height="610" loading="lazy"></div>
+        <div class="handle"></div>
+        <span class="lbl l">Light</span><span class="lbl r">Dark</span>
+      </div>
+      <p class="caption">Drag the handle</p>
+    </div>
+  </div>
+</section>
+
+<!-- Features page -->
+<section class="feature alt flip">
+  <div class="wrap">
+    <div class="copy">
+      <div class="ftag">Preferences → Features</div>
+      <h3>Every habit is a switch.</h3>
+      <p class="intro">Don't like click-to-pause? Rather keep the queue as it is when you open a single file? Each feature turns off instantly, no restart.</p>
+      <div class="flist">
+        <div class="fi"><span class="chk">✓</span><span><b>Preferred languages</b> for audio tracks and subtitles.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>Hardware decoding</b> when your graphics card can.</span></div>
+      </div>
+    </div>
+    <div class="visual reveal tabbed" data-tabs>
+      <div class="tabs">
+        <button class="active" data-i="0">Features</button>
+        <button data-i="1">Welcome</button>
+      </div>
+      <div class="shot">
+        <img class="active" src="img/features.png" alt="Preferences window, Features page with a switch for each feature" width="990" height="610" loading="lazy">
+        <img src="img/welcome.png" alt="Welcome page: drop videos here, or open them" width="990" height="610" loading="lazy">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── EVERYTHING ───────────── -->
+<section class="grid-sec" id="all">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">Everything</div>
+      <h2>All you need to watch. Nothing to manage.</h2>
+      <p>No library, no database, no account: your videos stay in your folders, Nausicaa just plays them.</p>
+    </div>
+    <div class="egrid">
+      <div class="ecard reveal"><div class="ei">🎞️</div><h4>The mpv engine</h4><p>Almost every format, smooth playback, the picture drawn straight into the window.</p><code>libmpv</code></div>
+      <div class="ecard reveal"><div class="ei">💬</div><h4>Subtitles</h4><p>Files next to the video are found by themselves; add another one, or hide them with V.</p><code>.srt · .ass · .vtt</code></div>
+      <div class="ecard reveal"><div class="ei">🗣️</div><h4>Audio tracks</h4><p>Pick the language from the right-click menu, or set your favourite ones once.</p><code>fre · eng · ger</code></div>
+      <div class="ecard reveal"><div class="ei">⏩</div><h4>Speed &amp; frames</h4><p>From × 0.5 to × 2, and frame by frame with . and , when paused.</p><code>. ,</code></div>
+      <div class="ecard reveal"><div class="ei">📸</div><h4>Picture capture</h4><p>Press S: the current image goes to your Pictures folder, named after the video and the time.</p><code>S</code></div>
+      <div class="ecard reveal"><div class="ei">🌐</div><h4>Streams</h4><p>Open an address — the one in your clipboard is offered.</p><code>Ctrl+U</code></div>
+      <div class="ecard reveal"><div class="ei">🌙</div><h4>No screen saver mid-film</h4><p>The screen stays on while a video plays, and goes back to normal on pause.</p><code>inhibit</code></div>
+      <div class="ecard reveal"><div class="ei">⌨️</div><h4>Keyboard too</h4><p>Space, ← / →, Ctrl+← / →, ↑ / ↓, M, F, F9… all listed in the shortcuts window.</p><code>F1</code></div>
+      <div class="ecard reveal"><div class="ei">🪶</div><h4>No Flatpak</h4><p>A small Python app using your distribution's GTK and mpv — nothing duplicated.</p><code>apt</code></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── INSTALL ───────────── -->
+<section class="soon" id="install">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">Install</div>
+      <h2>Lights down. Press play.</h2>
+      <p>Nausicaa is available for <b>Ubuntu 24.04 “Noble”</b> and <b>26.04 “Resolute”</b> and their derivatives — Zorin OS 18, Linux Mint 22 — from a PPA. Updates then arrive with the rest of your system.</p>
+    </div>
+    <div class="soon-card reveal">
+      <div class="soon-top" style="position:relative">Terminal<button class="copy-btn" type="button" id="copy" title="Copy the two install commands" data-text="sudo add-apt-repository ppa:nourpon/nausicaa&#10;sudo apt update &amp;&amp; sudo apt install nausicaa">Copy</button></div>
+      <pre class="cmd"><span class="p">$ </span>sudo add-apt-repository ppa:nourpon/nausicaa
+<span class="p">$ </span>sudo apt update &amp;&amp; sudo apt install nausicaa</pre>
+    </div>
+    <div class="soon-card reveal" style="margin-top:22px">
+      <div class="soon-body">
+        <div class="soon-row"><span class="ri">📦</span><div class="rt"><b>Debian package &amp; PPA</b><span>Signed packages, updated through apt · <a href="https://launchpad.net/~nourpon/+archive/ubuntu/nausicaa">ppa:nourpon/nausicaa</a></span></div><span class="badge ok">Available</span></div>
+        <div class="soon-row"><span class="ri">🧩</span><div class="rt"><b>Other Debian-based distributions</b><span>Debian 13… · download the .deb from <a href="https://github.com/ToFpon/Nausicaa/releases">GitHub Releases</a> and open it, or in a terminal:<code class="row-cmd">sudo apt install ./nausicaa_*_all.deb</code></span></div><span class="badge ok">Available</span></div>
+        <div class="soon-row"><span class="ri">💻</span><div class="rt"><b>Source code</b><span>GPL-3.0 · <a href="https://github.com/ToFpon/Nausicaa">github.com/ToFpon/Nausicaa</a></span></div><span class="badge ok">Available</span></div>
+        <div class="soon-row"><span class="ri">🐞</span><div class="rt"><b>Found a bug? An idea?</b><span><a href="https://github.com/ToFpon/Nausicaa/issues">Open an issue on GitHub</a></span></div><span class="badge ok">Welcome</span></div>
+      </div>
+    </div>
+    <p class="reqs">Requirements: Python 3.10+, PyGObject, GTK ≥ 4.14, libadwaita ≥ 1.5, libmpv and python3-mpv — all installed by the package. In the spirit of <a href="https://celluloid-player.github.io">Celluloid</a>; foundations shared with <a href="https://tofmicro.pages-perso.free.fr/Odysseus/">Odysseus</a> and <a href="https://tofmicro.pages-perso.free.fr/Ithaca/">Ithaca</a>.</p>
+  </div>
+</section>
+
+<!-- ───────────── FOOTER ───────────── -->
+<footer>
+  <div class="wrap">
+    <div class="foot-brand"><img src="img/icon.svg" alt=""> Nausicaa</div>
+    <div class="foot-links">
+      <a href="#features">Features</a>
+      <a href="#all">Everything</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/ToFpon/Nausicaa">GitHub</a>
+      <a href="https://launchpad.net/~nourpon/+archive/ubuntu/nausicaa">PPA</a>
+      <a href="https://tofmicro.pages-perso.free.fr/Odysseus/">Odysseus</a>
+      <a href="https://tofmicro.pages-perso.free.fr/Ithaca/">Ithaca</a>
+    </div>
+    <p class="foot-meta">Built by Tof · GPL-3.0 <span class="sep">·</span> Made on Zorin OS <span class="sep">·</span> No library, no Flatpak <span class="sep">·</span> No telemetry, no nonsense</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const nav = document.getElementById('nav');
+  addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 20));
+
+  // pellicule sous le titre
+  const strip = document.getElementById('strip');
+  for (let i = 0; i < 14; i++) {
+    const b = document.createElement('i');
+    b.style.setProperty('--d', (i * 0.17).toFixed(2) + 's');
+    strip.appendChild(b);
+  }
+
+  const io = new IntersectionObserver((es) => {
+    es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold: .12});
+  document.querySelectorAll('.reveal').forEach((el, i) => {
+    el.style.transitionDelay = (Math.min(i % 6, 5) * 0.05) + 's';
+    io.observe(el);
+  });
+
+  document.querySelectorAll('[data-tabs]').forEach(box => {
+    const buttons = box.querySelectorAll('.tabs button');
+    const imgs = box.querySelectorAll('.shot img');
+    buttons.forEach(b => b.addEventListener('click', () => {
+      buttons.forEach(x => x.classList.toggle('active', x === b));
+      imgs.forEach((im, i) => im.classList.toggle('active', i === +b.dataset.i));
+    }));
+  });
+
+  const copy = document.getElementById('copy');
+  copy.addEventListener('click', () => {
+    navigator.clipboard.writeText(copy.dataset.text).then(() => {
+      copy.textContent = 'Copied ✓';
+      setTimeout(() => copy.textContent = 'Copy', 1600);
+    });
+  });
+
+  const cmp = document.getElementById('compare');
+  const cover = cmp.querySelector('.top'), handle = cmp.querySelector('.handle');
+  const set = x => {
+    const r = cmp.getBoundingClientRect();
+    const p = Math.min(Math.max((x - r.left) / r.width, 0), 1) * 100;
+    cover.style.clipPath = `inset(0 ${100 - p}% 0 0)`;
+    handle.style.left = p + '%';
+  };
+  let drag = false;
+  cmp.addEventListener('pointerdown', e => { drag = true; cmp.setPointerCapture(e.pointerId); set(e.clientX); });
+  cmp.addEventListener('pointermove', e => { if (drag) set(e.clientX); });
+  cmp.addEventListener('pointerup', () => { drag = false; });
+})();
+</script>
+</body>
+</html>

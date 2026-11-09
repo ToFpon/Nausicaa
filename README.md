@@ -3,7 +3,7 @@
 **A small GTK4 / libadwaita video player for GNOME that plays your videos, and nothing else. Built on mpv, without Flatpak.**
 **Un petit lecteur vidéo GTK4 / libadwaita pour GNOME, qui lit vos vidéos et rien d'autre. Sur mpv, sans Flatpak.**
 
-[English](#english) · [Français](#français)
+[English](#english) · [Français](#français) · [Website / Site](https://tofmicro.pages-perso.free.fr/Nausicaa/)
 
 ![Nausicaa](docs/captures/lecture.png)
 

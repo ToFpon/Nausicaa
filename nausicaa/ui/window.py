@@ -138,7 +138,7 @@ class MainWindow(Adw.ApplicationWindow):
 
         self.panel = PlaylistPanel(self.c)
         self.split = Adw.OverlaySplitView(sidebar_position=Gtk.PackType.END, show_sidebar=settings["playlist_visible"],
-                                          min_sidebar_width=260, max_sidebar_width=420, sidebar_width_fraction=0.3)
+                                          min_sidebar_width=300, max_sidebar_width=440, sidebar_width_fraction=0.34)
         self.split.set_content(self.toolbar)
         self.split.set_sidebar(self.panel)
         self.split.connect("notify::show-sidebar", self._on_sidebar)
@@ -512,6 +512,8 @@ class MainWindow(Adw.ApplicationWindow):
         self.controls.fullscreen.set_icon_name("view-restore-symbolic" if full else "view-fullscreen-symbolic")
         self.controls.fullscreen.set_tooltip_text(tr("Quitter le plein écran") if full else tr("Plein écran"))
         self._float_controls(full)
+        # plein écran : l'en-tête est posé sur l'image, l'encart du volume passe en dessous
+        self.osd.set_margin_top(84 if full else 24)
         if full:
             self.add_css_class("fullscreen-video")
             self.split.set_show_sidebar(False)

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#99c1f1"/>
+      <stop offset="1" stop-color="#ffbe6f"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#26a269"/>
+      <stop offset="1" stop-color="#1a5fb4"/>
+    </linearGradient>
+    <clipPath id="screen"><rect x="12" y="20" width="104" height="76" rx="10"/></clipPath>
+  </defs>
+  <!-- socle et ombre de l'écran -->
+  <rect x="12" y="26" width="104" height="76" rx="10" fill="#241f31" opacity="0.35"/>
+  <rect x="48" y="100" width="32" height="8" rx="2" fill="#5e5c64"/>
+  <rect x="36" y="106" width="56" height="6" rx="3" fill="#77767b"/>
+  <!-- l'écran : ciel du soir sur la mer de Schérie -->
+  <g clip-path="url(#screen)">
+    <rect x="12" y="20" width="104" height="76" fill="url(#sky)"/>
+    <circle cx="92" cy="58" r="12" fill="#ffa348"/>
+    <path d="M12 66 C 34 58 52 72 74 64 S 104 58 116 64 V 96 H 12 Z" fill="url(#sea)"/>
+    <path d="M12 76 C 36 70 54 82 78 74 S 106 70 116 74" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="2"/>
+  </g>
+  <rect x="12" y="20" width="104" height="76" rx="10" fill="none" stroke="#3d3846" stroke-width="4"/>
+  <!-- lecture -->
+  <circle cx="58" cy="56" r="20" fill="#ffffff" fill-opacity="0.92"/>
+  <path d="M52 45 L 70 56 L 52 67 Z" fill="#1a5fb4"/>
+</svg>

@@ -91,4 +91,14 @@ PPA `ppa:nourpon/nausicaa` (https://launchpad.net/~nourpon/+archive/ubuntu/nausi
 `<release>` de la fiche AppStream, entrée de `debian/changelog` (« X~noble1 »), commit « Version X »,
 push sur main (le workflow `release-deb.yml` publie le .deb dans les Releases), puis Tof lance
 `tools/ppa.sh`.
+
+Site de présentation (`site/index.html`, anglais, tons orangés pour se distinguer d'Odysseus (bleu) et
+d'Ithaca (violet), même gabarit) : https://tofmicro.pages-perso.free.fr/Nausicaa/, envoyé par FTP à la fin
+de `tools/ppa.sh` via `tools/site.sh` (repris d'Ithaca : lftp, ~/.netrc de Tof, `--transfer-all`, jamais de
+suppression ; `--essai` montre sans envoyer). Version dans la pastille et l'accroche (« v0.1.1 »,
+« Version 0.1.1 ») : à tenir à jour. Captures de `site/img/` en anglais, sombre sauf `light.png` :
+`LANGUAGE=en xvfb-run -a -s "-screen 0 1280x800x24" python3.12 tools/screenshot.py site/img/NOM.png [options]`
+— dark (`--dark --playlist`), light (`--playlist`), fullscreen (`--dark --fullscreen --volume`, écran réel
+1280×800), welcome (`--dark --welcome`), features (`--dark --prefs=features`) ; `icon.svg` = icône couleur.
+Vidéos de démonstration : série « Phaeacia » (fractales de Mandelbrot), image arrêtée à 0:09 de l'épisode 2.
 Paquet vérifié ici : dpkg-buildpackage, lintian sans remarque, appstreamcli validate (note pédante).
