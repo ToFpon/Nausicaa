@@ -1,3 +1,14 @@
+nausicaa (1.0.0~noble1) noble; urgency=medium
+
+  * Première version stable.
+  * Image dans l'image (Ctrl+P) : fenêtre sans bordure en 16:9, toujours
+    au-dessus, en bas à droite de l'écran (X11). Commandes et retour au
+    passage de la souris ; on la glisse pour la déplacer, on tire ses
+    bords pour la redimensionner ; taille et position retenues.
+  * Le choix entre durée totale et temps restant est retenu.
+
+ -- Tof <nourpon@gmail.com>  Wed, 11 Nov 2026 22:00:00 +0000
+
 nausicaa (0.1.7~noble1) noble; urgency=medium
 
   * Accueil et page « son seul » : le fond de fenêtre du thème se voit

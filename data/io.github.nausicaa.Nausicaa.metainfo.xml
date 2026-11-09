@@ -73,6 +73,15 @@
   </requires>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.0.0" date="2026-11-11">
+      <description>
+        <p>First stable release.</p>
+        <ul>
+          <li>Picture in picture (Ctrl+P): a borderless 16:9 window, always on top, in the bottom-right corner of the screen (X11); controls and a way back appear when the mouse passes over it; drag it to move it, drag its edges to resize it; its size and place are remembered</li>
+          <li>The choice between total length and time left is remembered</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.1.7" date="2026-11-10">
       <description>
         <ul>
