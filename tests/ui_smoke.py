@@ -314,6 +314,13 @@ def image_dans_l_image(win):
     check("ABOVE" not in _wm_state(win), "plus au-dessus des autres")
     check(win.toolbar.get_reveal_top_bars() and win.controls_visible(), "barres revenues")
     check(win.get_decorated(), "décorations revenues")
+    from nausicaa.ui import x11
+    yield pump(0.8)
+    pos = x11.position(win)
+    if pos is not None:
+        cx = pos[0] + win.get_width() / 2
+        cy = pos[1] + win.get_height() / 2
+        check(abs(cx - 640) < 60 and abs(cy - 400) < 60, f"fenêtre revenue au centre de l'écran ({pos})")
     win.activate_action("win.pip", None)
     yield Wait(3, until=lambda: win.pip and win.get_width() <= 420)
     win.activate_action("win.leave-fullscreen", None)          # Échap

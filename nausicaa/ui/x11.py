@@ -111,6 +111,20 @@ def move(window, x: int, y: int) -> bool:
     return True
 
 
+def position(window) -> Optional[tuple]:
+    """Position de la fenêtre sur l'écran (x, y), en pixels X11 — pour les tests."""
+    dpy, wid = _display(), xid(window)
+    if dpy is None or wid is None:
+        return None
+    _lib.XTranslateCoordinates.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_int,
+                                           ctypes.c_int, ctypes.POINTER(ctypes.c_int),
+                                           ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_ulong)]
+    x, y, child = ctypes.c_int(), ctypes.c_int(), ctypes.c_ulong()
+    _lib.XTranslateCoordinates(dpy, wid, _lib.XDefaultRootWindow(dpy), 0, 0, ctypes.byref(x), ctypes.byref(y),
+                               ctypes.byref(child))
+    return x.value, y.value
+
+
 def workarea(window) -> Optional[tuple]:
     """Zone utile de l'écran de la fenêtre (sans tableau de bord ni dock), en pixels X11."""
     surface = window.get_surface()

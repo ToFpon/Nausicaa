@@ -484,6 +484,23 @@ class MainWindow(Adw.ApplicationWindow):
         self.lookup_action("pip").set_state(GLib.Variant("b", False))
         self._reveal_bars(True)
         self._sync_page()
+        if not maximized:                        # au centre de l'écran, une fois sa taille reprise (Tof)
+            for ms in (150, 450):
+                GLib.timeout_add(ms, self._center_window)
+
+    def _center_window(self):
+        if self.pip or self.is_maximized() or self.is_fullscreen():
+            return False
+        from . import x11
+        area = x11.workarea(self)
+        surface = self.get_surface()
+        if area is None or surface is None:
+            return False
+        scale = surface.get_scale_factor() or 1
+        ax, ay, aw, ah = area
+        w, h = self.get_width() * scale, self.get_height() * scale
+        x11.move(self, ax + (aw - w) // 2, ay + (ah - h) // 2)
+        return False
 
     def seek(self, seconds: float):
         if self.c.player.path is None:
