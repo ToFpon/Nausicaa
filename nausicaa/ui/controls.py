@@ -61,7 +61,7 @@ class Controls(Gtk.Box):
         self.total.add_css_class("time-button")
         self.total.connect("clicked", self._toggle_remaining)
         self.append(self.total)
-        self._remaining = False
+        self._remaining = bool(settings["show_remaining"])     # choix retenu d'une séance à l'autre
         self._duration = 0.0
 
         # volume : bouton + petite fenêtre avec une réglette verticale, molette sur le bouton
@@ -142,6 +142,7 @@ class Controls(Gtk.Box):
 
     def _toggle_remaining(self, *_):
         self._remaining = not self._remaining
+        settings["show_remaining"] = self._remaining
         self._update_total(self.scale.get_value())
 
     def _update_total(self, position: float):

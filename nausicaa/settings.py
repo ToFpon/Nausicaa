@@ -31,6 +31,7 @@ DEFAULTS: dict[str, Any] = {
     "window_width": 960,
     "window_height": 600,
     "playlist_visible": False,
+    "show_remaining": False,        # à droite de la barre : temps restant (« -37:15 ») au lieu de la durée
     "features": {},                 # fonctionnalités activées / désactivées (voir features.py)
 }
 

@@ -318,6 +318,18 @@ def avance_et_file(win):
     win.activate_action("win.seek-forward", None)
     yield Wait(2, until=lambda: c().player.position() >= 1.5)
     check(win.osd.get_reveal_child(), "→ : avance affichée")
+    total = win.controls.total
+    total.emit("clicked")
+    yield pump(0.3)
+    check(total.get_label().startswith("-") and settings["show_remaining"],
+          "clic sur la durée : temps restant, choix retenu")
+    from nausicaa.ui.controls import Controls
+    other = Controls(c())                       # une barre neuve = un prochain lancement
+    other.set_duration(c().player.duration())
+    check(other.total.get_label().startswith("-"), "temps restant gardé au lancement suivant")
+    total.emit("clicked")
+    yield pump(0.3)
+    check(not total.get_label().startswith("-") and not settings["show_remaining"], "re-clic : durée totale")
     win.activate_action("win.playlist", None)
     yield pump(0.3)
     check(win.split.get_show_sidebar() and settings["playlist_visible"], "F9 : file affichée (et retenue)")
