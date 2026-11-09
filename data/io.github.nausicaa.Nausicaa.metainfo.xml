@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.nausicaa.Nausicaa</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>Nausicaa</name>
+  <summary>Play your videos, and nothing else</summary>
+  <summary xml:lang="fr">Regarder vos vidéos, et rien d'autre</summary>
+  <summary xml:lang="de">Ihre Videos abspielen, und sonst nichts</summary>
+  <developer id="io.github.nausicaa">
+    <name>Tof</name>
+  </developer>
+  <description>
+    <p>
+      Nausicaa is a small video player for GNOME, built on the mpv engine. A simple window, the mouse
+      habits of VLC, and a play queue that remembers where you stopped. It follows the desktop theme.
+    </p>
+    <p xml:lang="fr">
+      Nausicaa est un petit lecteur vidéo pour GNOME, sur le moteur mpv. Une fenêtre simple, les gestes
+      de souris de VLC, et une file de lecture qui se souvient où l'on s'était arrêté. Il suit le thème
+      du bureau.
+    </p>
+    <p xml:lang="de">
+      Nausicaa ist ein kleiner Videoplayer für GNOME auf Basis von mpv. Ein schlichtes Fenster, die
+      Mausgesten von VLC und eine Warteschlange, die sich merkt, wo man aufgehört hat. Es folgt dem Thema
+      der Arbeitsumgebung.
+    </p>
+    <ul>
+      <li>Click to pause, double-click for full screen without pausing, mouse wheel for the volume with an on-screen display</li>
+      <li>Pause when the window is minimised, resume when it comes back</li>
+      <li>Each video resumes where you left it</li>
+      <li>Open one episode: the following ones are queued, in natural order</li>
+      <li>Play queue with shuffle, repeat and drag to reorder, saved as a playlist</li>
+      <li>Audio tracks, subtitles, speed, frame by frame, picture capture</li>
+    </ul>
+    <ul xml:lang="fr">
+      <li>Clic pour la pause, double-clic pour le plein écran sans pause, molette pour le volume affiché sur l'image</li>
+      <li>Pause quand la fenêtre est réduite, reprise quand elle revient</li>
+      <li>Chaque vidéo reprend où on l'avait laissée</li>
+      <li>Un épisode ouvert : les suivants rejoignent la file, dans l'ordre des noms</li>
+      <li>File de lecture : aléatoire, répétition, glisser pour réordonner, enregistrée en liste de lecture</li>
+      <li>Pistes audio, sous-titres, vitesse, image par image, capture de l'image</li>
+    </ul>
+    <ul xml:lang="de">
+      <li>Klick pausiert, Doppelklick schaltet ohne Pause in den Vollbildmodus, Mausrad regelt die Lautstärke mit Einblendung</li>
+      <li>Pause beim Minimieren, weiter, wenn das Fenster zurückkommt</li>
+      <li>Jedes Video wird dort fortgesetzt, wo man aufgehört hat</li>
+      <li>Eine Folge öffnen: die nächsten kommen in die Warteschlange, in natürlicher Reihenfolge</li>
+      <li>Warteschlange mit Zufall, Wiederholung und Umsortieren per Ziehen, als Wiedergabeliste speicherbar</li>
+      <li>Tonspuren, Untertitel, Geschwindigkeit, Einzelbilder, Bildschirmfoto</li>
+    </ul>
+  </description>
+  <url type="homepage">https://github.com/ToFpon/Nausicaa</url>
+  <url type="vcs-browser">https://github.com/ToFpon/Nausicaa</url>
+  <url type="bugtracker">https://github.com/ToFpon/Nausicaa/issues</url>
+  <launchable type="desktop-id">io.github.nausicaa.Nausicaa.desktop</launchable>
+  <categories>
+    <category>AudioVideo</category>
+    <category>Video</category>
+    <category>Player</category>
+  </categories>
+  <keywords>
+    <keyword>video</keyword>
+    <keyword>movie</keyword>
+    <keyword>player</keyword>
+    <keyword>subtitles</keyword>
+  </keywords>
+  <provides>
+    <binary>nausicaa</binary>
+  </provides>
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.1.0" date="2026-11-09">
+      <description>
+        <ul>
+          <li>First release: a small video player on mpv, for Ubuntu 24.04 / Zorin OS 18 without Flatpak</li>
+          <li>Click to pause, double-click for full screen without pausing, wheel volume with an on-screen display</li>
+          <li>Pause when minimised, resume position for each video, following episodes queued</li>
+          <li>Play queue and playlists, audio tracks, subtitles, speed, picture capture</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>

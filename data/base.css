@@ -1,0 +1,31 @@
+/* Nausicaa — mise en page. Couleurs du thème GTK actif, sauf le fond de l'image : noir, comme dans
+   tout lecteur vidéo (les bandes autour d'un film ne prennent pas la couleur de la fenêtre). */
+
+.video-area { background-color: black; }
+.video-area > .welcome,
+.video-area > .audio-only { background-color: @window_bg_color; }
+
+/* Plein écran : barres posées sur l'image, translucides */
+.fullscreen-video .nausicaa-controls,
+.fullscreen-video headerbar { background-color: alpha(@window_bg_color, 0.85); }
+
+/* Barre de commandes */
+.nausicaa-controls { padding: 2px 6px; }
+.nausicaa-controls scale.seek { margin: 0 4px; }
+.nausicaa-controls .time-button { padding: 2px 6px; min-width: 0; }
+.numeric { font-feature-settings: "tnum"; }
+
+/* Affichage par-dessus l'image (volume, avance…) */
+.nausicaa-osd { padding: 14px 22px; border-radius: 14px; }
+.nausicaa-osd .osd-text { font-size: 1.25em; font-weight: 700; }
+.nausicaa-osd levelbar.osd-level trough { min-height: 6px; }
+.nausicaa-osd levelbar.osd-level block.filled { background-color: @accent_bg_color; }
+.nausicaa-osd levelbar.over block.filled { background-color: @warning_bg_color; }
+
+/* Dépôt de fichiers */
+.drop-hint { background-color: alpha(@window_bg_color, 0.9); }
+
+/* File de lecture */
+.playlist-panel { background-color: @sidebar_bg_color; }
+.playlist-panel row.current label { font-weight: 700; color: @accent_color; }
+.playlist-panel row.current label.dim-label { font-weight: normal; }

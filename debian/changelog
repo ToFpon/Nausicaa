@@ -1,0 +1,12 @@
+nausicaa (0.1.0~noble1) noble; urgency=medium
+
+  * Première version : petit lecteur vidéo sur mpv, pour Ubuntu 24.04 /
+    Zorin OS 18, sans Flatpak.
+  * Clic pour la pause, double-clic pour le plein écran sans pause,
+    molette pour le volume affiché sur l'image.
+  * Pause quand la fenêtre est réduite, reprise de chaque vidéo où on
+    l'avait laissée, épisodes suivants ajoutés à la file.
+  * File de lecture et listes de lecture, pistes audio, sous-titres,
+    vitesse, capture de l'image.
+
+ -- Tof <nourpon@gmail.com>  Mon, 09 Nov 2026 12:00:00 +0000

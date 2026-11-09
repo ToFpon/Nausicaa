@@ -1,0 +1,31 @@
+.TH NAUSICAA 1 "November 2026" "Nausicaa 0.1.0" "User Commands"
+.SH NAME
+nausicaa \- small video player for GNOME
+.SH SYNOPSIS
+.B nausicaa
+[\fIOPTION\fR] [\fIFILE\fR|\fIFOLDER\fR|\fIPLAYLIST\fR|\fIURL\fR...]
+.SH DESCRIPTION
+Nausicaa plays your videos, and nothing else. Files, folders, playlists
+(.m3u, .m3u8, .xspf, .pls) and addresses given on the command line replace the
+play queue and the first one is played. A single video brings the other videos
+of its folder with it. If Nausicaa is already running, they are sent to the
+running instance.
+.SH OPTIONS
+.TP
+.BR \-e ", " \-\-enqueue
+Add to the play queue instead of replacing it.
+.TP
+.BR \-v ", " \-\-version
+Print the version and exit.
+.SH FILES
+.TP
+.I ~/.config/nausicaa/settings.json
+Preferences.
+.TP
+.I ~/.local/share/nausicaa/queue.json
+The play queue, offered again on the welcome page.
+.TP
+.I ~/.local/share/nausicaa/positions.json
+Where each video was left, to resume it.
+.SH AUTHOR
+Tof <nourpon@gmail.com>

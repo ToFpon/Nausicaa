@@ -1,0 +1,21 @@
+[Desktop Entry]
+Type=Application
+Name=Nausicaa
+GenericName=Video Player
+GenericName[fr]=Lecteur vidéo
+GenericName[de]=Videowiedergabe
+Comment=Play your videos, and nothing else
+Comment[fr]=Regarder vos vidéos, et rien d'autre
+Comment[de]=Ihre Videos abspielen, und sonst nichts
+Exec=nausicaa %U
+Icon=io.github.nausicaa.Nausicaa
+Terminal=false
+Categories=GTK;GNOME;AudioVideo;Video;Player;
+Keywords=video;movie;film;player;mpv;playlist;subtitles;
+Keywords[fr]=vidéo;film;série;lecteur;mpv;liste;sous-titres;
+Keywords[de]=Video;Film;Serie;Wiedergabe;mpv;Playlist;Untertitel;
+StartupNotify=true
+DBusActivatable=true
+StartupWMClass=io.github.nausicaa.Nausicaa
+MimeType=video/mp4;video/x-matroska;video/webm;video/x-msvideo;video/avi;video/quicktime;video/x-ms-wmv;video/x-ms-asf;video/x-flv;video/mpeg;video/mp2t;video/x-m4v;video/ogg;video/3gpp;video/3gpp2;video/dv;video/vnd.rn-realvideo;video/x-ogm+ogg;video/x-theora+ogg;application/vnd.rn-realmedia;audio/x-matroska;audio/x-mpegurl;audio/mpegurl;application/vnd.apple.mpegurl;application/xspf+xml;audio/x-scpls;
+

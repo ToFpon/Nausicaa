@@ -1,0 +1,28 @@
+Source: nausicaa
+Section: video
+Priority: optional
+Maintainer: Tof <nourpon@gmail.com>
+Build-Depends: debhelper-compat (= 13), dh-python, python3:any
+Standards-Version: 4.6.2
+Homepage: https://github.com/ToFpon/Nausicaa
+Vcs-Browser: https://github.com/ToFpon/Nausicaa
+Vcs-Git: https://github.com/ToFpon/Nausicaa.git
+Rules-Requires-Root: no
+
+Package: nausicaa
+Architecture: all
+Depends: ${misc:Depends}, ${python3:Depends}, python3 (>= 3.10), python3-gi, gir1.2-gtk-4.0 (>= 4.14),
+ gir1.2-adw-1 (>= 1.5), gir1.2-glib-2.0, python3-mpv, libmpv2 | libmpv1, libegl1
+Description: small video player for GNOME, built on mpv
+ Nausicaa plays your videos, and nothing else. It is a simple window around
+ the mpv engine, with the mouse habits of VLC:
+  - click on the picture to pause, double-click for full screen (without
+    pausing), mouse wheel for the volume with an on-screen display;
+  - pause when the window is minimised, resume when it comes back;
+  - resume each video where you left it;
+  - open one episode and the following ones are queued, in natural order;
+  - play queue with shuffle, repeat, drag to reorder, saved as a playlist
+    (.m3u, .m3u8, .xspf, .pls are read);
+  - audio tracks, subtitles (files next to the video are found), speed,
+    frame by frame, picture capture.
+ It follows the desktop theme (Adwaita, light/dark, accent colour).
