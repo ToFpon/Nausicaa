@@ -144,7 +144,9 @@ sous Xvfb + openbox.
 
 PPA `ppa:nourpon/nausicaa` (https://launchpad.net/~nourpon/+archive/ubuntu/nausicaa, créé par Tof) :
 `tools/ppa.sh` chez Tof. Nouvelle version : version dans `nausicaa/__init__.py`, `debian/nausicaa.1`,
-`<release>` de la fiche AppStream, entrée de `debian/changelog` (« X~noble1 »), commit « Version X »,
+`<release>` de la fiche AppStream, entrée de `debian/changelog` (« X~noble1 », date RÉELLE du jour —
+`date -R` —, plus récente que l'entrée d'avant : des dates inventées dans le désordre ont valu à la 1.0.1 un
+`latest-debian-changelog-entry-without-new-date` de lintian, sans bloquer Launchpad), commit « Version X »,
 push sur main (le workflow `release-deb.yml` publie le .deb dans les Releases), puis Tof lance
 `tools/ppa.sh`.
 

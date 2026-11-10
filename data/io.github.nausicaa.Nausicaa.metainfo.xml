@@ -80,7 +80,7 @@
         </ul>
       </description>
     </release>
-    <release version="1.0.0" date="2026-11-11">
+    <release version="1.0.0" date="2026-11-10">
       <description>
         <p>First stable release.</p>
         <ul>
@@ -89,14 +89,14 @@
         </ul>
       </description>
     </release>
-    <release version="0.1.7" date="2026-11-10">
+    <release version="0.1.7" date="2026-11-09">
       <description>
         <ul>
           <li>Welcome page and audio-only page show your theme's window background (translucent themes included), like Ithaca</li>
         </ul>
       </description>
     </release>
-    <release version="0.1.6" date="2026-11-10">
+    <release version="0.1.6" date="2026-11-09">
       <description>
         <ul>
           <li>Sound: Nausicaa's volume is now the only one that counts — its stream volume in the sound settings is set back to 100 %, so 75 % in Nausicaa sounds like 75 % in VLC</li>
