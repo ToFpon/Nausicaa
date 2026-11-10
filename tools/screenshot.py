@@ -141,6 +141,8 @@ def on_ready(win):
                                                   Gtk.STYLE_PROVIDER_PRIORITY_USER)
     w, _, h = opts.get("size", "1000x620").partition("x")
     win.set_default_size(int(w), int(h))
+    if "left" in opts:                          # file de lecture à gauche
+        settings["playlist_side"] = "start"
     win.split.set_show_sidebar("playlist" in opts)
     if "welcome" not in opts:
         first = demo_series()

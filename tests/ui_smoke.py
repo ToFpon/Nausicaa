@@ -147,17 +147,24 @@ def basename():
 
 
 def frame_has_colour(win) -> bool:
-    """L'image de la vidéo est vraiment dessinée (pas noire) : capture du widget."""
+    """L'image de la vidéo est vraiment dessinée (pas noire). Capture de la FENÊTRE entière, pixels lus dans la
+    zone de la vidéo : la capture du seul Gtk.GLArea revenait parfois vide alors que mpv dessinait bien
+    (13 images rendues, diagnostic) — échec du test une fois sur quatre, jamais de l'appli."""
     view = win.video
-    p = Gtk.WidgetPaintable.new(view)
+    ok, bounds = view.compute_bounds(win)
+    if not ok:
+        frame_has_colour.why = "compute_bounds"
+        return False
+    p = Gtk.WidgetPaintable.new(win)
     snap = Gtk.Snapshot()
-    p.snapshot(snap, view.get_width(), view.get_height())
+    p.snapshot(snap, win.get_width(), win.get_height())
     node = snap.to_node()
-    if node is None:                             # pas encore dessinée (rendu logiciel lent au 1er fichier)
-        win.video.queue_render()
+    if node is None:
+        frame_has_colour.why = f"capture vide ({win.get_width()}×{win.get_height()}, visible={win.get_visible()})"
         return False
     tex = win.get_renderer().render_texture(node, None)
-    w, h = tex.get_width(), tex.get_height()
+    ox, oy = int(bounds.get_x()), int(bounds.get_y())
+    w, h = int(bounds.get_width()), int(bounds.get_height())
     data = tex.save_to_png_bytes().get_data()
     from gi.repository import GdkPixbuf
     loader = GdkPixbuf.PixbufLoader.new_with_type("png")
@@ -168,11 +175,12 @@ def frame_has_colour(win) -> bool:
     stride, n = pix.get_rowstride(), pix.get_n_channels()
     bright = 0
     for x, y in ((w // 4, h // 2), (w // 2, h // 3), (3 * w // 4, h // 2), (w // 3, h // 4)):
+        x, y = min(ox + x, pix.get_width() - 1), min(oy + y, pix.get_height() - 1)
         o = y * stride + x * n
         if max(px[o], px[o + 1], px[o + 2]) > 60:
             bright += 1
     if bright < 2:
-        print("  (image : %dx%d, échantillons clairs : %d)" % (w, h, bright))
+        frame_has_colour.why = "image : %dx%d à (%d, %d), échantillons clairs : %d" % (w, h, ox, oy, bright)
     return bright >= 2
 
 
@@ -197,6 +205,14 @@ def ouvrir_un_episode(win):
           "titre : nom de la vidéo et place dans la file")
     # jusqu'à 8 s : sous Xvfb (llvmpipe), la première image tardait parfois plus de 3 s (échec 1 fois sur 4)
     yield Wait(8, until=lambda: frame_has_colour(win))
+    if not frame_has_colour(win):
+        v = win.video
+        print("  diagnostic :", dict(realized=v.get_realized(), mapped=v.get_mapped(), ctx=v.ctx is not None,
+                                     gl_error=v.gl_error, size=(v.get_width(), v.get_height()),
+                                     opacity=v.get_opacity(), page=win.picture.get_visible_child_name(),
+                                     renders=getattr(v, "_renders", "?"), pending=v._pending,
+                                     pos=c().player.position(), vid=c().player.get("vid"),
+                                     why=getattr(frame_has_colour, "why", "?")))
     check(frame_has_colour(win), "image de la vidéo dessinée (mpv → Gtk.GLArea)")
     yield Wait(3, until=lambda: len(c().player.tracks("audio")) == 2)
     labels = []
@@ -429,6 +445,10 @@ def avance_et_file(win):
     win.activate_action("win.playlist", None)
     yield pump(0.3)
     check(win.split.get_show_sidebar() and settings["playlist_visible"], "F9 : file affichée (et retenue)")
+    settings["playlist_side"] = "start"
+    check(win.split.get_sidebar_position() == Gtk.PackType.START, "réglage : file à gauche, tout de suite")
+    settings["playlist_side"] = "end"
+    check(win.split.get_sidebar_position() == Gtk.PackType.END, "réglage : file revenue à droite")
     panel = win.panel
     check(len(panel._rows) == 3 and panel._rows[1].icon.get_opacity() == 1, "file : 3 lignes, la courante marquée")
     panel.list.unselect_all()

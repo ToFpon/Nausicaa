@@ -64,7 +64,7 @@ bin/nausicaa                # try it without installing
 - **Following episodes**: open one episode and the other videos of its folder join the queue, in natural order
   ("Episode 2" before "Episode 10"), starting with the one you opened.
 - **Resume where you left off**: each video remembers its position ("From the start" if you prefer).
-- **Play queue** at the side (F9): shuffle, repeat, drag to reorder, Delete to remove, drop files to add; save it
+- **Play queue** at the side (F9) — on the right or on the left, as you like (Preferences): shuffle, repeat, drag to reorder, Delete to remove, drop files to add; save it
   as a playlist (relative paths). `.m3u`, `.m3u8`, `.xspf`, `.pls` and addresses (streams) open too. The last
   queue is offered again on the welcome page.
 - **Time left or total length**: click it to switch, your choice is kept.
@@ -155,7 +155,7 @@ bin/nausicaa                # pour l'essayer sans l'installer
 - **Épisodes suivants** : un épisode ouvert amène les autres vidéos de son dossier dans la file, dans l'ordre des
   noms (« Épisode 2 » avant « Épisode 10 »), en commençant par celui qu'on a ouvert.
 - **Reprendre où on s'était arrêté** : chaque vidéo retient sa position (« Depuis le début » si on préfère).
-- **File de lecture** sur le côté (F9) : aléatoire, répétition, glisser pour réordonner, Suppr pour retirer,
+- **File de lecture** sur le côté (F9), à droite ou à gauche au choix (Préférences) : aléatoire, répétition, glisser pour réordonner, Suppr pour retirer,
   déposer des fichiers pour ajouter ; enregistrement en liste de lecture (chemins relatifs). Les `.m3u`, `.m3u8`,
   `.xspf`, `.pls` et les adresses (flux) s'ouvrent aussi. La dernière file est proposée sur l'accueil.
 - **Temps restant ou durée totale** : un clic pour passer de l'un à l'autre, le choix est retenu.

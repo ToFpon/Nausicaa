@@ -31,6 +31,7 @@ DEFAULTS: dict[str, Any] = {
     "window_width": 960,
     "window_height": 600,
     "playlist_visible": False,
+    "playlist_side": "end",          # file de lecture à droite (end) ou à gauche (start) — gauchers / droitiers
     "show_remaining": False,
     # image dans l'image : taille (px logiques) et position (px de l'écran X11) retenues ; 0 / -1 : aucune
     "pip_width": 0,

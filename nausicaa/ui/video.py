@@ -141,6 +141,7 @@ class VideoView(Gtk.GLArea):
         return False
 
     def _on_render(self, _area, _gl_context):
+        self._renders = getattr(self, "_renders", 0) + 1         # (diagnostic des tests)
         if self.ctx is None:
             return True
         fbo = ctypes.c_int(0)

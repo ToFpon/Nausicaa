@@ -44,6 +44,8 @@ class PreferencesWindow(Adw.PreferencesWindow):
         codes = list(LANGUAGE_NAMES)
         look.add(_choice(tr("Langue"), "language", [tr("Comme le système")] + [LANGUAGE_NAMES[c] for c in codes[1:]],
                          codes, tr("Appliquée au prochain démarrage")))
+        look.add(_choice(tr("File de lecture"), "playlist_side", [tr("À droite"), tr("À gauche")], ["end", "start"],
+                         tr("Côté de la fenêtre où s'ouvre la file (F9)")))
         page.add(look)
         play = Adw.PreferencesGroup(title=tr("Lecture"))
         play.add(_choice(tr("Volume maximal"), "volume_max", ["100 %", "150 %"], [100, 150],

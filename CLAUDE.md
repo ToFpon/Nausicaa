@@ -115,6 +115,12 @@ tests, paquet.
   mélangeur = 42,19). `NAUSICAA_DEBUG=1` : diagnostic sur la sortie d'erreur.
 - Décodage matériel : sans `/proc/driver/nvidia`, `gpu_hwdec_interop=vaapi` — sinon mpv charge aussi
   l'interop CUDA à la création du contexte de rendu et écrit « Cannot load libcuda.so.1 » (vu chez Tof).
+- File de lecture à droite ou à gauche (réglage `playlist_side` end / start, Préférences → Apparence ; idée de
+  Tof, gauchers / droitiers) : `split.set_sidebar_position`, en direct. Boutons de la fenêtre : libadwaita les
+  met tout seul dans l'en-tête du bord droit. `tools/screenshot.py --left`.
+- Test « image de la vidéo dessinée » (ui_smoke) : capture de la FENÊTRE, pixels lus dans la zone de la vidéo ;
+  capturer le seul Gtk.GLArea revenait parfois vide alors que mpv dessinait (diagnostic : `_renders` > 0).
+  Diagnostic affiché s'il échoue encore (`frame_has_colour.why`).
 - Fenêtre des raccourcis : F1 d'abord (affiché dans le menu, marche partout), Ctrl+? ensuite. Un utilisateur
   allemand (QWERTZ, « ? » = Maj+ß) : Ctrl+? sans effet ; non reproduit sous X11 (us / de / fr passent, sans
   doute Wayland). Filet : `MainWindow._on_help_key` (contrôleur en capture) regarde le caractère que donne la

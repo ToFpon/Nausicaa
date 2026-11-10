@@ -152,7 +152,8 @@ class MainWindow(Adw.ApplicationWindow):
             bar.add_controller(hover)
 
         self.panel = PlaylistPanel(self.c)
-        self.split = Adw.OverlaySplitView(sidebar_position=Gtk.PackType.END, show_sidebar=settings["playlist_visible"],
+        self.split = Adw.OverlaySplitView(sidebar_position=self._playlist_side(),
+                                          show_sidebar=settings["playlist_visible"],
                                           min_sidebar_width=300, max_sidebar_width=440, sidebar_width_fraction=0.34)
         self.split.set_content(self.toolbar)
         self.split.set_sidebar(self.panel)
@@ -1075,9 +1076,17 @@ class MainWindow(Adw.ApplicationWindow):
         if not self.is_fullscreen() and not self.pip:
             settings["playlist_visible"] = shown_now
 
+    @staticmethod
+    def _playlist_side() -> Gtk.PackType:
+        """File à droite (par défaut) ou à gauche (réglage playlist_side, idée de Tof : gauchers / droitiers).
+        Les boutons de la fenêtre suivent d'eux-mêmes : libadwaita les met dans l'en-tête du bord droit."""
+        return Gtk.PackType.START if settings["playlist_side"] == "start" else Gtk.PackType.END
+
     def _on_setting(self, key, _value):
         if key in ("volume", "muted", "volume_max"):
             self.controls.sync_volume()
+        elif key == "playlist_side":
+            self.split.set_sidebar_position(self._playlist_side())       # tout de suite, sans redémarrer
 
     # -- fermeture -----------------------------------------------------------------------------
     def _on_close_request(self, *_):
