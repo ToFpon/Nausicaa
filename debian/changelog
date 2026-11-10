@@ -1,3 +1,10 @@
+nausicaa (1.0.2~noble1) noble; urgency=medium
+
+  * File de lecture à droite ou à gauche de la fenêtre, au choix
+    (Préférences → Apparence).
+
+ -- Tof <nourpon@gmail.com>  Tue, 10 Nov 2026 19:50:55 +0000
+
 nausicaa (1.0.1~noble1) noble; urgency=medium
 
   * Fenêtre des raccourcis : F1 (affiché dans le menu), et Ctrl+? sur

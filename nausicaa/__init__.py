@@ -2,4 +2,4 @@
 
 APP_ID = "io.github.nausicaa.Nausicaa"
 APP_NAME = "Nausicaa"
-VERSION = "1.0.1"
+VERSION = "1.0.2"
