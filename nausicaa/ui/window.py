@@ -164,6 +164,9 @@ class MainWindow(Adw.ApplicationWindow):
         self._install_actions()
         self._install_mouse()
         self._install_drop()
+        help_key = Gtk.EventControllerKey(propagation_phase=Gtk.PropagationPhase.CAPTURE)
+        help_key.connect("key-pressed", self._on_help_key)
+        self.add_controller(help_key)
         self.c.connect(self._on_event)
         settings.connect(self._on_setting)
         self.connect("notify::fullscreened", self._on_fullscreen)
@@ -272,7 +275,9 @@ class MainWindow(Adw.ApplicationWindow):
             ("add-subtitles", self.add_subtitles_dialog, []),
             ("save-playlist", self.panel.save_queue, ["<Control>s"]),
             ("clear-queue", c.clear, []),
-            ("show-help-overlay", self.show_shortcuts, ["<Control>question", "F1"]),
+            # F1 en premier (c'est lui que le menu affiche) : il marche sur tous les claviers. Ctrl+? reste,
+            # avec un filet pour les dispositions où GTK ne le reconnaît pas (_on_help_key)
+            ("show-help-overlay", self.show_shortcuts, ["F1", "<Control>question"]),
         )
         for name, cb, accels in simple:
             a = Gio.SimpleAction.new(name, None)
@@ -320,6 +325,28 @@ class MainWindow(Adw.ApplicationWindow):
         motion.connect("motion", self._on_motion)
         motion.connect("leave", self._on_pointer_leave)
         self.toolbar.add_controller(motion)
+
+    def _on_help_key(self, ctl, keyval, keycode, state):
+        """Ctrl+? quelle que soit la disposition du clavier. Signalé par un utilisateur allemand (QWERTZ,
+        « ? » = Maj+ß) : rien ne se passait. Reproduit nulle part sous X11 (us, de, fr passent) — sans doute
+        Wayland, où GTK 4.14 rapproche mal certains raccourcis à Maj. On regarde le caractère que donne
+        vraiment la touche sur la disposition active, Ctrl retiré : « ? » → fenêtre des raccourcis."""
+        if not state & Gdk.ModifierType.CONTROL_MASK:
+            return False
+        typed = keyval
+        display = self.get_display()
+        event = ctl.get_current_event()
+        group = event.get_layout() if event is not None else 0
+        try:
+            ok, typed, *_ = display.translate_key(keycode, state & ~Gdk.ModifierType.CONTROL_MASK, group)
+            if not ok:
+                typed = keyval
+        except (TypeError, ValueError, AttributeError):
+            typed = keyval
+        if Gdk.keyval_to_unicode(typed) == ord("?") or Gdk.keyval_to_unicode(keyval) == ord("?"):
+            self.show_shortcuts()
+            return True
+        return False
 
     def _install_drop(self):
         target = Gtk.DropTarget.new(Gdk.FileList, Gdk.DragAction.COPY)

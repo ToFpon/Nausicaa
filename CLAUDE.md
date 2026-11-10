@@ -115,6 +115,11 @@ tests, paquet.
   mélangeur = 42,19). `NAUSICAA_DEBUG=1` : diagnostic sur la sortie d'erreur.
 - Décodage matériel : sans `/proc/driver/nvidia`, `gpu_hwdec_interop=vaapi` — sinon mpv charge aussi
   l'interop CUDA à la création du contexte de rendu et écrit « Cannot load libcuda.so.1 » (vu chez Tof).
+- Fenêtre des raccourcis : F1 d'abord (affiché dans le menu, marche partout), Ctrl+? ensuite. Un utilisateur
+  allemand (QWERTZ, « ? » = Maj+ß) : Ctrl+? sans effet ; non reproduit sous X11 (us / de / fr passent, sans
+  doute Wayland). Filet : `MainWindow._on_help_key` (contrôleur en capture) regarde le caractère que donne la
+  touche sans Ctrl (`display.translate_key`) ; « ? » → fenêtre. `tests/ui_keyboard.py` le vérifie avec et
+  sans le raccourci de GTK (`set_accels_for_action` réduit à F1 : le filet seul).
 - `app.py` : instance unique, HANDLES_OPEN + ligne de commande (`--enqueue`), fermer = quitter,
   inhibition IDLE | SUSPEND pendant la lecture.
 
@@ -123,6 +128,7 @@ tests, paquet.
 ```sh
 python3.12 -m unittest discover -s tests            # moteur (vrai mpv, vo/ao factices)
 dbus-run-session -- python3.12 -m unittest discover -s tests   # + MPRIS (vrai client D-Bus)
+xvfb-run -a python3.12 tests/ui_keyboard.py         # raccourcis sur vrais claviers us / de / fr (xdotool)
 xvfb-run -a -s "-screen 0 1280x800x24" python3.12 tests/ui_smoke.py   # doit finir par « Aucune erreur. »
 LANGUAGE=en … ; LANGUAGE=de …
 python3 -m pyflakes nausicaa tests tools
