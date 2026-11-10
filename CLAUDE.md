@@ -151,6 +151,11 @@ suppression ; `--essai` montre sans envoyer). Version dans la pastille et l'accr
 — dark (`--dark --playlist`), light (`--playlist`), fullscreen (`--dark --fullscreen --volume`, écran réel
 1280×800), welcome (`--dark --welcome`), features (`--dark --prefs=features`) ; `icon.svg` = icône couleur.
 Vidéos de démonstration : série « Phaeacia » (fractales de Mandelbrot), image arrêtée à 0:09 de l'épisode 2.
+Captures du SITE (idée de Tof, plus vivant que des fractales) : `--source=` Big Buck Bunny 1080p
+(download.blender.org/demo/movies/BBB/bbb_sunflower_1080p_30fps_normal.mp4.zip, © 2008 Blender Foundation,
+CC BY 3.0 : crédit obligatoire, en bas du site et sous la capture principale), découpé en six extraits
+(`BBB_CUTS`) — dark / light : brigands (épisode 2) ; fullscreen : écureuil volant (`--episode=6`) ; pip :
+papillon (`--episode=3`) ; `--delay=6000` (découpage plus long). Pas le lapin de face, vu partout.
 `site/img/pip.png` : `--dark --pip` (écran réel, commandes au survol) puis la petite fenêtre découpée (zone
 non noire de la capture) ; posée sur un faux coin de bureau en CSS (`.desk`, section `#pip`).
 Paquet vérifié ici : dpkg-buildpackage, lintian sans remarque, appstreamcli validate (note pédante).

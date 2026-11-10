@@ -6,6 +6,8 @@
 Options : --dark --size=LxH --delay=ms --welcome (page d'accueil) --playlist (file affichée)
           --volume (volume affiché sur l'image) --fullscreen (plein écran, barres affichées)
           --pip (image dans l'image, écran réel)
+          --source=FILM [--episode=N] (six extraits d'une vraie vidéo au lieu des fractales ; pour le site :
+          Big Buck Bunny, voir BBB_CUTS)
           --prefs=page (general, features) --css=FICHIER (couleurs d'un thème à imiter)
 Vidéos d'exemple générées par ffmpeg (fractales), sortie son factice, configuration jetable.
 --fullscreen lance openbox et capture l'écran réel (`import -window root`) : la capture d'un widget
@@ -58,8 +60,31 @@ SOURCES = [
 TITLES = ["The Shore", "The Stranger", "The Palace", "The Games", "The Song", "The Ship"]
 
 
+# --source=FILM : six « épisodes » découpés dans une vraie vidéo (début, titre). Pour le site : Big Buck Bunny
+# (© 2008 Blender Foundation, CC BY 3.0, peach.blender.org), version 1080p de download.blender.org/demo/movies/BBB/.
+# L'image capturée est celle de début + 9 s (seek_to 9) : brigands 5:22, papillon 1:22, écureuil volant 7:15
+# (vérifié image par image ; une planche « fps=1/15 » décale ses étiquettes de 7,5 s).
+BBB_CUTS = [(13, "Morning"), (313, "The Bullies"), (73, "The Butterfly"), (163, "The Apple"), (268, "The Trap"),
+            (426, "Flying Squirrel")]
+
+
+def demo_from(source: str, episode: int) -> str:
+    folder = os.path.join(TMP, "Videos", "Big Buck Bunny")
+    os.makedirs(folder)
+    for i, (start, title) in enumerate(BBB_CUTS, 1):
+        path = os.path.join(folder, f"Big Buck Bunny - {i} - {title}.mkv")
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-ss", str(start), "-i", source, "-t", "16",
+                        "-vf", "scale=1280:-2", "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
+                        "-pix_fmt", "yuv420p", "-c:a", "aac", path], check=True)
+    i = max(1, min(episode, len(BBB_CUTS)))
+    return os.path.join(folder, f"Big Buck Bunny - {i} - {BBB_CUTS[i - 1][1]}.mkv")
+
+
 def demo_series() -> str:
-    """« Phaeacia » : six épisodes (fractales qui zooment), un son, de quoi remplir la file."""
+    """« Phaeacia » : six épisodes (fractales qui zooment), un son, de quoi remplir la file.
+    Avec --source=FILM : six extraits d'une vraie vidéo (--episode=N : celui qui est lu, 2 par défaut)."""
+    if opts.get("source"):
+        return demo_from(opts["source"], int(opts.get("episode", 2)))
     folder = os.path.join(TMP, "Videos", "Phaeacia")
     os.makedirs(folder)
     for i, title in enumerate(TITLES, 1):
