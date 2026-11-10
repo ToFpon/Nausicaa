@@ -153,7 +153,8 @@ def frame_has_colour(win) -> bool:
     snap = Gtk.Snapshot()
     p.snapshot(snap, view.get_width(), view.get_height())
     node = snap.to_node()
-    if node is None:
+    if node is None:                             # pas encore dessinée (rendu logiciel lent au 1er fichier)
+        win.video.queue_render()
         return False
     tex = win.get_renderer().render_texture(node, None)
     w, h = tex.get_width(), tex.get_height()
@@ -194,7 +195,8 @@ def ouvrir_un_episode(win):
     check(win.controls_visible(), "commandes affichées")
     check(win.title_widget.get_title() == "Épisode 2" and win.title_widget.get_subtitle() == "2 / 3",
           "titre : nom de la vidéo et place dans la file")
-    yield Wait(3, until=lambda: frame_has_colour(win))
+    # jusqu'à 8 s : sous Xvfb (llvmpipe), la première image tardait parfois plus de 3 s (échec 1 fois sur 4)
+    yield Wait(8, until=lambda: frame_has_colour(win))
     check(frame_has_colour(win), "image de la vidéo dessinée (mpv → Gtk.GLArea)")
     yield Wait(3, until=lambda: len(c().player.tracks("audio")) == 2)
     labels = []
