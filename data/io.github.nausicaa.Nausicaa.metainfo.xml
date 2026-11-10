@@ -73,6 +73,13 @@
   </requires>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.0.1" date="2026-11-10">
+      <description>
+        <ul>
+          <li>Keyboard shortcuts window: F1 (shown in the menu) and Ctrl+? now work whatever the keyboard layout (German QWERTZ reported)</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.0.0" date="2026-11-11">
       <description>
         <p>First stable release.</p>

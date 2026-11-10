@@ -1,3 +1,10 @@
+nausicaa (1.0.1~noble1) noble; urgency=medium
+
+  * Fenêtre des raccourcis : F1 (affiché dans le menu), et Ctrl+? sur
+    toutes les dispositions de clavier (signalé en QWERTZ allemand).
+
+ -- Tof <nourpon@gmail.com>  Tue, 10 Nov 2026 18:00:00 +0000
+
 nausicaa (1.0.0~noble1) noble; urgency=medium
 
   * Première version stable.
