@@ -156,6 +156,10 @@ Captures du SITE (idée de Tof, plus vivant que des fractales) : `--source=` Big
 CC BY 3.0 : crédit obligatoire, en bas du site et sous la capture principale), découpé en six extraits
 (`BBB_CUTS`) — dark / light : brigands (épisode 2) ; fullscreen : écureuil volant (`--episode=6`) ; pip :
 papillon (`--episode=3`) ; `--delay=6000` (découpage plus long). Pas le lapin de face, vu partout.
+Captures du README (`docs/captures/`, en français comme Odysseus / Ithaca, mêmes extraits, `LANGUAGE=fr`) :
+lecture (sombre + file), clair, plein-ecran (`--episode=6`), image-dans-l-image (`--episode=3`, fenêtre
+découpée), fonctionnalites (`--prefs=features --size=1000x680`), accueil (`--welcome`). Crédit CC BY en bas
+du README.
 `site/img/pip.png` : `--dark --pip` (écran réel, commandes au survol) puis la petite fenêtre découpée (zone
 non noire de la capture) ; posée sur un faux coin de bureau en CSS (`.desk`, section `#pip`).
 Paquet vérifié ici : dpkg-buildpackage, lintian sans remarque, appstreamcli validate (note pédante).
