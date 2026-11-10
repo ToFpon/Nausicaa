@@ -151,4 +151,6 @@ suppression ; `--essai` montre sans envoyer). Version dans la pastille et l'accr
 — dark (`--dark --playlist`), light (`--playlist`), fullscreen (`--dark --fullscreen --volume`, écran réel
 1280×800), welcome (`--dark --welcome`), features (`--dark --prefs=features`) ; `icon.svg` = icône couleur.
 Vidéos de démonstration : série « Phaeacia » (fractales de Mandelbrot), image arrêtée à 0:09 de l'épisode 2.
+`site/img/pip.png` : `--dark --pip` (écran réel, commandes au survol) puis la petite fenêtre découpée (zone
+non noire de la capture) ; posée sur un faux coin de bureau en CSS (`.desk`, section `#pip`).
 Paquet vérifié ici : dpkg-buildpackage, lintian sans remarque, appstreamcli validate (note pédante).

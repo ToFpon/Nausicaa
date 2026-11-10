@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nausicaa — a small video player for GNOME</title>
-<meta name="description" content="Nausicaa is a small GTK4 / libadwaita video player for GNOME built on mpv: click to pause, double-click for full screen without pausing, mouse wheel volume with an on-screen display, pause when minimised, resume where you left off, following episodes queued. No Flatpak. For Ubuntu 24.04 and 26.04, Zorin OS 18 and Linux Mint 22.">
+<meta name="description" content="Nausicaa is a small GTK4 / libadwaita video player for GNOME built on mpv: click to pause, double-click for full screen without pausing, mouse wheel volume with an on-screen display, pause when minimised, resume where you left off, following episodes queued, picture in picture. No Flatpak. For Ubuntu 24.04 and 26.04, Zorin OS 18 and Linux Mint 22.">
 <link rel="icon" href="img/icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -155,6 +155,18 @@
   .g b{display:block;font-family:var(--display);font-size:.95rem}
   .g span{font-size:.8rem;color:var(--text-dim)}
 
+  /* picture in picture: a corner of a desktop, the small window on top */
+  .desk{position:relative;aspect-ratio:16/10;border-radius:13px;overflow:hidden;border:1px solid rgba(0,0,0,.5);
+    background:radial-gradient(120% 90% at 20% 0%,rgba(253,186,116,.25),transparent 60%),linear-gradient(160deg,#3a1d0c,#1c110a 70%,#120a05);
+    box-shadow:0 32px 70px -20px rgba(0,0,0,.8)}
+  .desk-win{position:absolute;left:6%;top:9%;width:62%;height:64%;border-radius:10px;background:#242424;
+    border:1px solid rgba(255,255,255,.08);box-shadow:0 16px 40px -12px rgba(0,0,0,.7);
+    display:flex;flex-direction:column;gap:10px;padding:16% 8% 0}
+  .desk-win span{display:block;height:9px;border-radius:5px;background:rgba(255,255,255,.08)}
+  .desk-win span:nth-child(2){width:80%}.desk-win span:nth-child(3){width:60%}
+  .desk-pip{position:absolute;right:4%;bottom:6%;width:52%;box-shadow:0 18px 40px -10px rgba(0,0,0,.85),0 0 0 1px rgba(0,0,0,.5)}
+  .desk-pip img{width:100%;display:block}
+
   /* ───────────────── GRID ───────────────── */
   .grid-sec{padding:100px 0}
   .egrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
@@ -219,6 +231,7 @@
     <a href="#" class="brand"><img src="img/icon.svg" alt=""> Nausicaa</a>
     <div class="nav-links">
       <a href="#features">Features</a>
+      <a href="#pip">Picture in picture</a>
       <a href="#all">Everything</a>
       <a href="#install">Install</a>
       <a href="https://github.com/ToFpon/Nausicaa">GitHub</a>
@@ -276,7 +289,6 @@
         <div class="fi"><span class="chk">✓</span><span><b>Compact controls in full screen</b>, centred and rounded, fading away when the mouse rests.</span></div>
         <div class="fi"><span class="chk">✓</span><span><b>Up to 150 %</b> for a video that is too quiet — if you allow it.</span></div>
         <div class="fi"><span class="chk">✓</span><span><b>Minimise the window, the video waits.</b> Bring it back, it plays again.</span></div>
-        <div class="fi"><span class="chk">✓</span><span><b>Picture in picture</b> (Ctrl+P) — a small window always on top in the corner; drag it anywhere, double-click to come back.</span></div>
       </div>
     </div>
     <div class="visual reveal">
@@ -286,8 +298,32 @@
   </div>
 </section>
 
+<!-- Picture in picture -->
+<section class="feature alt flip" id="pip">
+  <div class="wrap">
+    <div class="copy">
+      <div class="ftag">Picture in picture <span class="kbd">Ctrl+P</span><span class="kbd">Esc</span></div>
+      <h3>Keep watching while you work.</h3>
+      <p class="intro">One shortcut and the film shrinks to a small borderless window in the corner of your screen, always on top of the others. Your mail, your files, your code — and the episode carries on.</p>
+      <div class="flist">
+        <div class="fi"><span class="chk">✓</span><span><b>Controls when you need them</b> — previous, play / pause, next and a way back appear when the mouse passes over, then fade.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>Drag it anywhere, pull its edges to resize it.</b> No frame, no title bar: just the picture, square corners, like in Firefox.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>Remembered</b> — it comes back at the same size and in the same place next time. 16:9 the first time, black bars for a CinemaScope film.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>Double-click or Escape</b> and the full window comes back, centred, playlist and all.</span></div>
+      </div>
+    </div>
+    <div class="visual reveal">
+      <div class="desk">
+        <div class="desk-win"><span></span><span></span><span></span></div>
+        <div class="desk-pip"><img src="img/pip.png" alt="Picture in picture: a small window with previous, play and next controls and a button to come back" width="399" height="225" loading="lazy"></div>
+      </div>
+      <p class="caption">Real picture-in-picture window, mouse over it · X11</p>
+    </div>
+  </div>
+</section>
+
 <!-- Series -->
-<section class="feature alt flip">
+<section class="feature">
   <div class="wrap">
     <div class="copy">
       <div class="ftag">Series <span class="kbd">N</span><span class="kbd">P</span><span class="kbd">F9</span></div>
@@ -298,6 +334,7 @@
         <div class="fi"><span class="chk">✓</span><span><b>Resume where you left off</b>, for every video. “From the start” is one click away.</span></div>
         <div class="fi"><span class="chk">✓</span><span><b>A real queue</b>: shuffle, repeat, drag to reorder, Delete to remove, drop files to add.</span></div>
         <div class="fi"><span class="chk">✓</span><span><b>Playlists</b> — M3U, M3U8, XSPF, PLS, and the queue saved as a playlist with relative paths.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>Time left or total length</b> — click it to switch; your choice is kept for next time.</span></div>
       </div>
     </div>
     <div class="visual reveal">
@@ -307,7 +344,7 @@
 </section>
 
 <!-- Theme -->
-<section class="feature">
+<section class="feature alt flip">
   <div class="wrap">
     <div class="copy">
       <div class="ftag">Your theme</div>
@@ -316,7 +353,8 @@
       <div class="flist">
         <div class="fi"><span class="chk">✓</span><span><b>Light and dark</b>, switched live with the system.</span></div>
         <div class="fi"><span class="chk">✓</span><span><b>Made on Zorin OS</b>, for GNOME 46, GTK 4.14 and the distribution's mpv.</span></div>
-        <div class="fi"><span class="chk">✓</span><span><b>X11 and Wayland</b> — the picture is an ordinary GTK widget.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>Translucent themes welcome</b> — the welcome page and the full-screen controls take your theme's colours, see-through included.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>X11 and Wayland</b> — the picture is an ordinary GTK widget (picture in picture stays on top on X11).</span></div>
       </div>
     </div>
     <div class="visual reveal">
@@ -332,7 +370,7 @@
 </section>
 
 <!-- Features page -->
-<section class="feature alt flip">
+<section class="feature">
   <div class="wrap">
     <div class="copy">
       <div class="ftag">Preferences → Features</div>
