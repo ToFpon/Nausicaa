@@ -1,3 +1,10 @@
+nausicaa (1.0.3~noble1) noble; urgency=medium
+
+  * Fenêtre des raccourcis : elle indique comment l'ouvrir elle-même
+    (F1 ou Ctrl+?).
+
+ -- Tof <nourpon@gmail.com>  Thu, 12 Nov 2026 11:06:00 +0000
+
 nausicaa (1.0.2~noble1) noble; urgency=medium
 
   * File de lecture à droite ou à gauche de la fenêtre, au choix

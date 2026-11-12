@@ -73,6 +73,13 @@
   </requires>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.0.3" date="2026-11-12">
+      <description>
+        <ul>
+          <li>The keyboard shortcuts window now lists its own shortcut (F1 or Ctrl+?)</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.0.2" date="2026-11-10">
       <description>
         <ul>
