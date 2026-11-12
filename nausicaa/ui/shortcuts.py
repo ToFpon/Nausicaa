@@ -37,6 +37,7 @@ def _groups():
             ("<Control>u", tr("Ouvrir une adresse")),
             ("<Control>s", tr("Enregistrer la file")),
             ("<Control>comma", tr("Préférences")),
+            ("F1 <Control>question", tr("Raccourcis clavier")),
             ("<Control>q", tr("Quitter")),
         ]),
         (tr("Souris"), [
