@@ -126,6 +126,8 @@ tests, paquet.
   doute Wayland). Filet : `MainWindow._on_help_key` (contrôleur en capture) regarde le caractère que donne la
   touche sans Ctrl (`display.translate_key`) ; « ? » → fenêtre. `tests/ui_keyboard.py` le vérifie avec et
   sans le raccourci de GTK (`set_accels_for_action` réduit à F1 : le filet seul).
+  La fenêtre se cite elle-même (« Raccourcis clavier », 1.0.3) et tient sur UNE page (`max-height` 16) :
+  sur deux pages, les boutons « 1 / 2 » de GTK 4.14 écrivent « GtkLabel reported min width -4 » (vu chez Tof).
 - `app.py` : instance unique, HANDLES_OPEN + ligne de commande (`--enqueue`), fermer = quitter,
   inhibition IDLE | SUSPEND pendant la lecture.
 

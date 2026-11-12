@@ -50,9 +50,12 @@ def _groups():
 
 
 def shortcuts_window() -> Gtk.ShortcutsWindow:
-    parts = ['<interface><object class="GtkShortcutsWindow" id="win"><property name="modal">1</property>'
+    # max-height : tout sur UNE page. Sur deux pages, GTK 4.14 ajoute des boutons « 1 / 2 » dont les
+    # étiquettes se mesurent en négatif (« GtkLabel reported min width -4 », vu chez Tof) ; la ligne
+    # « Raccourcis clavier » ajoutée en 1.0.3 avait fait passer la fenêtre à deux pages.
+    parts =['<interface><object class="GtkShortcutsWindow" id="win"><property name="modal">1</property>'
              '<child><object class="GtkShortcutsSection"><property name="section-name">main</property>'
-             '<property name="max-height">12</property>']
+             '<property name="max-height">16</property>']
     for title, rows in _groups():
         parts.append(f'<child><object class="GtkShortcutsGroup"><property name="title">{escape(title)}</property>')
         for accel, text in rows:
