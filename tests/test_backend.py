@@ -274,8 +274,75 @@ class ControllerTest(unittest.TestCase):
         self.assertFalse(features.enabled("resume"))
         settings["features"] = {}
 
+    def test_non_utf8_name(self):
+        """Nom non UTF-8 (clé FAT, vieux partage) : lu, et la file s'enregistre encore."""
+        d = os.path.join(TMP, "nonutf8")
+        os.makedirs(d, exist_ok=True)
+        bad = os.path.join(os.fsencode(d), b"caf\xe9.mp4")
+        shutil.copy(LIB["e1"], bad)
+        path = os.fsdecode(bad)
+        self.c.open_paths([path])
+        self.assertTrue(run_until(lambda: self.c.player.duration() > 0, 10))
+        self.assertFalse(any(e == "error" for e, _ in self.events))
+        self.c.save()
+        data = Controller.saved_queue(self.c.queue_file)
+        self.assertEqual(data["current"], path)
+
+    def test_latest_open_wins(self):
+        """Une ouverture plus ancienne qui finit après ne remplace pas la file de la plus récente."""
+        import threading as th
+        real = media.expand
+        gate = th.Event()
+
+        def slow(paths, titles=None):
+            if paths == [LIB["serie"]]:
+                gate.wait(5)
+            return real(paths, titles)
+        media.expand = slow
+        try:
+            self.c.open_paths([LIB["serie"]])                   # lente
+            features.set_enabled("next_episodes", False)
+            self.c.open_paths([LIB["film"]])                    # rapide, plus récente
+            self.assertTrue(run_until(lambda: self.c.item is not None and self.c.item.path == LIB["film"]))
+            gate.set()
+            self.assertTrue(run_until(lambda: self.c.loading == 0, 5))
+            run_until(lambda: False, 0.3)
+            self.assertEqual([i.path for i in self.c.queue.items], [LIB["film"]])
+        finally:
+            media.expand = real
+            gate.set()
+            features.set_enabled("next_episodes", True)
+
+    def test_stale_end_file_ignored(self):
+        self.c.open_paths([LIB["e1"]])
+        self.assertTrue(run_until(lambda: self.c.player.duration() > 0))
+        self.events.clear()
+        self.c._on_player("end-file", (4, -13, (self.c.player.entry_id or 0) + 99))   # fichier d'avant
+        self.assertFalse(any(e == "error" for e, _ in self.events))
+        self.assertIsNotNone(self.c.player.path)
+
+    def test_open_thread_error(self):
+        """Une erreur dans la lecture de la liste n'est pas muette : on_done(0), plus rien en cours."""
+        real = media.expand
+        media.expand = lambda *a, **k: (_ for _ in ()).throw(ValueError("embedded null byte"))
+        got = []
+        try:
+            self.c.open_paths(["/x.m3u"], on_done=got.append)
+            self.assertTrue(run_until(lambda: got == [0], 5))
+            self.assertEqual(self.c.loading, 0)
+        finally:
+            media.expand = real
+
 
 class PlaylistAuditTest(unittest.TestCase):
+    def test_utf16(self):
+        d = os.path.join(TMP, "pl-u16")
+        os.makedirs(d, exist_ok=True)
+        out = os.path.join(d, "windows.m3u")
+        with open(out, "wb") as fh:
+            fh.write("#EXTM3U\r\nÉté.mkv\r\n".encode("utf-16"))
+        self.assertEqual([os.path.basename(e.location) for e in playlists.parse(out)], ["Été.mkv"])
+
     def test_hash_name_survives(self):
         d = os.path.join(TMP, "pl-hash")
         os.makedirs(d, exist_ok=True)

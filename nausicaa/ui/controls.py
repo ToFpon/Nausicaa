@@ -5,7 +5,7 @@ from __future__ import annotations
 import gi
 
 gi.require_version("Gtk", "4.0")
-from gi.repository import Gtk  # noqa: E402
+from gi.repository import Gdk, Gtk  # noqa: E402
 
 from ..format import duration as fmt  # noqa: E402
 from ..i18n import tr  # noqa: E402
@@ -106,14 +106,27 @@ class Controls(Gtk.Box):
         self.fullscreen = _button("view-fullscreen-symbolic", tr("Plein écran"), "win.fullscreen")
         self.append(self.fullscreen)
         self.dragging = False
-        press = Gtk.GestureClick()
-        press.connect("pressed", lambda *_: setattr(self, "dragging", True))
-        press.connect("stopped", lambda *_: setattr(self, "dragging", False))
-        press.connect("released", lambda *_: setattr(self, "dragging", False))
-        self.scale.add_controller(press)
+        # bouton enfoncé sur la barre : la position lue de mpv ne déplace plus le curseur (il avançait sous
+        # le pointeur, ou revenait en arrière sur un flux lent). Pas un Gtk.GestureClick : le glisser de
+        # GtkRange prend la séquence et le geste reçoit « stopped » tout de suite — un contrôleur « legacy »
+        # voit l'appui et le relâchement quoi qu'il arrive.
+        legacy = Gtk.EventControllerLegacy()
+        legacy.connect("event", self._on_scale_event)
+        self.scale.add_controller(legacy)
         self.sync_volume()
 
     # -- avance -------------------------------------------------------------------------------
+    def _on_scale_event(self, controller, event):
+        event = event or controller.get_current_event()       # PyGObject passe parfois None
+        if event is None:
+            return False
+        kind = event.get_event_type()
+        if kind in (Gdk.EventType.BUTTON_PRESS, Gdk.EventType.TOUCH_BEGIN):
+            self.dragging = True
+        elif kind in (Gdk.EventType.BUTTON_RELEASE, Gdk.EventType.TOUCH_END, Gdk.EventType.TOUCH_CANCEL):
+            self.dragging = False
+        return False
+
     def _on_change_value(self, _scale, _scroll, value):
         if self._duration > 0:
             self.controller.seek_to(max(0.0, min(value, self._duration)))

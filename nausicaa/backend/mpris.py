@@ -207,12 +207,14 @@ class Mpris:
             if duration and pos > duration:
                 self.c.next()
             else:
-                self.c.seek_to(max(0.0, pos))
-                self._seeked(max(0.0, pos))
+                self.c.seek_to(max(0.0, pos))            # Seeked : annoncé par l'événement « seeked »
         elif method == "SetPosition":
-            if self.c.item is not None and args[0] == self._track_id():
-                self.c.seek_to(args[1] / 1_000_000)
-                self._seeked(args[1] / 1_000_000)
+            # la norme : position hors de [0, durée] ignorée (avant : saut à la vidéo suivante)
+            pos = args[1] / 1_000_000
+            duration = self.c.player.duration()
+            if self.c.item is not None and args[0] == self._track_id() and pos >= 0 \
+                    and (not duration or pos <= duration):
+                self.c.seek_to(pos)
         elif method == "OpenUri":
             f = Gio.File.new_for_uri(args[0])
             self.c.open_paths([f.get_path() or args[0]])
@@ -226,6 +228,11 @@ class Mpris:
     def _on_event(self, event, *args):
         if self.conn is None or event == "position":
             return
+        if event == "seeked":
+            self._seeked(args[0])
+            return
+        if event == "resumed":                       # reprise : la vidéo démarre ailleurs qu'au début
+            self._seeked(float(args[0]) if args else self.c.player.position())
         props = self._player_props()
         changed = {k: v for k, v in props.items() if self._last.get(k) != v}
         self._last = props

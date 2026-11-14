@@ -45,6 +45,13 @@ def is_stream(location: str) -> bool:
 def _read_text(path: str) -> str:
     with open(path, "rb") as fh:
         raw = fh.read(20_000_000)
+    if raw[:2] in (b"\xff\xfe", b"\xfe\xff"):
+        # liste exportée de Windows en UTF-16 : lue en latin-1, chaque nom portait des octets nuls et
+        # l'ouverture échouait sans rien dire
+        try:
+            return raw.decode("utf-16")
+        except UnicodeDecodeError:
+            pass
     try:
         return raw.decode("utf-8-sig")
     except UnicodeDecodeError:

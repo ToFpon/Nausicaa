@@ -36,10 +36,22 @@ def _debug(*args):
         print("nausicaa:", *args, file=sys.stderr, flush=True)
 
 
+
+def _arg(path: str):
+    """Chemin pour mpv : python-mpv l'encode en UTF-8, un nom qui n'en est pas (clé FAT, vieux partage
+    Samba : « caf\\xe9.mp4 ») levait UnicodeEncodeError — rien ne se lisait, sans message. Ce nom-là part
+    en octets, tel qu'il est sur le disque."""
+    try:
+        path.encode("utf-8")
+        return path
+    except UnicodeEncodeError:
+        return os.fsencode(path)
+
 class Player:
     def __init__(self, video: bool = True, audio_output: str = "", **options):
         # mpv refuse de démarrer si les nombres ne s'écrivent pas avec un point (LC_NUMERIC=fr…)
         locale.setlocale(locale.LC_NUMERIC, "C")
+        self.entry_id = None                    # numéro donné par mpv au fichier ouvert (loadfile)
         opts = dict(vo="libmpv" if video else "null", keep_open="yes", idle="yes",
                     input_default_bindings=False, input_vo_keyboard=False, osc=False, osd_level=0,
                     sub_auto="fuzzy", audio_file_auto="fuzzy", ytdl=False,
@@ -132,7 +144,7 @@ class Player:
         eid = event.event_id.value
         if eid == mpv.MpvEventID.END_FILE:
             data = event.data
-            self._post("end-file", (data.reason, data.error))
+            self._post("end-file", (data.reason, data.error, data.playlist_entry_id))
         elif eid == mpv.MpvEventID.FILE_LOADED:
             self._post("file-loaded", True)
 
@@ -168,8 +180,12 @@ class Player:
         args = dict(url=path, flags="replace")
         if start > 0:
             args["options"] = f"start={start:.3f}"     # chaîne « clé=valeur » : un dictionnaire est refusé
+        args["url"] = _arg(path)
         # arguments nommés : même appel pour mpv 0.37 (Ubuntu 24.04) et 0.38+ (index ajouté avant options)
-        self.mpv.command("loadfile", **args)
+        result = self.mpv.command("loadfile", **args)
+        # « fin de fichier » d'un fichier d'AVANT (illisible, puis « Suivant » tout de suite) : reconnu à son
+        # numéro, il n'est plus pris pour une erreur du fichier qu'on vient d'ouvrir
+        self.entry_id = result.get("playlist_entry_id") if isinstance(result, dict) else None
 
     def stop(self):
         self.path = None
@@ -221,10 +237,10 @@ class Player:
         self.set_property(kind, track_id)
 
     def add_subtitle(self, path: str):
-        self.mpv.command("sub-add", path, "select")
+        self.mpv.command("sub-add", _arg(path), "select")
 
     def screenshot(self, path: str):
-        self.mpv.command("screenshot-to-file", path, "subtitles")
+        self.mpv.command("screenshot-to-file", _arg(path), "subtitles")
 
     def shutdown(self):
         """À appeler APRÈS la libération du contexte de rendu (fenêtre détruite), sinon mpv avorte."""

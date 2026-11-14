@@ -84,7 +84,9 @@ class NausicaaApp(Adw.Application):
         if value is None:
             return win is not None and win.is_fullscreen()
         if win is not None:
-            GLib.idle_add(lambda: ((win.fullscreen() if value else win.unfullscreen()), False)[1])
+            # par toggle_fullscreen : depuis l'image dans l'image, il faut d'abord en sortir (sinon plein
+            # écran sans décoration, en-tête et commandes cachés)
+            GLib.idle_add(lambda: (value != win.is_fullscreen() and win.toggle_fullscreen(), False)[1])
         return value
 
     def _on_setting(self, key, _value):

@@ -125,5 +125,20 @@ class MprisTest(unittest.TestCase):
         self.assertTrue(run_until(lambda: self.raised, 3))
 
 
+    def test_seeked_and_range(self):
+        """Seeked annoncé pour un saut fait dans l'application ; SetPosition hors de la vidéo ignoré."""
+        seeked = []
+        self.player.connect("g-signal", lambda _p, _s, name, params:
+                            name == "Seeked" and seeked.append(params.unpack()[0]))
+        self.c.seek_to(7)                               # barre, clavier : pas par MPRIS
+        self.assertTrue(run_until(lambda: any(abs(v - 7_000_000) < 1000 for v in seeked), 3))
+        item = self.c.item
+        self.call("SetPosition", GLib.Variant("(ox)", (self.m._track_id(), 10_000_000_000)))   # 10 000 s
+        self.call("SetPosition", GLib.Variant("(ox)", (self.m._track_id(), -5)))
+        run_until(lambda: False, 0.5)
+        self.assertIs(self.c.item, item)                # pas de saut à la vidéo suivante
+        self.assertLess(self.c.player.position(), 12)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -130,6 +130,26 @@ tests, paquet.
   sur deux pages, les boutons « 1 / 2 » de GTK 4.14 écrivent « GtkLabel reported min width -4 » (vu chez Tof).
 - `app.py` : instance unique, HANDLES_OPEN + ligne de commande (`--enqueue`), fermer = quitter,
   inhibition IDLE | SUSPEND pendant la lecture.
+- Audit de novembre 2026 (3 agents, corrigé, tests dans test_backend / test_mpris) :
+  - Lecture : « Répéter la vidéo » ne bouclait qu'une fois (`_ended_path` remis à None quand eof-reached
+    repasse à faux) ; ouverture sans rien de lisible → file gardée ; .srt déposé sur la fenêtre = sous-titre
+    du film (`_on_drop`), pas une nouvelle file ; `_errors` remis à zéro avec une nouvelle file ; ouvertures
+    numérotées (`_open_seq`) : la plus récente gagne, sans attendre les plus anciennes (NAS lent), ajouts
+    dans l'ordre ; erreur dans le fil de lecture → `on_done(0)`, jamais muet ; `end-file` d'un fichier
+    d'AVANT ignoré (`playlist_entry_id` rendu par loadfile, `Player.entry_id`) ; `shutdown` : mpv arrêté
+    même si l'enregistrement échoue.
+  - Noms non UTF-8 : python-mpv encode les chaînes en UTF-8 → `player._arg` passe ces noms-là en octets
+    (loadfile, sub-add, capture) ; queue.json en `ensure_ascii` (sinon plus jamais enregistrée).
+  - Listes : nom commençant par « # » écrit « ./# … » ; décodage ligne par ligne (un nom latin-1 dans un
+    .m3u8) ; UTF-16 de Windows reconnu au BOM. Réglages : repeat inconnu → « consecutive », features : vrais
+    booléens seulement.
+  - Interface : menu principal / clic droit ouverts en plein écran → barres gardées (`_menu_open`) ; barre de
+    progression tenue = `Gtk.EventControllerLegacy` (le GestureClick recevait « stopped » aussitôt) ;
+    ↑ ↓ Début Fin dans la file (`_on_list_key`, en capture : sinon le volume) ; « _ » doublé dans les noms
+    de pistes (Gio.Menu) ; OpenGL indisponible → un seul message (`_gl_failed`).
+  - MPRIS : `Seeked` pour tout saut (événement « seeked » du contrôleur, reprise comprise), SetPosition hors
+    [0, durée] ignoré, Fullscreen depuis l'image dans l'image par `toggle_fullscreen`, coche de vitesse suivie.
+  - Laissé : file de plusieurs milliers d'éléments reconstruite d'un bloc (Gtk.ListBox, ~1,4 s pour 5000).
 
 ## Tests
 

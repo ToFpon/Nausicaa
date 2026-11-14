@@ -45,6 +45,10 @@ class Controller:
         self._listeners: list[Callable] = []
         self._save_timer = 0
         self._ended_path: Optional[str] = None
+        self._open_seq = 0                     # ouvertures demandées (numéros), appliquées dans l'ordre
+        self._open_next = 1
+        self._open_replace = 0                 # dernière ouverture qui remplace la file
+        self._open_done: dict = {}
         self._apply_volume()
         self._autosave = GLib.timeout_add(SAVE_EVERY_MS, self._periodic_save)
         settings.connect(self._on_setting)
@@ -96,18 +100,53 @@ class Controller:
                     and features.enabled("next_episodes"))
         self.loading += 1
         self._emit("loading")
+        # chaque ouverture a son numéro : un gros dossier (ou un NAS) lu avant une vidéo ouverte juste
+        # après finissait PLUS TARD et remplaçait la file ; les ajouts à la file gardent leur ordre
+        self._open_seq += 1
+        seq = self._open_seq
+        if replace:
+            self._open_replace = seq
 
         def work():
             titles: dict = {}
-            if siblings:
-                found, first = media.siblings(paths[0]), os.path.abspath(paths[0])
-            else:
-                found = media.expand(paths, titles)
-                first = found[0] if found else None
-            GLib.idle_add(lambda: (done(found, first, titles), False)[1])
+            try:
+                if siblings:
+                    found, first = media.siblings(paths[0]), os.path.abspath(paths[0])
+                else:
+                    found = media.expand(paths, titles)
+                    first = found[0] if found else None
+            except Exception:  # noqa: BLE001 — liste illisible, nom impossible : rien d'ouvert, mais on le dit
+                import traceback
+                traceback.print_exc()
+                found, first, titles = [], None, {}
+            GLib.idle_add(lambda: (arrived(found, first, titles), False)[1])
 
-        def done(found, first, titles):
+        def arrived(found, first, titles):
+            if seq < self._open_next:                # dépassée (une ouverture plus récente est passée)
+                done(found, first, titles, seq=seq)
+                return
+            self._open_done[seq] = (found, first, titles, done)
+            if seq == self._open_replace:
+                # la dernière ouverture n'attend pas les plus anciennes (un NAS lent) : elles seront
+                # ignorées en arrivant
+                for n in [n for n in self._open_done if n < seq]:
+                    args = self._open_done.pop(n)
+                    args[3](*args[:3], seq=n)
+                self._open_next = seq
+            # dans l'ordre des demandes : on applique tant que la suivante attendue est arrivée
+            while self._open_next in self._open_done:
+                n = self._open_next
+                args = self._open_done.pop(n)
+                self._open_next += 1
+                args[3](*args[:3], seq=n)
+
+        def done(found, first, titles, seq):
             self.loading -= 1
+            if seq < self._open_replace:
+                self._emit("loading")                # dépassée par une ouverture plus récente
+                if on_done:
+                    on_done(len(found))
+                return
             items = [Item(p, titles.get(p, "")) for p in found]
             if replace and not items:
                 # rien de lisible (dossier vide, sans vidéo) : la file en cours reste telle quelle, la
@@ -192,7 +231,7 @@ class Controller:
 
     def previous(self):
         if self.player.position() > RESTART_AFTER:
-            self.player.seek_to(0)
+            self.seek_to(0)
             return
         i = self.queue.previous_index()
         if i is not None:
@@ -202,13 +241,19 @@ class Controller:
         """« Depuis le début » (après une reprise)."""
         if self.item is not None:
             self.positions.forget(self.item.path)
-            self.player.seek_to(0)
+            self.seek_to(0)
 
+    # « seeked » : un saut dans la vidéo, d'où qu'il vienne (clavier, barre, MPRIS) — MPRIS l'annonce
+    # (Seeked), sans quoi la barre de progression des clients (KDE, playerctl) dérivait
     def seek(self, seconds: float):
         self.player.seek(seconds)
+        target = max(0.0, self.player.position() + seconds)
+        duration = self.player.duration()
+        self._emit("seeked", min(target, duration) if duration else target)
 
     def seek_to(self, seconds: float):
         self.player.seek_to(seconds)
+        self._emit("seeked", max(0.0, seconds))
 
     def remove(self, items: list[Item]):
         was_current = self.queue.current
@@ -316,7 +361,9 @@ class Controller:
             self._errors = 0
             self._emit("video")
         elif name == "end-file":
-            reason, error = value
+            reason, error, entry = value
+            if entry is not None and self.player.entry_id is not None and entry != self.player.entry_id:
+                return                               # fin d'un fichier d'avant : pas celui qui joue
             if reason == 4 and self.player.path is not None:      # MPV_END_FILE_REASON_ERROR
                 self._on_error(error)
 
@@ -390,11 +437,14 @@ class Controller:
 
     def shutdown(self, terminate: bool = True):
         """terminate=False : la fenêtre libère d'abord son contexte de rendu, puis player.shutdown()."""
-        self._remember_position(save=True)
-        self.save()
-        if self._autosave:
-            GLib.source_remove(self._autosave)
-            self._autosave = 0
-        settings.disconnect(self._on_setting)
-        if terminate:
-            self.player.shutdown()
+        try:
+            self._remember_position(save=True)
+            self.save()
+        finally:
+            # quoi qu'il arrive à l'enregistrement, mpv est arrêté (sinon il survivait à la fermeture)
+            if self._autosave:
+                GLib.source_remove(self._autosave)
+                self._autosave = 0
+            settings.disconnect(self._on_setting)
+            if terminate:
+                self.player.shutdown()

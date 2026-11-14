@@ -137,8 +137,9 @@ class MainWindow(Adw.ApplicationWindow):
         open_button = Gtk.Button(icon_name="document-open-symbolic", tooltip_text=tr("Ouvrir des vidéos"),
                                  action_name="win.open")
         self.header.pack_start(open_button)
-        self.header.pack_end(Gtk.MenuButton(icon_name="open-menu-symbolic", menu_model=self._main_menu(),
-                                            tooltip_text=tr("Menu principal"), primary=True))
+        self.main_menu_button = Gtk.MenuButton(icon_name="open-menu-symbolic", menu_model=self._main_menu(),
+                                               tooltip_text=tr("Menu principal"), primary=True)
+        self.header.pack_end(self.main_menu_button)
         self.controls = Controls(self.c)
         self.controls.tracks.set_menu_model(Gio.Menu())
         self.toolbar = Adw.ToolbarView(top_bar_style=Adw.ToolbarStyle.FLAT, bottom_bar_style=Adw.ToolbarStyle.RAISED)
@@ -168,6 +169,9 @@ class MainWindow(Adw.ApplicationWindow):
         help_key = Gtk.EventControllerKey(propagation_phase=Gtk.PropagationPhase.CAPTURE)
         help_key.connect("key-pressed", self._on_help_key)
         self.add_controller(help_key)
+        list_keys = Gtk.EventControllerKey(propagation_phase=Gtk.PropagationPhase.CAPTURE)
+        list_keys.connect("key-pressed", self._on_list_key)
+        self.add_controller(list_keys)
         self.c.connect(self._on_event)
         settings.connect(self._on_setting)
         self.connect("notify::fullscreened", self._on_fullscreen)
@@ -256,7 +260,7 @@ class MainWindow(Adw.ApplicationWindow):
             ("open", self.open_dialog, ["<Control>o"]),
             ("open-folder", self.open_folder_dialog, ["<Control><Shift>o"]),
             ("open-location", self.open_location_dialog, ["<Control>u"]),
-            ("restore-queue", lambda: self.video.when_ready(c.restore_saved), []),
+            ("restore-queue", lambda: self.video.when_ready(lambda: self._gl_failed() or c.restore_saved()), []),
             ("toggle", self.toggle_pause, ["space", "k", "AudioPlay", "AudioPause"]),
             ("next", c.next, ["n", "Page_Down", "AudioNext"]),
             ("previous", c.previous, ["p", "Page_Up", "AudioPrev"]),
@@ -327,6 +331,40 @@ class MainWindow(Adw.ApplicationWindow):
         motion.connect("leave", self._on_pointer_leave)
         self.toolbar.add_controller(motion)
 
+    def _on_list_key(self, _ctl, keyval, _keycode, state):
+        """Focus dans la file : ↑ / ↓ / Début / Fin y naviguent. Les raccourcis de l'application passent
+        AVANT la liste (GTK 4) : ↓ baissait le volume et la sélection ne bougeait pas."""
+        if state & (Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.ALT_MASK):
+            return False
+        focus = self.get_focus()
+        lst = self.panel.list
+        if focus is None or not (focus is lst or focus.is_ancestor(lst)):
+            return False
+        rows = []
+        i = 0
+        while (row := lst.get_row_at_index(i)) is not None:
+            rows.append(row)
+            i += 1
+        if not rows:
+            return False
+        current = next((r for r in rows if focus is r or focus.is_ancestor(r)), None)
+        index = rows.index(current) if current is not None else -1
+        if keyval in (Gdk.KEY_Down, Gdk.KEY_KP_Down):
+            target = rows[min(index + 1, len(rows) - 1)]
+        elif keyval in (Gdk.KEY_Up, Gdk.KEY_KP_Up):
+            target = rows[max(index - 1, 0)]
+        elif keyval in (Gdk.KEY_Home, Gdk.KEY_KP_Home):
+            target = rows[0]
+        elif keyval in (Gdk.KEY_End, Gdk.KEY_KP_End):
+            target = rows[-1]
+        else:
+            return False
+        target.grab_focus()
+        if not state & Gdk.ModifierType.SHIFT_MASK:
+            lst.unselect_all()
+        lst.select_row(target)
+        return True
+
     def _on_help_key(self, ctl, keyval, keycode, state):
         """Ctrl+? quelle que soit la disposition du clavier. Signalé par un utilisateur allemand (QWERTZ,
         « ? » = Maj+ß) : rien ne se passait. Reproduit nulle part sous X11 (us, de, fr passent) — sans doute
@@ -361,7 +399,20 @@ class MainWindow(Adw.ApplicationWindow):
         def done(n):
             if not n:
                 toast(self, tr("Aucune vidéo trouvée"))
-        self.video.when_ready(lambda: self.c.open_paths(paths, replace=replace, on_done=done))
+        self.video.when_ready(lambda: self._gl_failed() or
+                              self.c.open_paths(paths, replace=replace, on_done=done))
+
+    def _gl_failed(self) -> bool:
+        """OpenGL indisponible (pilote cassé, X déporté par ssh sans GLX) : mpv ne peut rien afficher.
+        Un seul message clair au lieu d'un « ne peut pas être lu » par fichier de la file."""
+        err = self.video.gl_error
+        if err is None:
+            return False
+        if not getattr(self, "_gl_told", False):
+            self._gl_told = True
+            alert(self, tr("Affichage vidéo impossible"),
+                  tr("OpenGL n'est pas disponible sur cet ordinateur : {0}").format(shown(err)))
+        return True
 
     def _start_folder(self) -> str:
         item = self.c.item
@@ -794,7 +845,13 @@ class MainWindow(Adw.ApplicationWindow):
         self._hide_timer = GLib.timeout_add(HIDE_DELAY, self._hide_bars)
 
     def _menu_open(self) -> bool:
-        return any(b.get_active() for b in (self.controls.volume, self.controls.tracks))
+        """Un menu est ouvert : les barres restent. Le menu principal compris (en plein écran, il se
+        refermait tout seul au bout de 2 s : ouvrir son popover fait « quitter » l'en-tête au pointeur), et
+        le menu du clic droit sur l'image."""
+        if any(b.get_active() for b in (self.controls.volume, self.controls.tracks, self.main_menu_button)):
+            return True
+        pop = getattr(self.picture, "_nausicaa_popover", None)
+        return pop is not None and pop.get_visible()
 
     def _on_pointer_leave(self, *_):
         """La souris quitte la fenêtre : en image dans l'image, les commandes s'effacent tout de suite."""
@@ -917,7 +974,8 @@ class MainWindow(Adw.ApplicationWindow):
         if t.get("external"):
             parts.append(tr("fichier"))
         label = " — ".join(str(p) for p in parts) or tr("Piste {0}").format(t.get("id"))
-        return shown(label)
+        # entrées de Gio.Menu : « _ » = lettre soulignée (« eng_SDH » devenait « engSDH »)
+        return shown(label).replace("_", "__")
 
     def _tracks_menu(self) -> Gio.Menu:
         menu = Gio.Menu()
@@ -979,6 +1037,12 @@ class MainWindow(Adw.ApplicationWindow):
             self._sync_page()
         elif event == "tracks":
             self._sync_tracks()
+        elif event == "speed":                       # changée ailleurs (MPRIS Rate) : la coche du menu suit
+            speed = float(self.c.player.get("speed") or 1.0)
+            text = next((s for s in SPEEDS if abs(float(s) - speed) < 1e-6), None)
+            action = self.lookup_action("speed")
+            if action is not None and text is not None and action.get_state().get_string() != text:
+                action.set_state(GLib.Variant("s", text))
             self._sync_page()
         elif event == "volume":
             self.controls.sync_volume()

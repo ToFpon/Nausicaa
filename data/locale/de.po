@@ -557,3 +557,9 @@ msgstr "Fortgesetzt bei {0}"
 #: nausicaa/ui/window.py:983
 msgid "« {0} » : {1}"
 msgstr "„{0}“: {1}"
+
+msgid "Affichage vidéo impossible"
+msgstr "Videoanzeige nicht möglich"
+
+msgid "OpenGL n'est pas disponible sur cet ordinateur : {0}"
+msgstr "OpenGL ist auf diesem Computer nicht verfügbar: {0}"
