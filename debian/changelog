@@ -1,3 +1,10 @@
+nausicaa (1.0.5~noble1) noble; urgency=medium
+
+  * Allemand : la file de lecture s'appelle « Wiedergabeliste », comme
+    dans VLC et Celluloid (suggestion d'un utilisateur).
+
+ -- Tof <nourpon@gmail.com>  Sat, 14 Nov 2026 15:57:13 +0000
+
 nausicaa (1.0.4~noble1) noble; urgency=medium
 
   * Fenêtre des raccourcis sur une seule page : plus d'avertissements
