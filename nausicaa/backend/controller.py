@@ -20,7 +20,7 @@ from ..settings import settings
 from . import media
 from .media import Item
 from .player import Player
-from .playqueue import PlayQueue, load_saved, restore
+from .playqueue import REPEAT_MODES, PlayQueue, load_saved, restore
 from .positions import Positions
 
 RESTART_AFTER = 3.0          # « Précédent » après 3 s : retour au début de la vidéo
@@ -33,7 +33,9 @@ class Controller:
         self.player = player or Player(**self._mpv_options())
         self.player.connect(self._on_player)
         self.queue = PlayQueue()
-        self.queue.repeat = settings["repeat"]
+        # valeur inconnue (settings.json modifié à la main, autre version) : KeyError à la construction
+        # du panneau, ValueError au changement de mode
+        self.queue.repeat = settings["repeat"] if settings["repeat"] in REPEAT_MODES else "consecutive"
         self.queue.shuffled = bool(settings["shuffle"])
         self.queue.connect(self._on_queue)
         self.positions = positions or Positions()
@@ -107,9 +109,17 @@ class Controller:
         def done(found, first, titles):
             self.loading -= 1
             items = [Item(p, titles.get(p, "")) for p in found]
+            if replace and not items:
+                # rien de lisible (dossier vide, sans vidéo) : la file en cours reste telle quelle, la
+                # fenêtre dit « Aucune vidéo trouvée » (avant : file vidée d'abord, film arrêté)
+                self._emit("loading")
+                if on_done:
+                    on_done(0)
+                return
             if replace:
                 self.stop()
                 self.queue.clear()
+                self._errors = 0                   # compte des illisibles : celui de la nouvelle file
             new = self.queue.add(items)
             start = next((i for i in new if i.path == first), new[0] if new else None)
             if start is not None and (play or self.queue.current is None):
@@ -214,6 +224,7 @@ class Controller:
     def clear(self):
         self.stop()
         self.queue.clear()
+        self._errors = 0
         self.save_soon()
 
     def stop(self):
@@ -286,6 +297,10 @@ class Controller:
         elif name == "eof-reached":
             if value and self.player.path is not None:
                 self._on_eof()
+            elif not value:
+                # repartie (« Répéter la vidéo », retour en arrière depuis la fin) : la fin suivante
+                # compte de nouveau — avant, la vidéo ne bouclait qu'une fois
+                self._ended_path = None
             self._emit("state")
         elif name == "track-list":
             self._emit("tracks")

@@ -45,12 +45,22 @@ def is_stream(location: str) -> bool:
 def _read_text(path: str) -> str:
     with open(path, "rb") as fh:
         raw = fh.read(20_000_000)
-    for enc in ("utf-8-sig", "cp1252", "latin-1"):          # vieux .m3u de Windows : cp1252
-        try:
-            return raw.decode(enc)
-        except UnicodeDecodeError:
-            continue
-    return raw.decode("utf-8", "replace")
+    try:
+        return raw.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        pass
+    # ligne par ligne : un seul nom en latin-1 dans un .m3u8 en UTF-8 ne doit pas rendre illisibles
+    # toutes les autres lignes (avant : fichier entier relu en cp1252, accents en « Ã© » partout).
+    # Vieux .m3u de Windows : cp1252.
+    out = []
+    for line in raw.split(b"\n"):
+        for enc in ("utf-8", "cp1252", "latin-1"):
+            try:
+                out.append(line.decode(enc))
+                break
+            except UnicodeDecodeError:
+                continue
+    return "\n".join(out)
 
 
 def _resolve(location: str, folder: str) -> str:
@@ -154,7 +164,12 @@ def _parse_xspf(path: str, folder: str) -> list[Entry]:
 
 # -- écriture -----------------------------------------------------------------------------------
 def _entry_path(location: str, folder: str) -> str:
-    return location if is_stream(location) else os.path.relpath(location, folder)
+    if is_stream(location):
+        return location
+    rel = os.path.relpath(location, folder)
+    # « #1 Pilot.mkv » serait lu comme un commentaire (par nous et par tous les lecteurs), une espace en
+    # tête serait retirée : « ./ » devant
+    return "./" + rel if rel[:1] in ("#", " ", "\t") else rel
 
 
 def _label(song) -> str:

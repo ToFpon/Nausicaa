@@ -218,6 +218,80 @@ class ControllerTest(unittest.TestCase):
         self.assertTrue(self.c.restore_saved(play=False))
         self.assertEqual(self.c.item.path, LIB["e10"])
 
+    # -- audit 1.0.5 -----------------------------------------------------------------------------
+    def test_repeat_one_loops_again(self):
+        """« Répéter la vidéo » : la vidéo repart à chaque fin, pas seulement la première."""
+        settings["repeat"] = "one"
+        self.c.queue.repeat = "one"
+        features.set_enabled("next_episodes", False)
+        try:
+            self.c.open_paths([LIB["e1"]])                       # 3 s
+            self.assertTrue(run_until(lambda: self.c.player.duration() > 0))
+            loops = {"n": 0, "low": True}
+
+            def watch(e, *a):
+                if e == "position":
+                    if a[0] < 1.0 and not loops["low"]:
+                        loops["n"] += 1
+                    loops["low"] = a[0] < 1.0
+            self.c.connect(watch)
+            self.assertTrue(run_until(lambda: loops["n"] >= 2, 15), loops)
+            self.assertTrue(self.c.playing)
+        finally:
+            features.set_enabled("next_episodes", True)
+
+    def test_nothing_playable_keeps_queue(self):
+        """Ouvrir un dossier sans vidéo : la file en cours reste."""
+        self.c.open_paths([LIB["e1"], LIB["e10"]])
+        self.assertTrue(run_until(lambda: self.c.item is not None))
+        empty = os.path.join(TMP, "vide")
+        os.makedirs(empty, exist_ok=True)
+        got = []
+        self.c.open_paths([empty], on_done=got.append)
+        self.assertTrue(run_until(lambda: got == [0]))
+        self.assertEqual(len(self.c.queue), 2)
+        self.assertEqual(self.c.item.path, LIB["e1"])
+
+    def test_error_count_fresh_queue(self):
+        """Des fichiers illisibles d'avant ne comptent plus dans la nouvelle file."""
+        self.c._errors = 3
+        self.c.open_paths([LIB["fake"], LIB["e1"]])
+        self.assertTrue(run_until(lambda: self.c.player.path == LIB["e1"], 10))
+
+    def test_unknown_repeat_setting(self):
+        settings["repeat"] = "playlist"
+        c = Controller(Player(video=False, audio_output="null"), os.path.join(TMP, "q-repeat.json"), self.pos)
+        try:
+            self.assertEqual(c.queue.repeat, "consecutive")
+            c.queue.cycle_repeat()
+        finally:
+            c.shutdown()
+
+    def test_feature_strict_bool(self):
+        settings["features"] = {"resume": "no"}
+        self.assertTrue(features.enabled("resume"))              # valeur par défaut, pas bool("no")
+        settings["features"] = {"resume": False}
+        self.assertFalse(features.enabled("resume"))
+        settings["features"] = {}
+
+
+class PlaylistAuditTest(unittest.TestCase):
+    def test_hash_name_survives(self):
+        d = os.path.join(TMP, "pl-hash")
+        os.makedirs(d, exist_ok=True)
+        a, b = os.path.join(d, "#1 Pilot.mkv"), os.path.join(d, "A.mp4")
+        out = os.path.join(d, "liste.m3u")
+        out = playlists.save([Item(a), Item(b)], out)
+        self.assertEqual([e.location for e in playlists.parse(out)], [a, b])
+
+    def test_mixed_encoding(self):
+        d = os.path.join(TMP, "pl-mixed")
+        os.makedirs(d, exist_ok=True)
+        out = os.path.join(d, "mixte.m3u8")
+        with open(out, "wb") as fh:
+            fh.write("Été.mkv\n".encode("utf-8") + "Hiver é.mkv\n".encode("latin-1"))
+        self.assertEqual([os.path.basename(e.location) for e in playlists.parse(out)], ["Été.mkv", "Hiver é.mkv"])
+
 
 if __name__ == "__main__":
     unittest.main()

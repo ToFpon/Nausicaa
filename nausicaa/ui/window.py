@@ -413,6 +413,16 @@ class MainWindow(Adw.ApplicationWindow):
         paths = [p for p in paths if p]
         if not paths:
             return False
+        from ..backend.media import is_subtitle
+        subs = [p for p in paths if is_subtitle(p)]
+        if subs and self.c.item is not None:
+            # sous-titres déposés sur le film (geste de VLC, mpv, Celluloid) : ajoutés à la vidéo en cours —
+            # avant, ils REMPLAÇAIENT la file (« Ce fichier ne peut pas être lu », film arrêté)
+            for p in subs:
+                self.c.player.add_subtitle(p)
+            paths = [p for p in paths if not is_subtitle(p)]
+            if not paths:
+                return True
         self.open_paths(paths)
         return True
 
