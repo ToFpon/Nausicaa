@@ -73,6 +73,19 @@
   </requires>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.0.6" date="2026-11-14">
+      <description>
+        <ul>
+          <li>“Repeat video” now loops endlessly (it stopped after one loop)</li>
+          <li>Dropping a subtitle file on the window adds it to the video playing, instead of replacing the queue; opening a folder without videos keeps the current queue</li>
+          <li>File names that are not valid UTF-8 (old USB sticks, old network shares) now play, and the queue is saved again</li>
+          <li>Fullscreen: the main menu no longer closes by itself; the seek bar stays still while held; arrow keys move in the queue</li>
+          <li>When two things are opened in quick succession, the latest wins; playlists from Windows (UTF-16) and names starting with “#” are handled</li>
+          <li>MPRIS: every seek is announced, out-of-range positions are ignored, fullscreen from picture-in-picture works</li>
+          <li>A single clear message when OpenGL is not available</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.0.5" date="2026-11-14">
       <description>
         <ul>

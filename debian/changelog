@@ -1,3 +1,20 @@
+nausicaa (1.0.6~noble1) noble; urgency=medium
+
+  * « Répéter la vidéo » boucle sans fin (elle s'arrêtait après un tour).
+  * Sous-titres déposés sur la fenêtre : ajoutés à la vidéo en cours au lieu
+    de remplacer la file ; un dossier sans vidéo ne vide plus la file.
+  * Noms de fichiers qui ne sont pas en UTF-8 (vieilles clés USB, vieux
+    partages réseau) : lus, et la file s'enregistre de nouveau.
+  * Plein écran : le menu principal ne se referme plus tout seul ; la barre
+    de progression tenue ne bouge plus ; flèches dans la file de lecture.
+  * Deux ouvertures rapprochées : la plus récente l'emporte ; listes de
+    Windows (UTF-16) et noms commençant par « # » pris en charge.
+  * MPRIS : chaque saut est annoncé, position hors de la vidéo ignorée,
+    plein écran depuis l'image dans l'image.
+  * Un seul message clair quand OpenGL n'est pas disponible.
+
+ -- Tof <nourpon@gmail.com>  Sat, 14 Nov 2026 22:10:11 +0000
+
 nausicaa (1.0.5~noble1) noble; urgency=medium
 
   * Allemand : la file de lecture s'appelle « Wiedergabeliste », comme
