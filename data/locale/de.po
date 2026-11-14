@@ -14,7 +14,7 @@ msgstr "Version anzeigen"
 
 #: nausicaa/app.py:32
 msgid "Ajouter à la file au lieu de la remplacer"
-msgstr "Zur Warteschlange hinzufügen, statt sie zu ersetzen"
+msgstr "Zur Wiedergabeliste hinzufügen, statt sie zu ersetzen"
 
 #: nausicaa/app.py:194
 msgid "Inspiré de"
@@ -78,7 +78,7 @@ msgstr "Nächste Folgen"
 
 #: nausicaa/features.py:39
 msgid "Ouvrir une seule vidéo ajoute à la file les autres vidéos de son dossier, dans l'ordre des noms (« Épisode 2 » avant « Épisode 10 »)"
-msgstr "Beim Öffnen eines einzelnen Videos kommen die anderen Videos seines Ordners in die Warteschlange, nach Namen geordnet („Folge 2“ vor „Folge 10“)"
+msgstr "Beim Öffnen eines einzelnen Videos kommen die anderen Videos seines Ordners in die Wiedergabeliste, nach Namen geordnet („Folge 2“ vor „Folge 10“)"
 
 #: nausicaa/features.py:42
 msgid "Contrôle depuis le système"
@@ -140,7 +140,7 @@ msgstr "Tonspuren und Untertitel"
 
 #: nausicaa/ui/controls.py:99 nausicaa/ui/playlist_panel.py:66 nausicaa/ui/preferences.py:47
 msgid "File de lecture"
-msgstr "Warteschlange"
+msgstr "Wiedergabeliste"
 
 #: nausicaa/ui/controls.py:162 nausicaa/ui/window.py:729 nausicaa/ui/window.py:1063
 msgid "Pause"
@@ -152,7 +152,7 @@ msgstr "Keine Wiederholung"
 
 #: nausicaa/ui/playlist_panel.py:28
 msgid "Répéter la file"
-msgstr "Warteschlange wiederholen"
+msgstr "Wiedergabeliste wiederholen"
 
 #: nausicaa/ui/playlist_panel.py:29
 msgid "Répéter la vidéo"
@@ -160,19 +160,19 @@ msgstr "Video wiederholen"
 
 #: nausicaa/ui/playlist_panel.py:72
 msgid "Enregistrer la file…"
-msgstr "Warteschlange speichern …"
+msgstr "Wiedergabeliste speichern …"
 
 #: nausicaa/ui/playlist_panel.py:73
 msgid "Vider la file"
-msgstr "Warteschlange leeren"
+msgstr "Wiedergabeliste leeren"
 
 #: nausicaa/ui/playlist_panel.py:195
 msgid "Retirer de la file"
-msgstr "Aus der Warteschlange entfernen"
+msgstr "Aus der Wiedergabeliste entfernen"
 
 #: nausicaa/ui/playlist_panel.py:243 nausicaa/ui/playlist_panel.py:68
 msgid "Ajouter des vidéos à la file"
-msgstr "Videos zur Warteschlange hinzufügen"
+msgstr "Videos zur Wiedergabeliste hinzufügen"
 
 #: nausicaa/ui/playlist_panel.py:253
 msgid "Liste de lecture"
@@ -180,11 +180,11 @@ msgstr "Wiedergabeliste"
 
 #: nausicaa/ui/playlist_panel.py:262 nausicaa/ui/shortcuts.py:38
 msgid "Enregistrer la file"
-msgstr "Warteschlange speichern"
+msgstr "Wiedergabeliste speichern"
 
 #: nausicaa/ui/playlist_panel.py:81
 msgid "File vide"
-msgstr "Leere Warteschlange"
+msgstr "Leere Wiedergabeliste"
 
 #: nausicaa/ui/playlist_panel.py:82
 msgid "Déposez des vidéos ici pour les ajouter"
@@ -206,7 +206,7 @@ msgstr "Im Ordner anzeigen"
 
 #: nausicaa/ui/playlist_panel.py:75
 msgid "Menu de la file"
-msgstr "Menü der Warteschlange"
+msgstr "Menü der Wiedergabeliste"
 
 #: nausicaa/ui/playlist_panel.py:259
 msgid "Liste de lecture non enregistrée"
@@ -219,8 +219,8 @@ msgstr "Wiedergabeliste gespeichert: {0}"
 #: nausicaa/ui/playlist_panel.py:236
 msgid "{0} vidéo ajoutée à la file"
 msgid_plural "{0} vidéos ajoutées à la file"
-msgstr[0] "{0} Video zur Warteschlange hinzugefügt"
-msgstr[1] "{0} Videos zur Warteschlange hinzugefügt"
+msgstr[0] "{0} Video zur Wiedergabeliste hinzugefügt"
+msgstr[1] "{0} Videos zur Wiedergabeliste hinzugefügt"
 
 #: nausicaa/ui/preferences.py:40
 msgid "Style"
@@ -260,7 +260,7 @@ msgstr "Wird beim nächsten Start übernommen"
 
 #: nausicaa/ui/preferences.py:48
 msgid "Côté de la fenêtre où s'ouvre la file (F9)"
-msgstr "Fensterseite, auf der sich die Warteschlange öffnet (F9)"
+msgstr "Fensterseite, auf der sich die Wiedergabeliste öffnet (F9)"
 
 #: nausicaa/ui/preferences.py:50 nausicaa/ui/shortcuts.py:18
 msgid "Lecture"
@@ -374,7 +374,7 @@ msgstr "Vollbild verlassen"
 
 #: nausicaa/ui/shortcuts.py:34 nausicaa/ui/window.py:242 nausicaa/ui/window.py:739
 msgid "Afficher la file de lecture"
-msgstr "Warteschlange anzeigen"
+msgstr "Wiedergabeliste anzeigen"
 
 #: nausicaa/ui/shortcuts.py:36 nausicaa/ui/window.py:374 nausicaa/ui/window.py:137
 msgid "Ouvrir des vidéos"

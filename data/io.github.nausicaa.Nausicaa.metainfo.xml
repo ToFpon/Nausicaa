@@ -22,7 +22,7 @@
     </p>
     <p xml:lang="de">
       Nausicaa ist ein kleiner Videoplayer für GNOME auf Basis von mpv. Ein schlichtes Fenster, die
-      Mausgesten von VLC und eine Warteschlange, die sich merkt, wo man aufgehört hat. Es folgt dem Thema
+      Mausgesten von VLC und eine Wiedergabeliste, die sich merkt, wo man aufgehört hat. Es folgt dem Thema
       der Arbeitsumgebung.
     </p>
     <ul>
@@ -45,8 +45,8 @@
       <li>Klick pausiert, Doppelklick schaltet ohne Pause in den Vollbildmodus, Mausrad regelt die Lautstärke mit Einblendung</li>
       <li>Pause beim Minimieren, weiter, wenn das Fenster zurückkommt</li>
       <li>Jedes Video wird dort fortgesetzt, wo man aufgehört hat</li>
-      <li>Eine Folge öffnen: die nächsten kommen in die Warteschlange, in natürlicher Reihenfolge</li>
-      <li>Warteschlange mit Zufall, Wiederholung und Umsortieren per Ziehen, als Wiedergabeliste speicherbar</li>
+      <li>Eine Folge öffnen: die nächsten kommen in die Wiedergabeliste, in natürlicher Reihenfolge</li>
+      <li>Wiedergabeliste mit Zufall, Wiederholung und Umsortieren per Ziehen, als Datei speicherbar</li>
       <li>Tonspuren, Untertitel, Geschwindigkeit, Einzelbilder, Bildschirmfoto</li>
     </ul>
   </description>
