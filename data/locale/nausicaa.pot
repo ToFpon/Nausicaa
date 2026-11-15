@@ -31,11 +31,11 @@ msgstr ""
 msgid "Un petit lecteur vidéo pour GNOME, qui lit vos vidéos et rien d'autre."
 msgstr ""
 
-#: nausicaa/backend/controller.py:390
+#: nausicaa/backend/controller.py:399
 msgid "Ce fichier ne peut pas être lu."
 msgstr ""
 
-#: nausicaa/backend/controller.py:392
+#: nausicaa/backend/controller.py:401
 msgid "Le fichier n'existe plus."
 msgstr ""
 
@@ -88,18 +88,26 @@ msgid "Panneau de GNOME, touches multimédia du clavier et boutons d'un casque B
 msgstr ""
 
 #: nausicaa/features.py:45
-msgid "Plein écran à l'ouverture"
+msgid "Titre enregistré dans le fichier"
 msgstr ""
 
 #: nausicaa/features.py:46
-msgid "Une vidéo ouverte (gestionnaire de fichiers, « Ouvrir », glisser) passe directement en plein écran, comme VLC ; pas un fichier audio, ni une vidéo ajoutée à la file"
+msgid "Afficher le titre que la vidéo porte en elle (« Série - S02E04 - Titre ») au lieu du nom du fichier, quand il en a un qui a du sens"
 msgstr ""
 
 #: nausicaa/features.py:49
-msgid "Décodage matériel"
+msgid "Plein écran à l'ouverture"
 msgstr ""
 
 #: nausicaa/features.py:50
+msgid "Une vidéo ouverte (gestionnaire de fichiers, « Ouvrir », glisser) passe directement en plein écran, comme VLC ; pas un fichier audio, ni une vidéo ajoutée à la file"
+msgstr ""
+
+#: nausicaa/features.py:53
+msgid "Décodage matériel"
+msgstr ""
+
+#: nausicaa/features.py:54
 msgid "La carte graphique décode la vidéo quand elle le peut : moins de travail pour le processeur"
 msgstr ""
 
@@ -113,7 +121,7 @@ msgstr[1] ""
 msgid "Précédent"
 msgstr ""
 
-#: nausicaa/ui/controls.py:40 nausicaa/ui/controls.py:175 nausicaa/ui/playlist_panel.py:194 nausicaa/ui/window.py:199
+#: nausicaa/ui/controls.py:40 nausicaa/ui/controls.py:175 nausicaa/ui/playlist_panel.py:197 nausicaa/ui/window.py:199
 msgid "Lire"
 msgstr ""
 
@@ -173,19 +181,19 @@ msgstr ""
 msgid "Vider la file"
 msgstr ""
 
-#: nausicaa/ui/playlist_panel.py:195
+#: nausicaa/ui/playlist_panel.py:198
 msgid "Retirer de la file"
 msgstr ""
 
-#: nausicaa/ui/playlist_panel.py:243 nausicaa/ui/playlist_panel.py:68
+#: nausicaa/ui/playlist_panel.py:246 nausicaa/ui/playlist_panel.py:68
 msgid "Ajouter des vidéos à la file"
 msgstr ""
 
-#: nausicaa/ui/playlist_panel.py:253
+#: nausicaa/ui/playlist_panel.py:256
 msgid "Liste de lecture"
 msgstr ""
 
-#: nausicaa/ui/playlist_panel.py:262 nausicaa/ui/shortcuts.py:38
+#: nausicaa/ui/playlist_panel.py:265 nausicaa/ui/shortcuts.py:38
 msgid "Enregistrer la file"
 msgstr ""
 
@@ -207,7 +215,7 @@ msgid_plural "{0} vidéos"
 msgstr[0] ""
 msgstr[1] ""
 
-#: nausicaa/ui/playlist_panel.py:197
+#: nausicaa/ui/playlist_panel.py:200
 msgid "Afficher dans le dossier"
 msgstr ""
 
@@ -215,15 +223,15 @@ msgstr ""
 msgid "Menu de la file"
 msgstr ""
 
-#: nausicaa/ui/playlist_panel.py:259
+#: nausicaa/ui/playlist_panel.py:262
 msgid "Liste de lecture non enregistrée"
 msgstr ""
 
-#: nausicaa/ui/playlist_panel.py:261
+#: nausicaa/ui/playlist_panel.py:264
 msgid "Liste enregistrée : {0}"
 msgstr ""
 
-#: nausicaa/ui/playlist_panel.py:236
+#: nausicaa/ui/playlist_panel.py:239
 msgid "{0} vidéo ajoutée à la file"
 msgid_plural "{0} vidéos ajoutées à la file"
 msgstr[0] ""

@@ -1134,8 +1134,8 @@ class MainWindow(Adw.ApplicationWindow):
         title = APP_NAME
         if item is not None and loaded:
             media_title = self.c.player.get("media-title") or ""
-            # le titre donné par le fichier (étiquette) sert pour les flux ; pour un fichier local,
-            # son nom : c'est lui que l'on reconnaît (« Épisode 3.mkv » plutôt qu'un titre de rippeur)
+            # flux : le titre que donne mpv ; fichier local : son titre enregistré s'il a du sens
+            # (media.tag_title écarte les signatures de rippeurs), sinon son nom
             title = shown(item.title or (media_title if item.stream and media_title else item.display_title))
         self.title_widget.set_title(title)
         self.set_title(title if title == APP_NAME else f"{title} — {APP_NAME}")

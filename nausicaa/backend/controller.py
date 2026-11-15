@@ -315,6 +315,7 @@ class Controller:
             self._emit("volume")
         elif key == "features":
             self.player.set_property("hwdec", "auto-safe" if features.enabled("hwdec") else "no")
+            self._emit("title")                       # « Titre enregistré dans le fichier » coupé / remis
         elif key == "audio_language":
             self.player.set_property("alang", value)
         elif key == "subtitle_language":
@@ -353,6 +354,14 @@ class Controller:
             self._emit("video")
         elif name == "media-title":
             self._emit("title")
+        elif name == "metadata":
+            # titre enregistré dans le fichier : gardé sur l'élément (la file le montre ensuite aussi)
+            item = self.item
+            if item is not None and not item.stream and self.player.path == item.path:
+                title = media.tag_title(value, item.path)
+                if title != item.tag_title:
+                    item.tag_title = title
+                    self._emit("title")
         elif name in ("volume", "mute"):
             pass                                     # c'est nous qui les réglons
         elif name == "speed":

@@ -334,6 +334,49 @@ class ControllerTest(unittest.TestCase):
             media.expand = real
 
 
+class TagTitleTest(unittest.TestCase):
+    """Titre enregistré dans le fichier : affiché s'il a du sens, sinon le nom du fichier."""
+
+    def test_filter(self):
+        path = "/v/Brigade.anonyme.S02E04.FiNAL.VOF.1080p.WEB.H264-PiCKLES.mkv"
+        good = "Brigade anonyme - S02E04 - Carmen"
+        self.assertEqual(media.tag_title({"title": good}, path), good)
+        self.assertEqual(media.tag_title({"TITLE": "  Le   Film  "}, path), "Le Film")
+        for junk in ("", "x", "www.monsite.com", "Encoded by Toto", "[tracker.to] Brigade",
+                     "Brigade.anonyme.S02E04.FiNAL.VOF.1080p.WEB.H264-PiCKLES",
+                     "Brigade.anonyme.S02E04.FiNAL.VOF.1080p.WEB.H264-PiCKLES.mkv", "film.avi",
+                     "https://exemple.org/x"):
+            self.assertEqual(media.tag_title({"title": junk}, path), "", junk)
+        self.assertEqual(media.tag_title(None, path), "")
+        self.assertEqual(media.tag_title({"title": 3}, path), "")
+
+    def test_display(self):
+        settings.data.clear()
+        item = Item("/v/brigade.s02e04.mkv", tag_title="Brigade anonyme - S02E04 - Carmen")
+        self.assertEqual(item.display_title, "Brigade anonyme - S02E04 - Carmen")
+        features.set_enabled("file_titles", False)
+        try:
+            self.assertEqual(item.display_title, "brigade.s02e04")
+        finally:
+            features.set_enabled("file_titles", True)
+        self.assertEqual(Item("/v/a.mkv", "De la liste", tag_title="Du fichier").display_title, "De la liste")
+
+    def test_controller_reads_title(self):
+        settings.data.clear()
+        path = testmedia.video(os.path.join(TMP, "titres", "brigade.s02e04.mkv"), 2, title="Brigade - S02E04 - Carmen")
+        c = Controller(Player(video=False, audio_output="null"), os.path.join(TMP, "q-titre.json"),
+                       positions.Positions(os.path.join(TMP, "pos-titre.json")))
+        events = []
+        c.connect(lambda e, *a: events.append(e))
+        try:
+            c.open_paths([path])
+            self.assertTrue(run_until(lambda: c.item is not None and c.item.tag_title))
+            self.assertEqual(c.item.display_title, "Brigade - S02E04 - Carmen")
+            self.assertIn("title", events)
+        finally:
+            c.shutdown()
+
+
 class PlaylistAuditTest(unittest.TestCase):
     def test_utf16(self):
         d = os.path.join(TMP, "pl-u16")

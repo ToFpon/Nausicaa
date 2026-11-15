@@ -42,6 +42,10 @@ FEATURES = [
     Feature("mpris", tr("Contrôle depuis le système"),
             tr("Panneau de GNOME, touches multimédia du clavier et boutons d'un casque Bluetooth (MPRIS)"),
             "input-keyboard-symbolic"),
+    Feature("file_titles", tr("Titre enregistré dans le fichier"),
+            tr("Afficher le titre que la vidéo porte en elle (« Série - S02E04 - Titre ») au lieu du nom du "
+               "fichier, quand il en a un qui a du sens"),
+            "text-x-generic-symbolic"),
     Feature("auto_fullscreen", tr("Plein écran à l'ouverture"),
             tr("Une vidéo ouverte (gestionnaire de fichiers, « Ouvrir », glisser) passe directement en plein "
                "écran, comme VLC ; pas un fichier audio, ni une vidéo ajoutée à la file"),

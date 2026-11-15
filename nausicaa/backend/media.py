@@ -28,6 +28,7 @@ class Item:
     path: str                       # chemin local absolu, ou adresse d'un flux
     title: str = ""                 # titre donné par une liste de lecture ou par le flux
     duration: float = 0.0           # connue une fois lue (ou donnée par la liste)
+    tag_title: str = ""             # titre enregistré dans le fichier (lu par mpv, filtré : tag_title)
 
     @property
     def stream(self) -> bool:
@@ -37,9 +38,42 @@ class Item:
     def display_title(self) -> str:
         if self.title:
             return self.title
+        if self.tag_title:
+            from .. import features
+            if features.enabled("file_titles"):
+                return self.tag_title
         if self.stream:
             return self.path
         return os.path.splitext(os.path.basename(self.path))[0]
+
+
+_JUNK = ("http:", "https:", "www.", "encoded by", "encodé par", "ripped by", "rip by", "uploaded by",
+         "downloaded from", "visit ", "torrent")
+_DOMAINS = (".com", ".net", ".org", ".to", ".tv", ".io", ".info", ".ru", ".cc", ".me", ".xyz", ".fr")
+
+
+def tag_title(metadata, path: str) -> str:
+    """Titre enregistré dans le fichier (« Brigade anonyme - S02E04 - Carmen »), s'il est digne d'être
+    affiché à la place du nom ; sinon "". Les rippeurs y mettent souvent n'importe quoi : leur site, une
+    signature, le nom du fichier lui-même."""
+    if not isinstance(metadata, dict):
+        return ""
+    value = next((v for k, v in metadata.items() if isinstance(k, str) and k.lower() == "title"), "")
+    if not isinstance(value, str):
+        return ""
+    title = " ".join(value.split())
+    if len(title) < 2 or len(title) > 200:
+        return ""
+    low = title.casefold()
+    name = os.path.basename(path).casefold()
+    if low in (name, os.path.splitext(name)[0]) or low.endswith(MEDIA_EXTS):
+        return ""                                  # le nom du fichier : rien de mieux
+    if any(j in low for j in _JUNK):
+        return ""
+    if any(w.endswith(_DOMAINS) for w in low.replace("[", " ").replace("]", " ").replace("(", " ")
+           .replace(")", " ").split()):
+        return ""                                  # « monsite.com », « [tracker.to] »
+    return title
 
 
 def is_video(path: str) -> bool:

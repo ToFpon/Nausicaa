@@ -162,6 +162,9 @@ class PlaylistPanel(Gtk.Box):
             self.rebuild()
         elif event == "item":
             self.sync_current()
+        elif event == "title":
+            for row in self._rows:
+                row.refresh()
         elif event == "duration":
             for row in self._rows:
                 if row.item is self.controller.item:

@@ -16,7 +16,7 @@ tests, paquet.
 - Dialogues : de vraies fenêtres (`common.AlertDialog`, `common.DialogWindow`, `Adw.PreferencesWindow`,
   `Adw.AboutWindow`).
 - Chaque fonctionnalité facultative est dans `nausicaa/features.py` (click_pause, wheel_volume,
-  minimize_pause, resume, next_episodes, mpris, hwdec, auto_fullscreen) et se consulte au moment de l'usage.
+  minimize_pause, resume, next_episodes, mpris, hwdec, auto_fullscreen, file_titles) et se consulte au moment de l'usage.
 - Tout texte visible passe par `tr()` / `ntr()`. Après modification : `python3.12 tools/update-pot.py`,
   compléter `data/locale/en.po` et `de.po`, puis `msgfmt -c --statistics` et `msgcmp`.
 - Toute fonction passée à `idle_add` / `timeout_add` renvoie False (sauf répétition voulue).
@@ -104,6 +104,12 @@ tests, paquet.
   MP3 / FLAC est une piste vidéo `albumart` pour mpv : ignorée. Ajout à la file, vidéo suivante : jamais (Échap
   reste un choix). Testé : `plein_ecran_a_l_ouverture` d'ui_smoke (`media.sound_with_cover` : image faite à part,
   une entrée lavfi « color » coupait le son à 0,05 s).
+- Titre enregistré dans le fichier (fonctionnalité `file_titles`, active par défaut, idée de Tof) : propriété
+  `metadata` de mpv observée → `media.tag_title` (clé « title » sans casse) → `Item.tag_title`, affiché par
+  `display_title` (après le titre d'une liste de lecture, avant le nom du fichier) : titre de la fenêtre, file
+  (gardé sur l'élément une fois lu), MPRIS, page « son seul ». Écartés (signatures de rippeurs) : nom du
+  fichier lui-même, « www. », http, « Encoded by »…, un mot finissant en .com / .to / .org…, < 2 ou > 200
+  caractères. Coupée : nom du fichier, en direct (événement « title »). Testé : `TagTitleTest`.
 - Fenêtre fermée maximisée : rouverte maximisée (`window_maximized`, `maximize()` avant l'affichage, comme
   Odysseus / Calypso) ; taille = `get_default_size()` (celle d'avant la maximisation ; `get_width()` perdait
   ~10 px à chaque ouverture sous openbox), aussi pour `_pip_saved`.

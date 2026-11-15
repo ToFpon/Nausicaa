@@ -25,7 +25,7 @@ import mpv
 
 OBSERVED = ("pause", "time-pos", "duration", "eof-reached", "volume", "mute", "track-list",
             "media-title", "vid", "dwidth", "dheight", "seekable", "paused-for-cache", "chapter-list",
-            "sub-visibility", "speed", "audio-out-params")
+            "sub-visibility", "speed", "audio-out-params", "metadata")
 CLIENT_NAME = "Nausicaa"          # nom du flux dans PipeWire / PulseAudio (sinon « mpv »)
 STREAM_CHECKS_MS = (150, 1000, 2500)   # après l'ouverture de la sortie son (PipeWire restaure tard)
 DEBUG = bool(os.environ.get("NAUSICAA_DEBUG"))

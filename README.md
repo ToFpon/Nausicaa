@@ -53,6 +53,7 @@ bin/nausicaa                # try it without installing
 - The **mouse wheel sets the volume**, shown over the picture (up to 150 % if you allow it).
 - In full screen, **compact rounded controls** float over the picture and fade away when the mouse rests.
 - Optionally, **videos open straight in full screen**, like VLC (Preferences → Features).
+- The **title stored in the video** (“Series - S02E04 - Title”) is shown instead of the file name when it makes sense.
 
 **Picture in picture** (Ctrl+P)
 - The film shrinks to a **small borderless 16:9 window, always on top**, in the bottom-right corner of the screen.
@@ -143,6 +144,8 @@ bin/nausicaa                # pour l'essayer sans l'installer
 - En plein écran, des **commandes compactes et arrondies** flottent sur l'image et s'effacent quand la souris ne
   bouge plus.
 - En option, **les vidéos s'ouvrent directement en plein écran**, comme dans VLC (Préférences → Fonctionnalités).
+- Le **titre enregistré dans la vidéo** (« Série - S02E04 - Titre ») s'affiche à la place du nom du fichier quand
+  il a du sens.
 
 **Image dans l'image** (Ctrl+P)
 - Le film devient une **petite fenêtre sans bordure, en 16:9, toujours au-dessus des autres**, en bas à droite de
