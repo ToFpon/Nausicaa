@@ -69,6 +69,7 @@ class Player:
         self.path: Optional[str] = None          # fichier chargé (None : rien)
         self._stream_gen = 0
         self._closed = False
+        self._pause_on_load: Optional[bool] = None   # pause voulue pour le fichier en cours d'ouverture
         for name in OBSERVED:
             self.mpv.observe_property(name, self._on_property)
         self.mpv.register_event_callback(self._on_event)
@@ -94,6 +95,15 @@ class Player:
         # ordre stable : fin de fichier après les propriétés qui l'accompagnent
         for name in sorted(pending, key=lambda n: n in ("end-file", "file-loaded")):
             value = pending[name]
+            if name == "file-loaded" and self._pause_on_load is not None:
+                # fin d'une vidéo (keep-open) : mpv se met en pause tout seul. Remis en lecture puis
+                # « loadfile », il pouvait repasser sur la fin de l'ancien fichier AVANT d'ouvrir le
+                # nouveau et se remettre en pause : l'épisode suivant attendait « Lecture » (vu chez Tof,
+                # de temps en temps). La pause voulue est donc reposée une fois le fichier chargé.
+                want, self._pause_on_load = self._pause_on_load, None
+                if bool(self.mpv.pause) != want:
+                    self.mpv.pause = want
+                self.values["pause"] = want
             if name not in ("end-file", "file-loaded"):
                 self.values[name] = value
             if name == "audio-out-params" and value:
@@ -176,7 +186,9 @@ class Player:
         self.path = path
         self.values["eof-reached"] = False
         self.values["time-pos"] = start
+        self.values["pause"] = not play
         self.mpv.pause = not play
+        self._pause_on_load = not play
         args = dict(url=path, flags="replace")
         if start > 0:
             args["options"] = f"start={start:.3f}"     # chaîne « clé=valeur » : un dictionnaire est refusé
@@ -197,6 +209,7 @@ class Player:
         if not value and self.values.get("eof-reached"):
             self.seek(0, "absolute")              # relancer une vidéo finie : depuis le début
             self.values["eof-reached"] = False
+        self._pause_on_load = None                 # choix de l'utilisateur : il l'emporte
         # valeur notée tout de suite : mpv ne la confirme qu'un peu plus tard (autre fil), et deux
         # bascules rapprochées (clic puis double-clic) doivent voir la première
         self.values["pause"] = bool(value)

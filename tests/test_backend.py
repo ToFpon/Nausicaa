@@ -334,6 +334,25 @@ class ControllerTest(unittest.TestCase):
             media.expand = real
 
 
+class NextEpisodePlaysTest(unittest.TestCase):
+    """Fin d'une vidéo → la suivante JOUE. mpv (keep-open) se met en pause à la fin ; remis en lecture puis
+    « loadfile », il repassait parfois sur la fin de l'ancien fichier et se remettait en pause : l'épisode
+    suivant attendait « Lecture » (vu chez Tof). Sans piste son (aid=no), ça arrivait à chaque fois."""
+
+    def test_chain_keeps_playing(self):
+        settings.data.clear()
+        c = Controller(Player(video=False, audio_output="null", aid="no"), os.path.join(TMP, "q-chain.json"),
+                       positions.Positions(os.path.join(TMP, "pos-chain.json")))
+        try:
+            c.open_paths([LIB["e1"]])                      # 3 s, puis Épisode 2
+            self.assertTrue(run_until(lambda: os.path.basename(c.player.path or "") == "Épisode 2.mp4", 12))
+            self.assertTrue(run_until(lambda: c.player.position() > 1.0, 6),
+                            "l'épisode suivant est resté en pause")
+            self.assertFalse(c.player.paused)
+        finally:
+            c.shutdown()
+
+
 class TagTitleTest(unittest.TestCase):
     """Titre enregistré dans le fichier : affiché s'il a du sens, sinon le nom du fichier."""
 

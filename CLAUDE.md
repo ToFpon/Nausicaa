@@ -50,6 +50,11 @@ tests, paquet.
   nommés (mpv 0.37 et 0.38+), options en CHAÎNE « start=12.3 » (un dictionnaire est refusé).
   `set_paused` note la pause tout de suite (mpv la confirme plus tard : clic + double-clic voyaient
   l'ancienne valeur) ; vidéo finie : bascule = relancer (mpv annonce sa pause de fin après eof-reached).
+  Épisode suivant resté en pause (vu chez Tof, de temps en temps) : à la fin, keep-open met mpv en pause ;
+  remis en lecture puis `loadfile`, mpv repassait parfois sur la fin de l'ANCIEN fichier avant d'ouvrir le
+  nouveau et se remettait en pause. La pause voulue par `load` (`_pause_on_load`) est reposée au
+  « file-loaded » ; un `set_paused` de l'utilisateur l'annule. Sans piste son (`aid=no`) : à chaque fois →
+  `NextEpisodePlaysTest` (échoue sans le correctif).
 - `backend/controller.py` : file + lecteur ; événements item / state / position / duration / queue /
   modes / volume / tracks / video / title / resumed / ended / error / loading. Fin d'une vidéo →
   position oubliée, suivante selon la répétition ; illisible → message et suivante. Volume 0..100
