@@ -73,6 +73,14 @@
   </requires>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.0.7" date="2026-11-15">
+      <description>
+        <ul>
+          <li>New option “Full screen when opening” (Preferences → Features, off by default): a video you open goes straight to full screen, like VLC; not an audio file, nor a video added to the queue</li>
+          <li>A window closed while maximized now reopens maximized, and no longer shrinks by a few pixels each time it is opened</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.0.6" date="2026-11-14">
       <description>
         <ul>

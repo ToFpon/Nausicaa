@@ -1,3 +1,14 @@
+nausicaa (1.0.7~noble1) noble; urgency=medium
+
+  * Nouvelle option « Plein écran à l'ouverture » (Préférences →
+    Fonctionnalités, coupée par défaut) : une vidéo ouverte passe
+    directement en plein écran, comme dans VLC ; pas un fichier audio, ni
+    une vidéo ajoutée à la file.
+  * Une fenêtre fermée maximisée se rouvre maximisée, et ne perd plus
+    quelques pixels de largeur à chaque ouverture.
+
+ -- Tof <nourpon@gmail.com>  Sun, 15 Nov 2026 20:44:50 +0000
+
 nausicaa (1.0.6~noble1) noble; urgency=medium
 
   * « Répéter la vidéo » boucle sans fin (elle s'arrêtait après un tour).
