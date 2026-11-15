@@ -1,3 +1,13 @@
+nausicaa (1.0.8~noble1) noble; urgency=medium
+
+  * L'épisode suivant ne reste plus parfois en pause : il démarre tout
+    seul, comme prévu.
+  * Nouvelle option « Titre enregistré dans le fichier » (active par
+    défaut) : le titre que porte la vidéo (« Série - S02E04 - Titre »)
+    s'affiche au lieu du nom du fichier, quand il a du sens.
+
+ -- Tof <nourpon@gmail.com>  Sun, 15 Nov 2026 21:17:15 +0000
+
 nausicaa (1.0.7~noble1) noble; urgency=medium
 
   * Nouvelle option « Plein écran à l'ouverture » (Préférences →

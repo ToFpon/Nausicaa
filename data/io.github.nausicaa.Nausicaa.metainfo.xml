@@ -73,6 +73,14 @@
   </requires>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.0.8" date="2026-11-15">
+      <description>
+        <ul>
+          <li>The next episode no longer sometimes stays paused: it starts playing on its own, as it should</li>
+          <li>New option “Title stored in the file” (on by default): the title a video carries (“Series - S02E04 - Title”) is shown instead of the file name, when it makes sense</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.0.7" date="2026-11-15">
       <description>
         <ul>
