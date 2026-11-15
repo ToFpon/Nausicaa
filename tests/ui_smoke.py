@@ -496,6 +496,38 @@ def reprise(win):
 
 
 @step
+def plein_ecran_a_l_ouverture(win):
+    check(not win.is_fullscreen(), "fenêtré avant l'essai")
+    features.set_enabled("auto_fullscreen", True)
+    try:
+        win.open_paths([LIB["pochette"]])
+        yield Wait(10, until=lambda: basename() == "avec pochette.mp3" and c().player.tracks("audio"))
+        yield pump(1.0)
+        check(any(t.get("albumart") for t in c().player.tracks("video")), "MP3 : pochette vue comme piste vidéo")
+        check(not win.is_fullscreen(), "plein écran à l'ouverture : pas pour un son avec pochette")
+        win.open_paths([LIB["e1"]], replace=False)               # ajout à la file : pas de plein écran
+        yield pump(1.0)
+        check(not win.is_fullscreen(), "plein écran à l'ouverture : pas pour un ajout à la file")
+        win.open_paths([LIB["film"]])
+        yield Wait(10, until=lambda: basename() == "Long film.mkv" and win.is_fullscreen())
+        check(win.is_fullscreen(), "plein écran à l'ouverture : la vidéo passe en plein écran")
+        win.activate_action("win.leave-fullscreen", None)
+        yield Wait(2, until=lambda: not win.is_fullscreen())
+        win.open_paths([LIB["e1"]], replace=False)
+        yield Wait(5, until=lambda: any(i.path == LIB["e1"] for i in c().queue.items))
+        c().play_index(len(c().queue.items) - 1)
+        yield Wait(5, until=lambda: basename() == "Épisode 1.mp4")
+        yield pump(1.0)
+        check(not win.is_fullscreen(), "Échap puis vidéo suivante : pas remis de force en plein écran")
+    finally:
+        features.set_enabled("auto_fullscreen", False)
+    win.open_paths([LIB["film"]])
+    yield Wait(10, until=lambda: basename() == "Long film.mkv" and c().player.duration() > 0)
+    yield pump(1.0)
+    check(not win.is_fullscreen(), "option coupée : la vidéo s'ouvre dans la fenêtre")
+
+
+@step
 def capture_image(win):
     win.screenshot()
     yield pump(1.0)

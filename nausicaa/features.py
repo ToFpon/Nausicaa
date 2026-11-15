@@ -42,6 +42,10 @@ FEATURES = [
     Feature("mpris", tr("Contrôle depuis le système"),
             tr("Panneau de GNOME, touches multimédia du clavier et boutons d'un casque Bluetooth (MPRIS)"),
             "input-keyboard-symbolic"),
+    Feature("auto_fullscreen", tr("Plein écran à l'ouverture"),
+            tr("Une vidéo ouverte (gestionnaire de fichiers, « Ouvrir », glisser) passe directement en plein "
+               "écran, comme VLC ; pas un fichier audio, ni une vidéo ajoutée à la file"),
+            "view-fullscreen-symbolic", default=False),
     Feature("hwdec", tr("Décodage matériel"),
             tr("La carte graphique décode la vidéo quand elle le peut : moins de travail pour le processeur"),
             "video-display-symbolic"),

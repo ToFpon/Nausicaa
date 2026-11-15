@@ -29,6 +29,19 @@ def sound(path: str, seconds: float) -> str:
     return path
 
 
+def sound_with_cover(path: str, seconds: float) -> str:
+    """MP3 avec pochette : mpv la voit comme une piste vidéo « albumart »."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    cover = path + ".png"
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "color=c=orange:size=200x200",
+                    "-frames:v", "1", cover], check=True)
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", f"sine=duration={seconds}",
+                    "-i", cover, "-map", "0:a", "-map", "1:v", "-c:a", "libmp3lame", "-c:v", "copy",
+                    "-disposition:v", "attached_pic", "-id3v2_version", "3", path], check=True)
+    os.remove(cover)
+    return path
+
+
 def subtitles(path: str, text: str = "Bonjour") -> str:
     with open(path, "w", encoding="utf-8") as fh:
         fh.write(f"1\n00:00:00,000 --> 00:00:05,000\n{text}\n")
@@ -44,6 +57,7 @@ def library(root: str) -> dict:
         "e10": video(os.path.join(serie, "Épisode 10.mp4"), 3),
         "film": video(os.path.join(root, "Films", "Long film.mkv"), 90, size="160x90"),
         "son": sound(os.path.join(root, "Musique", "chanson.mp3"), 3),
+        "pochette": sound_with_cover(os.path.join(root, "Musique", "avec pochette.mp3"), 3),
     }
     subtitles(os.path.join(serie, "Épisode 2.fr.srt"))
     fake = os.path.join(root, "Films", "cassé.mp4")

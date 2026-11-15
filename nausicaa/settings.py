@@ -30,6 +30,7 @@ DEFAULTS: dict[str, Any] = {
     # Fenêtre
     "window_width": 960,
     "window_height": 600,
+    "window_maximized": False,      # fermée maximisée : rouverte maximisée
     "playlist_visible": False,
     "playlist_side": "end",          # file de lecture à droite (end) ou à gauche (start) — gauchers / droitiers
     "show_remaining": False,

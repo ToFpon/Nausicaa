@@ -52,6 +52,7 @@ bin/nausicaa                # try it without installing
 - A click on the picture **pauses at once**; a **double-click goes full screen without pausing**.
 - The **mouse wheel sets the volume**, shown over the picture (up to 150 % if you allow it).
 - In full screen, **compact rounded controls** float over the picture and fade away when the mouse rests.
+- Optionally, **videos open straight in full screen**, like VLC (Preferences → Features).
 
 **Picture in picture** (Ctrl+P)
 - The film shrinks to a **small borderless 16:9 window, always on top**, in the bottom-right corner of the screen.
@@ -141,6 +142,7 @@ bin/nausicaa                # pour l'essayer sans l'installer
 - La **molette règle le volume**, affiché sur l'image (jusqu'à 150 % si on l'autorise).
 - En plein écran, des **commandes compactes et arrondies** flottent sur l'image et s'effacent quand la souris ne
   bouge plus.
+- En option, **les vidéos s'ouvrent directement en plein écran**, comme dans VLC (Préférences → Fonctionnalités).
 
 **Image dans l'image** (Ctrl+P)
 - Le film devient une **petite fenêtre sans bordure, en 16:9, toujours au-dessus des autres**, en bas à droite de

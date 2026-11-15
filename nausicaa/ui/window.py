@@ -94,8 +94,11 @@ class MainWindow(Adw.ApplicationWindow):
         self.app = app
         self.c = app.controller
         self.set_default_size(settings["window_width"], settings["window_height"])
+        if settings["window_maximized"]:
+            self.maximize()                      # avant l'affichage : ouverte directement maximisée
         self.set_size_request(480, 320)
         self._click_toggled = False
+        self._fs_pending = False                 # « Plein écran à l'ouverture » : en attente de la piste vidéo
         self.pip = False                          # image dans l'image
         self._pip_target = (0, 0)
         self._pip_frame = (0, 0)
@@ -260,7 +263,8 @@ class MainWindow(Adw.ApplicationWindow):
             ("open", self.open_dialog, ["<Control>o"]),
             ("open-folder", self.open_folder_dialog, ["<Control><Shift>o"]),
             ("open-location", self.open_location_dialog, ["<Control>u"]),
-            ("restore-queue", lambda: self.video.when_ready(lambda: self._gl_failed() or c.restore_saved()), []),
+            ("restore-queue", lambda: (self._want_fullscreen(),
+                                       self.video.when_ready(lambda: self._gl_failed() or c.restore_saved())), []),
             ("toggle", self.toggle_pause, ["space", "k", "AudioPlay", "AudioPause"]),
             ("next", c.next, ["n", "Page_Down", "AudioNext"]),
             ("previous", c.previous, ["p", "Page_Up", "AudioPrev"]),
@@ -399,8 +403,27 @@ class MainWindow(Adw.ApplicationWindow):
         def done(n):
             if not n:
                 toast(self, tr("Aucune vidéo trouvée"))
+        if replace:
+            self._want_fullscreen()
         self.video.when_ready(lambda: self._gl_failed() or
                               self.c.open_paths(paths, replace=replace, on_done=done))
+
+    def _want_fullscreen(self):
+        """Ouverture par l'utilisateur : plein écran dès que la piste vidéo est connue (option, comme VLC).
+        Les vidéos suivantes de la file n'y sont pas remises de force (Échap reste un choix)."""
+        self._fs_pending = features.enabled("auto_fullscreen")
+
+    def _auto_fullscreen(self):
+        if not self._fs_pending or self.c.player.path is None:
+            return
+        tracks = (self.c.player.values.get("track-list") or [])
+        if not tracks:
+            return                               # pas encore lu : on attend la liste des pistes
+        self._fs_pending = False
+        # une pochette d'album (MP3, FLAC) est une « piste vidéo » pour mpv : pas un film
+        if any(t.get("type") == "video" and not t.get("albumart") for t in tracks) \
+                and not self.pip and not self.is_fullscreen():
+            self.fullscreen()
 
     def _gl_failed(self) -> bool:
         """OpenGL indisponible (pilote cassé, X déporté par ssh sans GLX) : mpv ne peut rien afficher.
@@ -526,7 +549,8 @@ class MainWindow(Adw.ApplicationWindow):
             self.unfullscreen()
             GLib.timeout_add(250, lambda: (self.enter_pip(), False)[1])
             return
-        self._pip_saved = (self.get_width(), self.get_height(), self.is_maximized(), self.split.get_show_sidebar())
+        w, h = self.get_default_size()           # taille d'avant une maximisation (pas celle de l'écran)
+        self._pip_saved = (w, h, self.is_maximized(), self.split.get_show_sidebar())
         self.pip = True
         self.add_css_class("pip")
         self.split.set_show_sidebar(False)
@@ -1035,8 +1059,10 @@ class MainWindow(Adw.ApplicationWindow):
             self._sync_item()
         elif event == "video":
             self._sync_page()
+            self._auto_fullscreen()
         elif event == "tracks":
             self._sync_tracks()
+            self._auto_fullscreen()
         elif event == "speed":                       # changée ailleurs (MPRIS Rate) : la coche du menu suit
             speed = float(self.c.player.get("speed") or 1.0)
             text = next((s for s in SPEEDS if abs(float(s) - speed) < 1e-6), None)
@@ -1167,9 +1193,12 @@ class MainWindow(Adw.ApplicationWindow):
         if self.pip:                             # fermée en image dans l'image : la taille d'avant
             self.remember_pip()
             settings["window_width"], settings["window_height"] = self._pip_saved[:2]
-        elif not self.is_fullscreen() and not self.is_maximized():
-            settings["window_width"] = self.get_width()
-            settings["window_height"] = self.get_height()
+        else:
+            # taille d'avant la maximisation / le plein écran (GTK 4) ; get_width() perdait quelques
+            # pixels à chaque ouverture selon le gestionnaire de fenêtres
+            settings["window_width"], settings["window_height"] = self.get_default_size()
+        if self.get_visible():
+            settings["window_maximized"] = self._pip_saved[2] if self.pip else self.is_maximized()
         return False
 
     def teardown(self):

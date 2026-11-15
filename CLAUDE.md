@@ -16,7 +16,7 @@ tests, paquet.
 - Dialogues : de vraies fenêtres (`common.AlertDialog`, `common.DialogWindow`, `Adw.PreferencesWindow`,
   `Adw.AboutWindow`).
 - Chaque fonctionnalité facultative est dans `nausicaa/features.py` (click_pause, wheel_volume,
-  minimize_pause, resume, next_episodes, mpris, hwdec) et se consulte au moment de l'usage.
+  minimize_pause, resume, next_episodes, mpris, hwdec, auto_fullscreen) et se consulte au moment de l'usage.
 - Tout texte visible passe par `tr()` / `ntr()`. Après modification : `python3.12 tools/update-pot.py`,
   compléter `data/locale/en.po` et `de.po`, puis `msgfmt -c --statistics` et `msgcmp`.
 - Toute fonction passée à `idle_add` / `timeout_add` renvoie False (sauf répétition voulue).
@@ -98,6 +98,15 @@ tests, paquet.
   pause du clic annulée ; double-clic / Échap = retour (taille, maximisée, file d'avant). Taille enregistrée
   à la fermeture : celle d'avant (`_pip_saved`). Testé : `image_dans_l_image` d'ui_smoke (openbox, xprop).
   `tools/screenshot.py --pip` capture l'écran réel.
+- Plein écran à l'ouverture (fonctionnalité `auto_fullscreen`, coupée par défaut, idée de Tof, comme VLC) :
+  `open_paths(replace=True)` et « Reprendre » posent `_fs_pending` ; plein écran dès que la liste des pistes
+  est connue (`_auto_fullscreen`, événements video / tracks) s'il y a une vraie piste vidéo — une pochette de
+  MP3 / FLAC est une piste vidéo `albumart` pour mpv : ignorée. Ajout à la file, vidéo suivante : jamais (Échap
+  reste un choix). Testé : `plein_ecran_a_l_ouverture` d'ui_smoke (`media.sound_with_cover` : image faite à part,
+  une entrée lavfi « color » coupait le son à 0,05 s).
+- Fenêtre fermée maximisée : rouverte maximisée (`window_maximized`, `maximize()` avant l'affichage, comme
+  Odysseus / Calypso) ; taille = `get_default_size()` (celle d'avant la maximisation ; `get_width()` perdait
+  ~10 px à chaque ouverture sous openbox), aussi pour `_pip_saved`.
 - Temps restant / durée totale (clic sur la durée) : réglage `show_remaining`, retenu (0.1.8).
 - `backend/mpris.py` (repris d'Ithaca, demandé par Tof) : `org.mpris.MediaPlayer2.nausicaa`. Le casque
   Bluetooth passe par là : BlueZ relaie l'AVRCP (double tape = PlayPause, écouteurs retirés = Pause) au
