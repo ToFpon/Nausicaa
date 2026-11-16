@@ -28,6 +28,25 @@ def _choice(title: str, key: str, labels: list[str], values: list, subtitle: str
     return row
 
 
+def default_app_row(title: str, what: str, app_name: str) -> Adw.SwitchRow:
+    """Interrupteur « application par défaut » (defaultapp.py), comme celui d'Odysseus : l'état affiché est
+    celui du système ; grisé quand l'application tourne depuis les sources (pas de lanceur installé)."""
+    from .. import defaultapp
+    row = Adw.SwitchRow(title=title, active=defaultapp.is_default())
+    row.set_subtitle(what + "\n" + defaultapp.COMMAND)
+    row.set_subtitle_lines(0)
+    if not defaultapp.installed():
+        row.set_subtitle(row.get_subtitle() + "\n" + tr("{0} n'est pas installé (lancé depuis les sources)").format(app_name))
+        row.set_sensitive(False)
+        return row
+
+    def toggled(r, *_):
+        if r.get_active() != defaultapp.is_default() and not defaultapp.set_default(r.get_active()):
+            r.set_active(defaultapp.is_default())
+    row.connect("notify::active", toggled)
+    return row
+
+
 class PreferencesWindow(Adw.PreferencesWindow):
     def __init__(self):
         super().__init__(title=tr("Préférences"), search_enabled=False, default_width=620, default_height=620)
@@ -36,6 +55,11 @@ class PreferencesWindow(Adw.PreferencesWindow):
 
     def _general(self) -> Adw.PreferencesPage:
         page = Adw.PreferencesPage(title=tr("Général"), icon_name="preferences-system-symbolic", name="general")
+        system = Adw.PreferencesGroup()
+        system.add(default_app_row(tr("Lecteur vidéo par défaut"),
+                                    tr("Les vidéos s'ouvrent avec Nausicaa (la musique reste à Ithaca) ; coupé, l'application d'avant reprend la main."),
+                                    "Nausicaa"))
+        page.add(system)
         look = Adw.PreferencesGroup(title=tr("Apparence"))
         theme = _choice(tr("Style"), "theme", [tr("Comme le système"), tr("Clair"), tr("Sombre")],
                         ["system", "light", "dark"])

@@ -170,6 +170,14 @@ tests, paquet.
   - MPRIS : `Seeked` pour tout saut (événement « seeked » du contrôleur, reprise comprise), SetPosition hors
     [0, durée] ignoré, Fullscreen depuis l'image dans l'image par `toggle_fullscreen`, coche de vitesse suivie.
   - Laissé : file de plusieurs milliers d'éléments reconstruite d'un bloc (Gtk.ListBox, ~1,4 s pour 5000).
+- Application par défaut (Préférences → Général, demande de Tof, comme l'interrupteur d'Odysseus) : `defaultapp.py`
+  (même module dans Calypso, Nausicaa et Télémaque, seuls `TYPES` changent) — activé : `set_default_app` sur
+  chaque type (alias de mimeapps.list compris, lignes de « <bureau>-mimeapps.list » retirées, repris
+  d'Odysseus), application d'avant notée par type (`previous_defaults`) ; coupé : elle revient, sinon
+  `reset_type_associations` + nos lignes retirées. État = celui du système (`MAIN`). Grisé sans lanceur
+  installé (lancé depuis les sources). Testé : `test_defaultapp` (vrais mimeapps.list, processus à part : GIO
+  garde les dossiers XDG du premier usage ; lanceur copié avec Exec=true, GIO ignore un Exec introuvable).
+  Types : les VIDÉOS du lanceur seulement ; audio et listes de lecture restent à Ithaca (choix de Tof).
 
 ## Tests
 

@@ -114,7 +114,9 @@ msgstr "Title stored in the file"
 msgid ""
 "Afficher le titre que la vidéo porte en elle (« Série - S02E04 - Titre ») au "
 "lieu du nom du fichier, quand il en a un qui a du sens"
-msgstr "Show the title the video carries (“Series - S02E04 - Title”) instead of the file name, when it has one that makes sense"
+msgstr ""
+"Show the title the video carries (“Series - S02E04 - Title”) instead of the "
+"file name, when it has one that makes sense"
 
 #: nausicaa/features.py:49
 msgid "Plein écran à l'ouverture"
@@ -186,7 +188,7 @@ msgid "Pistes audio et sous-titres"
 msgstr "Audio tracks and subtitles"
 
 #: nausicaa/ui/controls.py:99 nausicaa/ui/playlist_panel.py:66
-#: nausicaa/ui/preferences.py:47
+#: nausicaa/ui/preferences.py:71
 msgid "File de lecture"
 msgstr "Play queue"
 
@@ -271,56 +273,68 @@ msgid_plural "{0} vidéos ajoutées à la file"
 msgstr[0] "{0} video added to the queue"
 msgstr[1] "{0} videos added to the queue"
 
-#: nausicaa/ui/preferences.py:40
+#: nausicaa/ui/preferences.py:64
 msgid "Style"
 msgstr "Style"
 
-#: nausicaa/ui/preferences.py:33 nausicaa/ui/shortcuts.py:39
+#: nausicaa/ui/preferences.py:52 nausicaa/ui/shortcuts.py:39
 #: nausicaa/ui/window.py:252
 msgid "Préférences"
 msgstr "Preferences"
 
-#: nausicaa/ui/preferences.py:38
+#: nausicaa/ui/preferences.py:57
 msgid "Général"
 msgstr "General"
 
-#: nausicaa/ui/preferences.py:39
+#: nausicaa/ui/preferences.py:59
+msgid "Lecteur vidéo par défaut"
+msgstr "Default video player"
+
+#: nausicaa/ui/preferences.py:60
+msgid ""
+"Les vidéos s'ouvrent avec Nausicaa (la musique reste à Ithaca) ; coupé, "
+"l'application d'avant reprend la main."
+msgstr ""
+"Videos open with Nausicaa (music stays with Ithaca); when off, the previous "
+"application takes over again."
+
+#: nausicaa/ui/preferences.py:63
 msgid "Apparence"
 msgstr "Appearance"
 
-#: nausicaa/ui/preferences.py:40 nausicaa/ui/preferences.py:45
+#: nausicaa/ui/preferences.py:64 nausicaa/ui/preferences.py:69
 msgid "Comme le système"
 msgstr "Follow the system"
 
-#: nausicaa/ui/preferences.py:40
+#: nausicaa/ui/preferences.py:64
 msgid "Clair"
 msgstr "Light"
 
-#: nausicaa/ui/preferences.py:40
+#: nausicaa/ui/preferences.py:64
 msgid "Sombre"
 msgstr "Dark"
 
-#: nausicaa/ui/preferences.py:45
+#: nausicaa/ui/preferences.py:69
 msgid "Langue"
 msgstr "Language"
 
-#: nausicaa/ui/preferences.py:46
+#: nausicaa/ui/preferences.py:70
 msgid "Appliquée au prochain démarrage"
 msgstr "Applied at the next start"
 
-#: nausicaa/ui/preferences.py:48
+#: nausicaa/ui/preferences.py:72
 msgid "Côté de la fenêtre où s'ouvre la file (F9)"
 msgstr "Side of the window where the queue opens (F9)"
 
-#: nausicaa/ui/preferences.py:50 nausicaa/ui/shortcuts.py:18
+#: nausicaa/ui/preferences.py:74 nausicaa/ui/shortcuts.py:18
 msgid "Lecture"
 msgstr "Playback"
 
-#: nausicaa/ui/preferences.py:51
+#: nausicaa/ui/preferences.py:75
 msgid "Volume maximal"
 msgstr "Maximum volume"
 
-#: nausicaa/ui/preferences.py:52
+#: nausicaa/ui/preferences.py:76
 msgid ""
 "Au-delà de 100 %, le son est amplifié (comme VLC) : utile pour une vidéo "
 "trop faible"
@@ -328,23 +342,23 @@ msgstr ""
 "Above 100 %, the sound is amplified (like VLC): useful for a video that is "
 "too quiet"
 
-#: nausicaa/ui/preferences.py:53
+#: nausicaa/ui/preferences.py:77
 msgid "Saut avec ← / →"
 msgstr "Jump with ← / →"
 
-#: nausicaa/ui/preferences.py:55
+#: nausicaa/ui/preferences.py:79
 msgid "Cran de molette"
 msgstr "Wheel step"
 
-#: nausicaa/ui/preferences.py:56
+#: nausicaa/ui/preferences.py:80
 msgid "Volume ajouté ou retiré à chaque cran de la molette"
 msgstr "Volume added or removed at each step of the wheel"
 
-#: nausicaa/ui/preferences.py:58
+#: nausicaa/ui/preferences.py:82
 msgid "Langues préférées"
 msgstr "Preferred languages"
 
-#: nausicaa/ui/preferences.py:59
+#: nausicaa/ui/preferences.py:83
 msgid ""
 "Codes de langue séparés par des virgules, dans l'ordre de préférence (par "
 "exemple « fr,fre,fra,en »). Vide : le choix du fichier."
@@ -352,35 +366,39 @@ msgstr ""
 "Language codes separated by commas, in order of preference (for instance “en,"
 "eng,fr”). Empty: the file's choice."
 
-#: nausicaa/ui/preferences.py:62 nausicaa/ui/window.py:1010
+#: nausicaa/ui/preferences.py:86 nausicaa/ui/window.py:1010
 msgid "Piste audio"
 msgstr "Audio track"
 
-#: nausicaa/ui/preferences.py:62 nausicaa/ui/window.py:1018
+#: nausicaa/ui/preferences.py:86 nausicaa/ui/window.py:1018
 #: nausicaa/ui/window.py:482
 msgid "Sous-titres"
 msgstr "Subtitles"
 
-#: nausicaa/ui/preferences.py:70
+#: nausicaa/ui/preferences.py:94
 msgid "Fonctionnalités"
 msgstr "Features"
 
-#: nausicaa/ui/preferences.py:72
+#: nausicaa/ui/preferences.py:96
 msgid ""
 "Chaque fonctionnalité s'active ou se coupe tout de suite, sans redémarrer "
 "Nausicaa"
 msgstr ""
 "Each feature is turned on or off right away, without restarting Nausicaa"
 
-#: nausicaa/ui/preferences.py:47
+#: nausicaa/ui/preferences.py:71
 msgid "À droite"
 msgstr "On the right"
 
-#: nausicaa/ui/preferences.py:47
+#: nausicaa/ui/preferences.py:71
 msgid "À gauche"
 msgstr "On the left"
 
-#: nausicaa/ui/preferences.py:54
+#: nausicaa/ui/preferences.py:39
+msgid "{0} n'est pas installé (lancé depuis les sources)"
+msgstr "{0} is not installed (running from the source code)"
+
+#: nausicaa/ui/preferences.py:78
 msgid "{0} seconde"
 msgid_plural "{0} secondes"
 msgstr[0] "{0} second"
