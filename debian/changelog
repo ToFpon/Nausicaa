@@ -1,3 +1,11 @@
+nausicaa (1.0.9~noble1) noble; urgency=medium
+
+  * Nouvel interrupteur dans Préférences → Général : « Lecteur vidéo par
+    défaut » (les vidéos seulement, la musique reste à Ithaca) ; coupé,
+    l'application d'avant revient.
+
+ -- Tof <nourpon@gmail.com>  Mon, 16 Nov 2026 16:18:39 +0000
+
 nausicaa (1.0.8~noble1) noble; urgency=medium
 
   * L'épisode suivant ne reste plus parfois en pause : il démarre tout
