@@ -50,6 +50,11 @@ FEATURES = [
             tr("Une vidéo ouverte (gestionnaire de fichiers, « Ouvrir », glisser) passe directement en plein "
                "écran, comme VLC ; pas un fichier audio, ni une vidéo ajoutée à la file"),
             "view-fullscreen-symbolic", default=False),
+    Feature("library", tr("Bibliothèque sur l'accueil"),
+            tr("L'accueil montre vos vidéos : à reprendre, séries (une affiche par série, ses saisons et ses "
+               "épisodes vus) et films. Dossiers choisis dans Préférences → Général ; affiches trouvées à côté "
+               "des vidéos ou tirées des vidéos elles-mêmes, sans Internet"),
+            "view-grid-symbolic", default=False),
     Feature("hwdec", tr("Décodage matériel"),
             tr("La carte graphique décode la vidéo quand elle le peut : moins de travail pour le processeur"),
             "video-display-symbolic"),

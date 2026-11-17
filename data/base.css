@@ -7,6 +7,16 @@
 .video-area > .welcome,
 .video-area > .audio-only { background: none; }
 
+/* Bibliothèque de l'accueil : affiches arrondies, fond discret tant que l'image n'est pas là */
+.library-card { padding: 6px; border-radius: 12px; }
+.library-card .poster { border-radius: 8px; background-color: alpha(currentColor, 0.08); }
+.library-card .poster progressbar { margin: 0 8px 8px 8px; }
+.library-card .poster progressbar trough,
+.library-card .poster progressbar progress { min-height: 4px; }
+.library-card .seen-badge { background-color: @accent_bg_color; color: @accent_fg_color; border-radius: 99px;
+                            padding: 4px; }
+.seen-mark { color: @accent_color; }
+
 /* Plein écran : commandes compactes, centrées, arrondies, flottant au-dessus de l'image. Fond = fond de
    fenêtre (opaque : lisible sur n'importe quelle image) + teinte des vues du thème posée dessus, comme
    les Propriétés d'Odysseus (le thème de Tof : view_bg_color = violet à 20 %, posé sur un fond sombre ;

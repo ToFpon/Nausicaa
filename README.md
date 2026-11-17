@@ -55,6 +55,13 @@ bin/nausicaa                # try it without installing
 - Optionally, **videos open straight in full screen**, like VLC (Preferences → Features).
 - The **title stored in the video** (“Series - S02E04 - Title”) is shown instead of the file name when it makes sense.
 
+**Library on the start page** (optional, Preferences → Features)
+- Your videos on the start page: **Continue watching**, **TV shows** (one poster per show) and **movies**.
+- Shows stored one folder per season (“Show season 1”, “Show season 2”… or “Show/Season 1”) are grouped
+  together; a show’s page lists its seasons with the **watched** episodes and a button to resume or play the next one.
+- Posters **without the Internet**: an image next to the videos (poster.jpg, folder.jpg, Movie-poster.jpg…), the
+  thumbnail GNOME already made, or a picture taken from the video; right-click to choose another one.
+
 **Picture in picture** (Ctrl+P)
 - The film shrinks to a **small borderless 16:9 window, always on top**, in the bottom-right corner of the screen.
 - Previous, play / pause, next and a way back **appear when the mouse passes over it**.
@@ -146,6 +153,13 @@ bin/nausicaa                # pour l'essayer sans l'installer
 - En option, **les vidéos s'ouvrent directement en plein écran**, comme dans VLC (Préférences → Fonctionnalités).
 - Le **titre enregistré dans la vidéo** (« Série - S02E04 - Titre ») s'affiche à la place du nom du fichier quand
   il a du sens.
+
+**Bibliothèque sur l'accueil** (en option, Préférences → Fonctionnalités)
+- Vos vidéos sur l'accueil : **à reprendre**, **séries** (une affiche par série) et **films**.
+- Les séries rangées par saison (« Série saison 1 », « Série saison 2 »… ou « Série/Saison 1 ») sont regroupées ;
+  la page d'une série montre ses saisons, les épisodes **vus**, et un bouton pour reprendre ou lire la suite.
+- Affiches **sans Internet** : image posée à côté des vidéos (poster.jpg, folder.jpg, Film-poster.jpg…), vignette
+  déjà faite par GNOME, ou image tirée de la vidéo ; clic droit pour en choisir une autre.
 
 **Image dans l'image** (Ctrl+P)
 - Le film devient une **petite fenêtre sans bordure, en 16:9, toujours au-dessus des autres**, en bas à droite de

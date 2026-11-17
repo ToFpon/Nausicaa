@@ -9,6 +9,7 @@ Options : --dark --size=LxH --delay=ms --welcome (page d'accueil) --playlist (fi
           --source=FILM [--episode=N] (six extraits d'une vraie vidéo au lieu des fractales ; pour le site :
           Big Buck Bunny, voir BBB_CUTS)
           --prefs=page (general, features) --css=FICHIER (couleurs d'un thème à imiter)
+          --library (accueil bibliothèque : vidéothèque de démonstration) [--show=NOM (page d'une série)]
 Vidéos d'exemple générées par ffmpeg (fractales), sortie son factice, configuration jetable.
 --fullscreen lance openbox et capture l'écran réel (`import -window root`) : la capture d'un widget
 peut rendre une image en retard pour la barre flottante.
@@ -18,6 +19,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TMP = tempfile.mkdtemp(prefix="nausicaa-shot-")
@@ -37,7 +39,6 @@ delay = int(opts.get("delay", 4000))
 WM = None
 SCREEN = "fullscreen" in opts or "pip" in opts       # capture de l'écran réel, gestionnaire de fenêtres
 if SCREEN and shutil.which("openbox"):
-    import time
     WM = subprocess.Popen(["openbox", "--sm-disable"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(0.5)
 
@@ -98,6 +99,53 @@ def demo_series() -> str:
     return os.path.join(folder, "Phaeacia - Episode 2 - The Stranger.mkv")
 
 
+def demo_library() -> str:
+    """Vidéothèque rangée comme chez Tof : « Série saison N » et films à la racine. Avec --source : extraits de
+    la vraie vidéo (affiches tirées de vraies images), sinon fractales."""
+    root = os.path.join(TMP, "Vidéos")
+    shows = [("Phaeacia saison 1", 3), ("Phaeacia saison 2", 2), ("Ithaque saison 1", 2)]
+    films = ["Le.Voyage.2019.1080p.BluRay.x264.mkv", "Calypso (2021).mkv", "Les Sirènes.mkv", "Charybde et Scylla.mkv"]
+    n = 0
+
+    def make(path, i):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        if opts.get("source"):
+            start = BBB_CUTS[i % len(BBB_CUTS)][0] + 6
+            cmd = ["ffmpeg", "-loglevel", "error", "-y", "-ss", str(start), "-i", opts["source"], "-t", "4",
+                   "-vf", "scale=640:-2", "-c:v", "libx264", "-preset", "veryfast", "-an", path]
+        else:
+            src = SOURCES[i % len(SOURCES)] + ":end_scale=0.0003"
+            cmd = ["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", src, "-t", "3",
+                   "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p", path]
+        subprocess.run(cmd, check=True)
+
+    for folder, count in shows:
+        name = folder.split(" saison")[0]
+        num = folder.rsplit(" ", 1)[1]
+        for e in range(1, count + 1):
+            make(os.path.join(root, folder, f"{name} S{int(num):02d}E{e:02d}.mkv"), n)
+            n += 1
+    for f in films:
+        make(os.path.join(root, f), n)
+        n += 1
+    return root
+
+
+def demo_history(win, root):
+    """Un épisode vu, un commencé, un film commencé : coches et barres d'avancement."""
+    from nausicaa.backend import positions
+    pos = app.controller.positions
+    now = int(time.time())
+    for rel, entry in (("Phaeacia saison 1/Phaeacia S01E01.mkv", {"pos": 0, "dur": 2700, "seen": True}),
+                       ("Phaeacia saison 1/Phaeacia S01E02.mkv", {"pos": 1500, "dur": 2700}),
+                       ("Calypso (2021).mkv", {"pos": 2400, "dur": 6300}),
+                       ("Les Sirènes.mkv", {"pos": 0, "dur": 5400, "seen": True})):
+        k = positions.key_for(os.path.join(root, rel))
+        if k:
+            pos.data[k] = dict(entry, time=now)
+            now -= 60
+
+
 def snap(win):
     def do():
         if SCREEN:
@@ -144,7 +192,23 @@ def on_ready(win):
     if "left" in opts:                          # file de lecture à gauche
         settings["playlist_side"] = "start"
     win.split.set_show_sidebar("playlist" in opts)
-    if "welcome" not in opts:
+    if "library" in opts:
+        root = demo_library()
+        demo_history(win, root)
+        settings["library_dirs"] = [root]
+        from nausicaa import features
+        features.set_enabled("library", True)
+        win._sync_page()
+        if opts.get("show"):
+            def show():
+                lib = win.library
+                if lib is None or not lib.lib.shows:
+                    return True
+                s = next((x for x in lib.lib.shows if x.name == opts["show"]), lib.lib.shows[0])
+                lib.open_show(s)
+                return False
+            GLib.timeout_add(1500, show)
+    elif "welcome" not in opts:
         first = demo_series()
         win.open_paths([first])
         # image arrêtée au même endroit à chaque capture : en pause sur une belle vue

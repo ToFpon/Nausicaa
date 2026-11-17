@@ -39,6 +39,10 @@ DEFAULTS: dict[str, Any] = {
     "pip_height": 0,
     "pip_x": -1,
     "pip_y": -1,        # à droite de la barre : temps restant (« -37:15 ») au lieu de la durée
+    # bibliothèque de l'accueil (fonctionnalité « library ») : dossiers lus ([] : le dossier Vidéos) et
+    # images choisies à la main ({chemin de la série / du film: image})
+    "library_dirs": [],
+    "library_images": {},
     "previous_defaults": {},        # application par défaut d'avant, par type (defaultapp.py)
     "features": {},                 # fonctionnalités activées / désactivées (voir features.py)
 }

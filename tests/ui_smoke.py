@@ -564,6 +564,94 @@ def reprendre_la_file(win):
           "accueil : « Reprendre » la dernière vidéo")
 
 
+@step
+def bibliotheque(win):
+    """Accueil « bibliothèque » (option) : séries rangées « Toto saison N », films à la racine, affiches tirées
+    des vidéos, page d'une série, épisode lu avec la série dans la file, vu / non vu, option coupée en direct."""
+    from nausicaa.backend import library
+    from nausicaa.ui.library import Card
+    root = os.path.join(TMP, "Vidéos")
+    for rel in ("Toto saison 1/Toto S01E01.mkv", "Toto saison 1/Toto S01E02.mkv", "Toto saison 2/Toto S02E01.mkv",
+                "Le.Film.2019.1080p.mkv"):
+        os.makedirs(os.path.dirname(os.path.join(root, rel)), exist_ok=True)
+        media.video(os.path.join(root, rel), 2)
+    settings["library_dirs"] = [root]
+    check(win.welcome_stack.get_visible_child_name() == "classic", "option coupée : accueil classique")
+    features.set_enabled("library", True)
+    lib = win.library
+    check(lib is not None and win.welcome_stack.get_visible_child_name() == "library",
+          "option activée : bibliothèque sur l'accueil, sans redémarrer")
+    yield Wait(10, until=lambda: lib.lib.shows and lib.lib.films)
+    check([s.name for s in lib.lib.shows] == ["Toto"] and len(lib.lib.shows[0].seasons) == 2,
+          "« Toto saison 1 » et « Toto saison 2 » : une série, deux saisons")
+    check([library.clean_title(p) for p in lib.lib.films] == ["Le Film (2019)"], "film à la racine, titre lisible")
+    titles = [w.get_label() for w in _all(lib, Gtk.Label) if "title-3" in w.get_css_classes()]
+    check(titles == [tr("Séries"), tr("Films")], f"sections ({titles})")
+    yield Wait(20, until=lambda: all(c.picture.get_visible() for cs in lib.cards.values() for c in cs))
+    check(all(c.picture.get_visible() for cs in lib.cards.values() for c in cs), "affiches tirées des vidéos")
+    show_card = lib.cards["show:toto"][0]
+    check(isinstance(show_card, Card), "carte de la série")
+    lib.card_menu(show_card, 20, 20)
+    yield pump(0.3)
+    pop = getattr(lib.get_visible_child(), "_nausicaa_popover", None)
+    check(pop is not None and pop.get_visible(), "clic droit : menu de la carte")
+    if pop is not None:
+        pop.popdown()
+    yield pump(0.2)
+    lib.refresh(force=True)                       # cartes reconstruites, menu gardé : pas de plantage
+    yield Wait(5, until=lambda: not lib._scanning)
+    yield pump(0.3)
+    show_card = lib.cards["show:toto"][0]
+    show_card.emit("clicked")
+    yield pump(0.3)
+    check(lib.get_visible_child_name() == "show", "clic : page de la série")
+    rows = [r for r in _all(lib.show_box, Gtk.Widget) if hasattr(r, "_path")]
+    check(len(rows) == 3, f"trois épisodes ({len(rows)})")
+    rows[1].emit("activated")
+    yield Wait(10, until=lambda: basename() == "Toto S01E02.mkv")
+    check(basename() == "Toto S01E02.mkv", "épisode lu")
+    check([os.path.basename(i.path) for i in c().queue.items] ==
+          ["Toto S01E01.mkv", "Toto S01E02.mkv", "Toto S02E01.mkv"], "toute la série dans la file, saisons comprises")
+    yield Wait(10, until=lambda: basename() == "Toto S02E01.mkv")
+    check(basename() == "Toto S02E01.mkv", "fin de saison 1 : la saison 2 suit")
+    c().stop()
+    yield pump(0.4)
+    check(win.picture.get_visible_child_name() == "welcome", "arrêt : retour à la bibliothèque")
+    yield Wait(5, until=lambda: lib.entries)
+    ep2 = os.path.join(root, "Toto saison 1", "Toto S01E02.mkv")
+    check(bool(lib.entries.get(ep2, {}).get("seen")), "épisode lu jusqu'au bout : vu")
+    lib._menu_path = ep2
+    lib._mark(False)
+    yield Wait(5, until=lambda: not lib.entries.get(ep2, {}).get("seen"))
+    check(not lib.entries.get(ep2, {}).get("seen"), "« Marquer comme non vu »")
+    lib._menu_path = ep2
+    lib._mark(True)
+    yield Wait(5, until=lambda: lib.entries.get(ep2, {}).get("seen"))
+    check(bool(lib.entries.get(ep2, {}).get("seen")), "« Marquer comme vu »")
+    film = lib.lib.films[0]
+    lib.play_film(film)
+    yield Wait(10, until=lambda: c().player.path == film)
+    check([i.path for i in c().queue.items] == [film], "film : lu seul (pas les autres vidéos du dossier)")
+    c().stop()
+    yield pump(0.3)
+    features.set_enabled("library", False)
+    check(win.welcome_stack.get_visible_child_name() == "classic", "option coupée : accueil classique, en direct")
+
+
+def _all(widget, cls):
+    out = []
+
+    def walk(w):
+        if isinstance(w, cls):
+            out.append(w)
+        ch = w.get_first_child()
+        while ch is not None:
+            walk(ch)
+            ch = ch.get_next_sibling()
+    walk(widget)
+    return out
+
+
 def on_window(_a, w):
     if not log:
         log.append("start")

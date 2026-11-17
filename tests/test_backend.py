@@ -91,6 +91,16 @@ class PositionsTest(unittest.TestCase):
         self.assertEqual(positions.Positions(os.path.join(TMP, "pos.json")).get(film), 40)
         self.assertTrue(pos.remember(film, 85, 90))            # fin : vue, oubliée
         self.assertEqual(pos.get(film), 0)
+        self.assertTrue(pos.entry(positions.key_for(film)).get("seen"), "vue")
+        self.assertTrue(pos.remember(film, 40, 90))            # revue en partie : reprise, toujours vue
+        self.assertEqual(pos.get(film), 40)
+        self.assertTrue(pos.entry(positions.key_for(film)).get("seen"))
+        self.assertEqual(pos.entry(positions.key_for(film)).get("dur"), 90)
+        pos.forget(film)                                        # « Depuis le début » : reste vue
+        self.assertEqual(pos.get(film), 0)
+        self.assertTrue(pos.entry(positions.key_for(film)).get("seen"))
+        pos.finished(LIB["e1"], 3)                              # clip court lu jusqu'au bout : vu aussi
+        self.assertTrue(pos.entry(positions.key_for(LIB["e1"])).get("seen"))
         self.assertFalse(pos.remember(LIB["e1"], 2, 3))        # clip court
         self.assertFalse(pos.remember("https://exemple/flux", 100, 1000))
 

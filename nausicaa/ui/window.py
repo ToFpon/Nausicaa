@@ -222,6 +222,29 @@ class MainWindow(Adw.ApplicationWindow):
         self.pip_leave.set_reveal_child(reveal and self.pip)
 
     def _build_welcome(self) -> Gtk.Widget:
+        """Accueil : la page classique, ou la bibliothèque (fonctionnalité « library », suivie en direct)."""
+        stack = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE, transition_duration=150)
+        stack.add_css_class("welcome")
+        stack.add_named(self._build_classic_welcome(), "classic")
+        self.library = None                      # LibraryView, créée la première fois qu'elle sert
+        self.welcome_stack = stack
+        return stack
+
+    def _sync_welcome(self):
+        """Page d'accueil affichée : bibliothèque (relue) si la fonctionnalité est active, sinon la classique."""
+        if features.enabled("library"):
+            if self.library is None:
+                from .library import LibraryView
+                self.library = LibraryView(self)
+                self.welcome_stack.add_named(self.library, "library")
+                self._sync_resume_button()
+            self.welcome_stack.set_visible_child_name("library")
+            if self.picture.get_visible_child_name() == "welcome":
+                self.library.refresh()
+        else:
+            self.welcome_stack.set_visible_child_name("classic")
+
+    def _build_classic_welcome(self) -> Gtk.Widget:
         page = Adw.StatusPage(icon_name=APP_ID, title=APP_NAME,
                               description=tr("Déposez des vidéos ici, ou ouvrez-les"))
         page.add_css_class("welcome")
@@ -399,14 +422,14 @@ class MainWindow(Adw.ApplicationWindow):
         self.picture_overlay.add_controller(target)
 
     # -- ouverture --------------------------------------------------------------------------
-    def open_paths(self, paths: list[str], replace: bool = True):
+    def open_paths(self, paths: list[str], replace: bool = True, start=None):
         def done(n):
             if not n:
                 toast(self, tr("Aucune vidéo trouvée"))
         if replace:
             self._want_fullscreen()
         self.video.when_ready(lambda: self._gl_failed() or
-                              self.c.open_paths(paths, replace=replace, on_done=done))
+                              self.c.open_paths(paths, replace=replace, on_done=done, start=start))
 
     def _want_fullscreen(self):
         """Ouverture par l'utilisateur : plein écran dès que la piste vidéo est connue (option, comme VLC).
@@ -1101,9 +1124,10 @@ class MainWindow(Adw.ApplicationWindow):
             name = "audio"
         else:
             name = "video"
+        self.picture.set_visible_child_name(name)
         if name == "welcome":
             self._sync_resume_button()
-        self.picture.set_visible_child_name(name)
+            self._sync_welcome()
         # accueil : pas de commandes de lecture (il n'y a rien à lire)
         if self.pip:
             pass                                 # image dans l'image : aucune barre
@@ -1121,12 +1145,17 @@ class MainWindow(Adw.ApplicationWindow):
             label = tr("Reprendre « {0} »").format(shown(title))
             if n > 1:
                 label += " " + ntr("(+ {0} autre)", "(+ {0} autres)", n - 1).format(n - 1)
-            self.resume_button.set_label(label)
-            self.resume_button.get_child().set_ellipsize(3)
-            self.resume_button.get_child().set_max_width_chars(48)
-            self.resume_button.set_visible(True)
+            for b in self._resume_buttons():
+                b.set_label(label)
+                b.get_child().set_ellipsize(3)
+                b.get_child().set_max_width_chars(48 if b is self.resume_button else 32)
+                b.set_visible(True)
         else:
-            self.resume_button.set_visible(False)
+            for b in self._resume_buttons():
+                b.set_visible(False)
+
+    def _resume_buttons(self) -> list:
+        return [self.resume_button] + ([self.library.resume_button] if self.library is not None else [])
 
     def _sync_item(self):
         item = self.c.item
@@ -1187,6 +1216,10 @@ class MainWindow(Adw.ApplicationWindow):
             self.controls.sync_volume()
         elif key == "playlist_side":
             self.split.set_sidebar_position(self._playlist_side())       # tout de suite, sans redémarrer
+        elif key == "features":
+            self._sync_welcome()                                          # bibliothèque activée / coupée
+        elif key in ("library_dirs", "library_images") and self.library is not None:
+            self.library.refresh(force=True)
 
     # -- fermeture -----------------------------------------------------------------------------
     def _on_close_request(self, *_):

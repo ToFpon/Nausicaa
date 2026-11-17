@@ -88,7 +88,57 @@ class PreferencesWindow(Adw.PreferencesWindow):
             row.connect("apply", lambda r, key=key: settings.__setitem__(key, r.get_text().strip()))
             langs.add(row)
         page.add(langs)
+        page.add(self._library_group())
         return page
+
+    def _library_group(self) -> Adw.PreferencesGroup:
+        """Dossiers de la bibliothèque de l'accueil (fonctionnalité « library ») ; aucun choisi : Vidéos."""
+        group = Adw.PreferencesGroup(title=tr("Bibliothèque"),
+                                     description=tr("Dossiers montrés sur l'accueil quand la fonctionnalité "
+                                                    "« Bibliothèque sur l'accueil » est active. Séries : un dossier "
+                                                    "par saison (« Série saison 1 »…) ou par série."))
+        add = Gtk.Button(icon_name="list-add-symbolic", tooltip_text=tr("Ajouter un dossier…"),
+                         css_classes=["flat"], valign=Gtk.Align.CENTER)
+        add.connect("clicked", lambda *_: self._add_library_dir())
+        group.set_header_suffix(add)
+        self.library_group = group
+        self._library_rows = []
+        self._fill_library_rows()
+        return group
+
+    def _fill_library_rows(self):
+        from ..backend import library
+        for row in self._library_rows:
+            self.library_group.remove(row)
+        self._library_rows = []
+        chosen = [d for d in settings["library_dirs"] if isinstance(d, str) and d]
+        for d in chosen or library.default_roots():
+            row = Adw.ActionRow(title=d, use_markup=False)
+            row.add_prefix(Gtk.Image(icon_name="folder-videos-symbolic"))
+            if chosen:
+                rm = Gtk.Button(icon_name="user-trash-symbolic", tooltip_text=tr("Retirer de la bibliothèque"),
+                                css_classes=["flat"], valign=Gtk.Align.CENTER)
+                rm.connect("clicked", lambda _b, d=d: self._remove_library_dir(d))
+                row.add_suffix(rm)
+            else:
+                row.set_subtitle(tr("Par défaut"))
+            self.library_group.add(row)
+            self._library_rows.append(row)
+
+    def _add_library_dir(self):
+        from ..backend import library
+        from .common import choose_folder
+        current = [d for d in settings["library_dirs"] if isinstance(d, str) and d] or library.default_roots()
+
+        def chosen(path):
+            if path and path not in current:
+                settings["library_dirs"] = current + [path]
+                self._fill_library_rows()
+        choose_folder(self, tr("Ajouter un dossier à la bibliothèque"), current[0] if current else "", chosen)
+
+    def _remove_library_dir(self, path):
+        settings["library_dirs"] = [d for d in settings["library_dirs"] if d != path]
+        self._fill_library_rows()
 
     def _features(self) -> Adw.PreferencesPage:
         page = Adw.PreferencesPage(title=tr("Fonctionnalités"), icon_name="application-x-addon-symbolic",

@@ -1,8 +1,10 @@
 """Positions de reprise : où on s'était arrêté dans chaque vidéo.
 
 Clé = chemin réel + taille (un fichier remplacé par un autre du même nom repart du début). Rien
-n'est retenu au tout début (moins de MIN_POSITION) ni à la fin (vidéo vue : entrée effacée). Les
-MAX_ENTRIES plus récentes sont gardées, dans ~/.local/share/nausicaa/positions.json.
+n'est retenu au tout début (moins de MIN_POSITION) ; à la fin, la vidéo est notée VUE (« seen »,
+position remise à 0) — la bibliothèque de l'accueil en fait une coche. La durée (« dur ») sert à sa
+barre d'avancement. Les MAX_ENTRIES plus récentes sont gardées, dans
+~/.local/share/nausicaa/positions.json.
 """
 
 from __future__ import annotations
@@ -20,7 +22,7 @@ MIN_POSITION = 15.0         # secondes : en deçà, on repart du début
 END_MARGIN = 0.05           # dernière partie (5 %, au moins END_SECONDS) : vidéo vue
 END_SECONDS = 20.0
 MIN_DURATION = 60.0         # clips courts : pas de reprise
-MAX_ENTRIES = 1000
+MAX_ENTRIES = 5000          # (vues comprises : une vidéothèque entière)
 
 
 def key_for(path: str) -> Optional[str]:
@@ -53,20 +55,51 @@ class Positions:
         entry = self.data.get(k) if k else None
         return float(entry["pos"]) if entry else 0.0
 
+    def entry(self, key: Optional[str]) -> dict:
+        """{pos, dur, seen, time} d'une clé (key_for), {} si rien n'est retenu."""
+        return dict(self.data.get(key) or {}) if key else {}
+
     def remember(self, path: str, position: float, duration: float) -> bool:
-        """Retient (ou efface) la position ; renvoie True si quelque chose a changé."""
+        """Retient (ou efface) la position ; renvoie True si quelque chose a changé. Passé la fin : vue."""
         k = key_for(path)
         if not k:
             return False
-        if (not duration or duration < MIN_DURATION or position < MIN_POSITION
-                or position > duration - max(END_SECONDS, duration * END_MARGIN)):
+        old = self.data.get(k)
+        if not duration or duration < MIN_DURATION:
+            if old and old.get("seen"):
+                return False                        # clip court déjà vu : il le reste
             return self.data.pop(k, None) is not None
-        self.data[k] = {"pos": round(position, 1), "time": int(time.time())}
+        if position > duration - max(END_SECONDS, duration * END_MARGIN):
+            self.data[k] = {"pos": 0, "dur": round(duration, 1), "seen": True, "time": int(time.time())}
+            return self.data[k] != old
+        if position < MIN_POSITION:
+            if old and old.get("seen"):
+                new = dict(old, pos=0)              # revue depuis le début : reste vue
+                self.data[k] = new
+                return new != old
+            return self.data.pop(k, None) is not None
+        self.data[k] = {"pos": round(position, 1), "dur": round(duration, 1), "time": int(time.time())}
+        if old and old.get("seen"):
+            self.data[k]["seen"] = True
         return True
 
-    def forget(self, path: str):
+    def finished(self, path: str, duration: float = 0.0):
+        """Vidéo lue jusqu'au bout : position oubliée, notée vue (clips courts compris)."""
         k = key_for(path)
         if k:
+            old = self.data.get(k) or {}
+            self.data[k] = {"pos": 0, "dur": round(duration or old.get("dur", 0), 1), "seen": True,
+                            "time": int(time.time())}
+
+    def forget(self, path: str):
+        """« Depuis le début » : position oubliée (une vidéo vue le reste)."""
+        k = key_for(path)
+        if not k:
+            return
+        old = self.data.get(k)
+        if old and old.get("seen"):
+            self.data[k] = dict(old, pos=0)
+        else:
             self.data.pop(k, None)
 
     def save(self):

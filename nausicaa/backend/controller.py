@@ -90,13 +90,14 @@ class Controller:
 
     # -- ouverture --------------------------------------------------------------------------
     def open_paths(self, paths: list[str], replace: bool = True, play: bool = True,
-                   on_done: Optional[Callable] = None):
+                   on_done: Optional[Callable] = None, start: Optional[str] = None):
         """Ouvre fichiers, dossiers, listes de lecture, adresses (lus dans un fil).
 
         replace : la file est remplacée (ouvrir) ; sinon ajout à la fin (« Ajouter à la file »).
         Une seule vidéo ouverte, « Épisodes suivants » actif : les vidéos de son dossier viennent
-        avec elle, la lecture commence par elle."""
-        siblings = (replace and len(paths) == 1 and os.path.isfile(paths[0]) and media.is_media(paths[0])
+        avec elle, la lecture commence par elle. start (bibliothèque) : la file est exactement `paths`
+        et la lecture commence par `start` (un film seul, ou une série à partir d'un épisode)."""
+        siblings = (start is None and replace and len(paths) == 1 and os.path.isfile(paths[0]) and media.is_media(paths[0])
                     and features.enabled("next_episodes"))
         self.loading += 1
         self._emit("loading")
@@ -115,6 +116,8 @@ class Controller:
                 else:
                     found = media.expand(paths, titles)
                     first = found[0] if found else None
+                    if start is not None and os.path.abspath(start) in found:
+                        first = os.path.abspath(start)
             except Exception:  # noqa: BLE001 — liste illisible, nom impossible : rien d'ouvert, mais on le dit
                 import traceback
                 traceback.print_exc()
@@ -383,7 +386,7 @@ class Controller:
             return
         self._ended_path = path
         if self.item is not None:
-            self.positions.forget(self.item.path)
+            self.positions.finished(self.item.path, self.player.duration() or 0.0)
             self.positions.save()
         if self.queue.repeat == "one":
             self.player.set_paused(False)

@@ -16,7 +16,7 @@ tests, paquet.
 - Dialogues : de vraies fenêtres (`common.AlertDialog`, `common.DialogWindow`, `Adw.PreferencesWindow`,
   `Adw.AboutWindow`).
 - Chaque fonctionnalité facultative est dans `nausicaa/features.py` (click_pause, wheel_volume,
-  minimize_pause, resume, next_episodes, mpris, hwdec, auto_fullscreen, file_titles) et se consulte au moment de l'usage.
+  minimize_pause, resume, next_episodes, mpris, hwdec, auto_fullscreen, file_titles, library) et se consulte au moment de l'usage.
 - Tout texte visible passe par `tr()` / `ntr()`. Après modification : `python3.12 tools/update-pot.py`,
   compléter `data/locale/en.po` et `de.po`, puis `msgfmt -c --statistics` et `msgcmp`.
 - Toute fonction passée à `idle_add` / `timeout_add` renvoie False (sauf répétition voulue).
@@ -115,6 +115,26 @@ tests, paquet.
   (gardé sur l'élément une fois lu), MPRIS, page « son seul ». Écartés (signatures de rippeurs) : nom du
   fichier lui-même, « www. », http, « Encoded by »…, un mot finissant en .com / .to / .org…, < 2 ou > 200
   caractères. Coupée : nom du fichier, en direct (événement « title »). Testé : `TagTitleTest`.
+- Bibliothèque sur l'accueil (fonctionnalité `library`, COUPÉE par défaut, idée de Tof ; v1 sans Internet) :
+  `backend/library.py` (pur, testé `test_library`) lit les dossiers `library_dirs` ([] = Vidéos de xdg-user-dirs)
+  dans un fil à chaque retour sur l'accueil : films = vidéos à la racine, seules dans leur dossier, ou dans un
+  dossier qui n'a pas l'air d'une série ; séries = « Toto saison 1 », « Toto saison 2 » (rangement de Tof)
+  regroupées sans casse, aussi « Toto/Saison 1 », « Season 02 », « S03 », « Staffel », ou dossier d'épisodes
+  (S01E02, 1x02, « Épisode », numéros) ; ordre naturel ; `clean_title` (« Film.2019.1080p… » → « Film (2019) »,
+  dernière année gardée : « Blade Runner 2049 (2017) »). Affiches `backend/posters.py` : image choisie
+  (`library_images`), image posée à côté (poster / folder / cover / front, « Film-poster.jpg »), vignette
+  freedesktop de GNOME, sinon image à 20 % tirée par la LIBMPV (vo=image, frames=1 : 0,1 s, aucune dépendance
+  de plus) ; recadrée 2:3 300 × 450, cache ~/.cache/nausicaa/posters ; un fil (`PosterWorker`, la plus récente
+  d'abord, `cancel_all` à chaque relecture). Vu / durée : `positions.py` garde maintenant `dur` et `seen` (fin
+  de lecture → `finished`, « Depuis le début » garde « vu », 5000 entrées). `ui/library.py` : Gtk.Stack
+  (ensemble / page d'une série), sections Reprendre / Séries / Films (Gtk.FlowBox de `Card` : Gtk.Picture
+  COVER dans un Adw.Clamp — sinon le Picture demandait la largeur de l'image et la grille s'étirait), page d'une
+  série par saison (Adw.PreferencesGroup), « Reprendre / Lire SxxEyy » (`next_episode`). Lecture : film seul
+  (`open_paths(start=)`, pas les autres films du dossier), épisode = toute la série dans la file à partir de lui.
+  Clic droit : choisir une image / image d'origine / vu - non vu ; UN menu posé sur la page (cartes reconstruites
+  à chaque relecture : un menu détruit après fermeture plantait GTK 4.14). Accueil = Gtk.Stack classique /
+  bibliothèque (`_sync_welcome`, en direct). Préférences → Général → Bibliothèque : dossiers. Testé :
+  `test_library`, `bibliotheque` d'ui_smoke ; capture `tools/screenshot.py --library [--show=NOM]`.
 - Fenêtre fermée maximisée : rouverte maximisée (`window_maximized`, `maximize()` avant l'affichage, comme
   Odysseus / Calypso) ; taille = `get_default_size()` (celle d'avant la maximisation ; `get_width()` perdait
   ~10 px à chaque ouverture sous openbox), aussi pour `_pip_saved`.
