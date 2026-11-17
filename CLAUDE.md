@@ -193,6 +193,8 @@ tests, paquet.
   sans le raccourci de GTK (`set_accels_for_action` réduit à F1 : le filet seul).
   La fenêtre se cite elle-même (« Raccourcis clavier », 1.0.3) et tient sur UNE page (`max-height` 16) :
   sur deux pages, les boutons « 1 / 2 » de GTK 4.14 écrivent « GtkLabel reported min width -4 » (vu chez Tof).
+- « À propos » : remerciements à Ponce De Leon (https://forum.zorin.com/u/Ponce-De-Leon, testeur de Tof, comme Odysseus) et
+  TMDB (section « Affiches », plus la mention légale exigée par TMDB).
 - `app.py` : instance unique, HANDLES_OPEN + ligne de commande (`--enqueue`), fermer = quitter,
   inhibition IDLE | SUSPEND pendant la lecture.
 - Audit de novembre 2026 (3 agents, corrigé, tests dans test_backend / test_mpris) :
