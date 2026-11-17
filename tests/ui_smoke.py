@@ -603,6 +603,11 @@ def bibliotheque(win):
     yield pump(0.3)
     check(lib._last_popover is not pop and lib._last_popover.get_visible(),
           "autre forme de menu : son propre menu (pas la hauteur de l'autre, vu tronqué chez Tof)")
+    sws = [w for w in _all(lib._last_popover, Gtk.ScrolledWindow)]
+    adj = sws[0].get_vadjustment() if sws else None
+    check(adj is not None and adj.get_page_size() >= adj.get_upper() - 0.5,
+          f"menu en entier, sans défilement ({adj.get_page_size() if adj else '?'} / {adj.get_upper() if adj else '?'} ; "
+          "accroché au Gtk.ScrolledWindow, GTK 4.14 le tronquait)")
     lib._last_popover.popdown()
     lib.card_menu(show_card, 20, 20)
     yield pump(0.3)

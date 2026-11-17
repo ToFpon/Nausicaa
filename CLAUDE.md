@@ -142,10 +142,14 @@ tests, paquet.
   une bibliothèque, choix de Tof) : petite croix au survol / au focus clavier comme les récents de Calypso
   (`_with_close` : Gtk.Overlay carte + croix, pas de bouton dans le bouton) et entrée du clic droit ; toast
   « Annuler ». `positions.hide` : drapeau `hidden`, la POSITION RESTE (la reprise marche) ; regardée de nouveau,
-  la vidéo revient (remember écrit une entrée neuve). Menus de la page : UN PAR FORME (`_popup`, clé = entrées
-  du Gio.Menu, `_labels`), gardés, jamais détruits, détachés à l'unrealize de la page — un seul menu réutilisé
-  avec plus d'entrées gardait la hauteur d'avant sous un vrai gestionnaire de fenêtres (tronqué + barre de
-  défilement, vu chez Tof ; pas reproduit sous Xvfb).
+  la vidéo revient (remember écrit une entrée neuve). Menus de la page : un par forme (`_popup`, clé = entrées
+  du Gio.Menu, `_labels`), gardés, jamais détruits, détachés à l'unrealize. PIÈGE GTK 4.14 (menu tronqué avec
+  barre de défilement, vu chez Tof, deux fois) : un Gtk.PopoverMenu accroché à la FENÊTRE, à un Gtk.Stack ou à
+  un Gtk.ScrolledWindow reçoit une hauteur trop petite (sous un vrai gestionnaire de fenêtres : openbox ; 108 px
+  pour 134) ; accroché à un widget À L'INTÉRIEUR de la zone défilante, il a sa taille. Ancres : `home_anchor`
+  (boîte de la page d'ensemble), `show_anchor` (boîte stable autour de `show_box`, qui est vidée à chaque série :
+  jamais un menu dans une boîte vidée par clear_box). Testé : « menu en entier » d'ui_smoke (échoue sur l'ancien
+  code). Menus de l'image (Overlay) et de la file (ListBox) : entiers.
 - Affiches de TMDB (fonctionnalité `tmdb`, coupée par défaut, demande de Tof) : `backend/tmdb.py`, avec la clé
   de L'UTILISATEUR (choix de Tof : rien lié à un compte de l'application ; réglage `tmdb_key`, Préférences →
   Général → « Affiches de TMDB », Adw.PasswordEntryRow + lien vers la page des clés). Clé v3 (api_key=) ou jeton

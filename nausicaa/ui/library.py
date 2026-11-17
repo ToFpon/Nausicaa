@@ -174,6 +174,7 @@ class LibraryView(Gtk.Stack):
                                    width_request=32, height_request=32)
         box.append(self.loading)
         clamp.set_child(box)
+        self.home_anchor = box                 # les menus de la page s'accrochent ici (voir _popup)
         scroller.set_child(clamp)
         self.home_scroller = scroller
         self.add_named(scroller, "home")
@@ -183,7 +184,10 @@ class LibraryView(Gtk.Stack):
         clamp = Adw.Clamp(maximum_size=900)
         self.show_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=24, margin_top=18,
                                 margin_bottom=36, margin_start=24, margin_end=24)
-        clamp.set_child(self.show_box)
+        # show_box est vidée à chaque série affichée : les menus s'accrochent à une boîte qui l'entoure
+        self.show_anchor = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.show_anchor.append(self.show_box)
+        clamp.set_child(self.show_anchor)
         scroller.set_child(clamp)
         self.show_scroller = scroller
         self.add_named(scroller, "show")
@@ -528,8 +532,11 @@ class LibraryView(Gtk.Stack):
         """Menus posés sur la page (jamais sur une carte : elles sont reconstruites à chaque lecture, un menu
         détruit juste après sa fermeture plantait GTK 4.14). UN menu PAR FORME (liste de ses entrées), gardé et
         réutilisé : un seul menu pour tout, rouvert avec plus d'entrées, gardait la hauteur de la fois d'avant
-        sous un vrai gestionnaire de fenêtres — tronqué, avec une barre de défilement (vu chez Tof)."""
-        anchor = self.get_visible_child()
+        sous un vrai gestionnaire de fenêtres."""
+        # accroché DANS la page défilante : accroché à la fenêtre, au Gtk.Stack ou au Gtk.ScrolledWindow, GTK 4.14
+        # donnait au menu une hauteur trop petite (tronqué, barre de défilement — vu chez Tof ; reproduit sous
+        # openbox avec un programme de dix lignes : 108 px pour 134 de contenu)
+        anchor = self.home_anchor if self.get_visible_child_name() == "home" else self.show_anchor
         ok = widget.translate_coordinates(anchor, x, y)
         px, py = (ok[1], ok[2]) if isinstance(ok, tuple) and len(ok) == 3 else (ok if ok else (x, y))
         shape = (anchor, _labels(menu))
