@@ -11,6 +11,10 @@
 |---|---|
 | ![Full screen](docs/captures/plein-ecran.png) | ![Picture in picture](docs/captures/image-dans-l-image.png) |
 
+| Library / Bibliothèque (1.1) |
+|---|
+| ![Library](docs/captures/bibliotheque.png) |
+
 | Light theme / Thème clair | Features / Fonctionnalités | Welcome / Accueil |
 |---|---|---|
 | ![Light](docs/captures/clair.png) | ![Features](docs/captures/fonctionnalites.png) | ![Welcome](docs/captures/accueil.png) |

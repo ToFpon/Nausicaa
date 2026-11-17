@@ -1,3 +1,17 @@
+nausicaa (1.1.0~noble1) noble; urgency=medium
+
+  * Nouvelle bibliothèque sur l'accueil (en option) : vidéos à reprendre,
+    séries (une affiche par série, saisons « Série saison 1 », « Série
+    saison 2 »… regroupées, épisodes vus) et films.
+  * Affiches sans Internet : image posée à côté des vidéos, vignette de
+    GNOME ou image tirée de la vidéo ; clic droit pour en choisir une
+    autre ou marquer une vidéo comme vue.
+  * En option, affiches de TMDB (themoviedb.org) dans votre langue, avec
+    votre propre clé d'API gratuite.
+  * Les vidéos lues jusqu'au bout sont maintenant retenues comme vues.
+
+ -- Tof <nourpon@gmail.com>  Tue, 17 Nov 2026 11:57:52 +0000
+
 nausicaa (1.0.9~noble1) noble; urgency=medium
 
   * Nouvel interrupteur dans Préférences → Général : « Lecteur vidéo par
