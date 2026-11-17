@@ -593,10 +593,21 @@ def bibliotheque(win):
     check(isinstance(show_card, Card), "carte de la série")
     lib.card_menu(show_card, 20, 20)
     yield pump(0.3)
-    pop = getattr(lib.get_visible_child(), "_nausicaa_popover", None)
+    pop = lib._last_popover
     check(pop is not None and pop.get_visible(), "clic droit : menu de la carte")
     if pop is not None:
         pop.popdown()
+    yield pump(0.2)
+    film_card = next(c for k, cs in lib.cards.items() if not k.startswith("show:") for c in cs)
+    lib.card_menu(film_card, 20, 20)
+    yield pump(0.3)
+    check(lib._last_popover is not pop and lib._last_popover.get_visible(),
+          "autre forme de menu : son propre menu (pas la hauteur de l'autre, vu tronqué chez Tof)")
+    lib._last_popover.popdown()
+    lib.card_menu(show_card, 20, 20)
+    yield pump(0.3)
+    check(lib._last_popover is pop, "même forme : le même menu, réutilisé (jamais détruit)")
+    pop.popdown()
     yield pump(0.2)
     lib.refresh(force=True)                       # cartes reconstruites, menu gardé : pas de plantage
     yield Wait(5, until=lambda: not lib._scanning)
@@ -628,6 +639,28 @@ def bibliotheque(win):
     lib._mark(True)
     yield Wait(5, until=lambda: lib.entries.get(ep2, {}).get("seen"))
     check(bool(lib.entries.get(ep2, {}).get("seen")), "« Marquer comme vu »")
+    # « Reprendre » : croix au survol / « Retirer de Reprendre », sans perdre la position
+    epr = os.path.join(root, "Toto saison 1", "Toto S01E01.mkv")
+    c().positions.data[__import__("nausicaa.backend.positions", fromlist=["x"]).key_for(epr)] = \
+        {"pos": 120, "dur": 1800, "time": int(time.time())}
+    lib.refresh(force=True)
+    yield Wait(5, until=lambda: any(getattr(c_, "resume_path", None) == epr for cs in lib.cards.values() for c_ in cs))
+    tiles = [w for w in _all(lib, Gtk.Overlay) if hasattr(w, "close")]
+    check(len(tiles) == 1 and tiles[0].close.get_opacity() == 0, "« Reprendre » : croix cachée tant qu'on ne survole pas")
+    tiles[0].close.emit("clicked")
+    yield pump(0.3)
+    check(not [w for w in _all(lib, Gtk.Overlay) if hasattr(w, "close")], "croix : retirée de « Reprendre »")
+    check(c().positions.get(epr) == 120, "… sans perdre la position (la reprise marche toujours)")
+    c().positions.hide(epr, False)
+    lib.refresh(force=True)
+    yield Wait(5, until=lambda: [w for w in _all(lib, Gtk.Overlay) if hasattr(w, "close")])
+    card = [w for w in _all(lib, Gtk.Overlay) if hasattr(w, "close")][0].get_child()
+    lib.card_menu(card, 20, 20)
+    yield pump(0.3)
+    lib._last_popover.popdown()
+    lib.activate_action("library.hide-resume", None)
+    yield pump(0.3)
+    check(not [w for w in _all(lib, Gtk.Overlay) if hasattr(w, "close")], "clic droit « Retirer de Reprendre »")
     film = lib.lib.films[0]
     lib.play_film(film)
     yield Wait(10, until=lambda: c().player.path == film)

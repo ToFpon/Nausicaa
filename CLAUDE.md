@@ -138,6 +138,14 @@ tests, paquet.
   Saisons regroupées par `library.name_key` (casse ET ponctuation ignorées : « Hunting : Chasseurs » et
   « Hunting - Chasseurs », vu chez Tof). Positions d'avant cette version : pas de durée → rien d'affiché (pas de
   « presque fini » faux). Relecture demandée pendant une autre : refaite à la fin (`_again`), jamais perdue.
+  « Retirer de Reprendre » (demande d'un utilisateur, validée par Tof ; PAS d'interrupteurs par section : c'est
+  une bibliothèque, choix de Tof) : petite croix au survol / au focus clavier comme les récents de Calypso
+  (`_with_close` : Gtk.Overlay carte + croix, pas de bouton dans le bouton) et entrée du clic droit ; toast
+  « Annuler ». `positions.hide` : drapeau `hidden`, la POSITION RESTE (la reprise marche) ; regardée de nouveau,
+  la vidéo revient (remember écrit une entrée neuve). Menus de la page : UN PAR FORME (`_popup`, clé = entrées
+  du Gio.Menu, `_labels`), gardés, jamais détruits, détachés à l'unrealize de la page — un seul menu réutilisé
+  avec plus d'entrées gardait la hauteur d'avant sous un vrai gestionnaire de fenêtres (tronqué + barre de
+  défilement, vu chez Tof ; pas reproduit sous Xvfb).
 - Affiches de TMDB (fonctionnalité `tmdb`, coupée par défaut, demande de Tof) : `backend/tmdb.py`, avec la clé
   de L'UTILISATEUR (choix de Tof : rien lié à un compte de l'application ; réglage `tmdb_key`, Préférences →
   Général → « Affiches de TMDB », Adw.PasswordEntryRow + lien vers la page des clés). Clé v3 (api_key=) ou jeton

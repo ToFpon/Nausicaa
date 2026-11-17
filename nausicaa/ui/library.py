@@ -13,14 +13,14 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gio, GLib, Gtk  # noqa: E402
+from gi.repository import Adw, Gdk, Gio, GLib, Gtk  # noqa: E402
 
 from .. import features  # noqa: E402
 from .. import format as fmt  # noqa: E402
 from ..backend import library, positions, posters, tmdb  # noqa: E402
 from ..i18n import current_language, ntr, tr  # noqa: E402
 from ..settings import settings  # noqa: E402
-from .common import choose_files, clear_box, popup_menu, shown, toast  # noqa: E402
+from .common import choose_files, clear_box, shown, toast  # noqa: E402
 
 CARD_W, CARD_H = 150, 225
 RESUME_MAX = 12
@@ -98,6 +98,19 @@ class Card(Gtk.Button):
             self.holder.set_visible_child(self.picture)
 
 
+def _labels(menu) -> tuple:
+    """Entrées d'un Gio.Menu (sections comprises), pour reconnaître sa forme."""
+    out = []
+    for i in range(menu.get_n_items()):
+        sec = menu.get_item_link(i, "section")
+        if sec is not None:
+            out.append(_labels(sec))
+        else:
+            v = menu.get_item_attribute_value(i, "label", None)
+            out.append(v.get_string() if v is not None else "")
+    return tuple(out)
+
+
 def _flow() -> Gtk.FlowBox:
     return Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, homogeneous=True, column_spacing=12,
                        row_spacing=18, min_children_per_line=2, max_children_per_line=12,
@@ -125,6 +138,8 @@ class LibraryView(Gtk.Stack):
         self.worker = posters.PosterWorker()
         self.cards: dict = {}              # clé → [Card…] affichées
         self._menu_card = None
+        self._popovers: dict = {}          # (page, entrées) → Gtk.PopoverMenu, jamais détruits
+        self._last_popover = None
         self._build_home()
         self._build_show_page()
         self._install_actions()
@@ -176,6 +191,7 @@ class LibraryView(Gtk.Stack):
     def _install_actions(self):
         group = Gio.SimpleActionGroup()
         for name, cb in (("choose-image", self._choose_image), ("forget-image", self._forget_image),
+                         ("hide-resume", lambda: self.hide_resume(getattr(self, "_resume_menu_path", ""))),
                          ("mark-seen", lambda: self._mark(True)), ("mark-unseen", lambda: self._mark(False))):
             a = Gio.SimpleAction.new(name, None)
             a.connect("activate", lambda _a, _p, cb=cb: cb())
@@ -258,7 +274,7 @@ class LibraryView(Gtk.Stack):
             self.empty.set_description(shown("\n".join(dirs)) if dirs else tr("Aucun dossier choisi"))
         show_of = {e: s for s in lib.shows for e in s.episodes}
         # à reprendre : commencées, les plus récentes d'abord
-        started = sorted((p for p, e in self.entries.items() if float(e.get("pos") or 0) > 0),
+        started = sorted((p for p, e in self.entries.items() if float(e.get("pos") or 0) > 0 and not e.get("hidden")),
                          key=lambda p: self.entries[p].get("time", 0), reverse=True)[:RESUME_MAX]
         if started:
             flow = _flow()
@@ -274,7 +290,8 @@ class LibraryView(Gtk.Stack):
                     card = self._card(p, library.clean_title(p), remaining_text(e), self._progress(e),
                                       poster=("film", p))
                     card.connect("clicked", lambda _b, path=p: self.play_film(path))
-                flow.append(card)
+                card.resume_path = p
+                flow.append(self._with_close(card, p))
             self._section(tr("Reprendre"), flow)
         if lib.shows:
             flow = _flow()
@@ -297,6 +314,40 @@ class LibraryView(Gtk.Stack):
                 card.connect("clicked", lambda _b, path=p: self.play_film(path))
                 flow.append(card)
             self._section(tr("Films"), flow)
+
+    def _with_close(self, card: Card, path: str) -> Gtk.Overlay:
+        """Petite croix au survol (et au focus clavier), comme les récents de Calypso : « Retirer de
+        Reprendre ». Pas de bouton dans le bouton : la carte et la croix sont posées dans un Gtk.Overlay."""
+        tile = Gtk.Overlay(child=card, halign=Gtk.Align.START, valign=Gtk.Align.START)
+        close = Gtk.Button(icon_name="window-close-symbolic", tooltip_text=tr("Retirer de « Reprendre »"),
+                           halign=Gtk.Align.END, valign=Gtk.Align.START, margin_top=12, margin_end=12,
+                           css_classes=["circular", "osd", "resume-remove"])
+        close.set_opacity(0)
+        close.connect("clicked", lambda *_: self.hide_resume(path))
+        tile.add_overlay(close)
+        tile.close = close
+        for ctl in (Gtk.EventControllerMotion(), Gtk.EventControllerFocus()):
+            ctl.connect("enter", lambda *_: close.set_opacity(1))
+            ctl.connect("leave", lambda *_: close.set_opacity(0))
+            tile.add_controller(ctl)
+        return tile
+
+    def hide_resume(self, path: str):
+        """Hors de « Reprendre », sans rien effacer : la reprise reste, « Annuler » la remet."""
+        pos = self.win.c.positions
+        if not pos.hide(path):
+            return
+        pos.save()
+        self.entries.get(path, {})["hidden"] = True
+        self._render_home(roots())
+        name = library.clean_title(path)
+
+        def undo():
+            if pos.hide(path, False):
+                pos.save()
+                self.entries.get(path, {}).pop("hidden", None)
+                self._render_home(roots())
+        toast(self.win, tr("« {0} » retiré de « Reprendre »").format(name), tr("Annuler"), undo)
 
     def _card(self, key, title, subtitle="", progress=0.0, seen=False, poster=None) -> Card:
         card = Card(self, key, title, subtitle, progress, seen)
@@ -453,6 +504,11 @@ class LibraryView(Gtk.Stack):
         menu.append_section(None, images)
         if self._menu_path:
             menu.append_section(None, self._seen_menu(self._menu_path))
+        if getattr(card, "resume_path", None):
+            self._resume_menu_path = card.resume_path
+            resume = Gio.Menu()
+            resume.append(tr("Retirer de « Reprendre »"), "library.hide-resume")
+            menu.append_section(None, resume)
         self._popup(card, menu, x, y)
 
     def row_menu(self, row, x, y):
@@ -469,12 +525,38 @@ class LibraryView(Gtk.Stack):
         return m
 
     def _popup(self, widget, menu, x, y):
-        """Un seul menu, posé sur la page (jamais sur une carte : elles sont reconstruites à chaque lecture,
-        un menu détruit juste après sa fermeture plantait GTK 4.14)."""
+        """Menus posés sur la page (jamais sur une carte : elles sont reconstruites à chaque lecture, un menu
+        détruit juste après sa fermeture plantait GTK 4.14). UN menu PAR FORME (liste de ses entrées), gardé et
+        réutilisé : un seul menu pour tout, rouvert avec plus d'entrées, gardait la hauteur de la fois d'avant
+        sous un vrai gestionnaire de fenêtres — tronqué, avec une barre de défilement (vu chez Tof)."""
         anchor = self.get_visible_child()
         ok = widget.translate_coordinates(anchor, x, y)
         px, py = (ok[1], ok[2]) if isinstance(ok, tuple) and len(ok) == 3 else (ok if ok else (x, y))
-        popup_menu(anchor, menu, px, py)
+        shape = (anchor, _labels(menu))
+        pop = self._popovers.get(shape)
+        if pop is None or pop.get_parent() is not anchor:
+            if not any(k[0] is anchor for k in self._popovers):
+                anchor.connect("unrealize", self._drop_popovers)
+            pop = Gtk.PopoverMenu.new_from_model(menu)
+            pop.set_parent(anchor)
+            pop.set_has_arrow(False)
+            pop.set_halign(Gtk.Align.START)
+            self._popovers[shape] = pop
+        else:
+            pop.set_menu_model(menu)
+        r = Gdk.Rectangle()
+        r.x, r.y, r.width, r.height = int(px), int(py), 1, 1
+        pop.set_pointing_to(r)
+        pop.popup()
+        self._last_popover = pop
+
+    def _drop_popovers(self, anchor):
+        """Page retirée (fenêtre fermée) : ses menus détachés avec elle (sinon GTK signale un enfant encore
+        attaché quand il libère la page)."""
+        for shape in [k for k in self._popovers if k[0] is anchor]:
+            pop = self._popovers.pop(shape)
+            if pop.get_parent() is not None:
+                pop.unparent()
 
     def _choose_image(self):
         card = self._menu_card

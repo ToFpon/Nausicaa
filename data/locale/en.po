@@ -241,11 +241,15 @@ msgstr "Pause"
 msgid "presque fini"
 msgstr "almost done"
 
-#: nausicaa/ui/library.py:450
+#: nausicaa/ui/library.py:350 nausicaa/ui/window.py:506
+msgid "Annuler"
+msgstr "Cancel"
+
+#: nausicaa/ui/library.py:501
 msgid "Choisir une image…"
 msgstr "Choose an Image…"
 
-#: nausicaa/ui/library.py:494
+#: nausicaa/ui/library.py:576
 msgid "Choisir une image"
 msgstr "Choose an Image"
 
@@ -253,98 +257,106 @@ msgstr "Choose an Image"
 msgid "reste {0}"
 msgstr "{0} left"
 
-#: nausicaa/ui/library.py:139 nausicaa/ui/preferences.py:97
+#: nausicaa/ui/library.py:154 nausicaa/ui/preferences.py:97
 msgid "Bibliothèque"
 msgstr "Library"
 
-#: nausicaa/ui/library.py:144 nausicaa/ui/window.py:275
+#: nausicaa/ui/library.py:159 nausicaa/ui/window.py:275
 #: nausicaa/ui/window.py:855 nausicaa/ui/window.py:262
 msgid "Ouvrir des vidéos…"
 msgstr "Open videos…"
 
-#: nausicaa/ui/library.py:147
+#: nausicaa/ui/library.py:162
 msgid "Relire la bibliothèque"
 msgstr "Reload the Library"
 
-#: nausicaa/ui/library.py:155
+#: nausicaa/ui/library.py:170
 msgid "Aucune vidéo dans la bibliothèque"
 msgstr "No Videos in the Library"
 
-#: nausicaa/ui/library.py:278
+#: nausicaa/ui/library.py:295
 msgid "Reprendre"
 msgstr "Continue Watching"
 
-#: nausicaa/ui/library.py:290
+#: nausicaa/ui/library.py:307
 msgid "Séries"
 msgstr "TV Shows"
 
-#: nausicaa/ui/library.py:299
+#: nausicaa/ui/library.py:316
 msgid "Films"
 msgstr "Movies"
 
-#: nausicaa/ui/library.py:342
+#: nausicaa/ui/library.py:322 nausicaa/ui/library.py:510
+msgid "Retirer de « Reprendre »"
+msgstr "Remove from “Continue Watching”"
+
+#: nausicaa/ui/library.py:393
 msgid ""
 "TMDB refuse la clé d'API : vérifiez-la dans Préférences → Général → "
 "Bibliothèque"
 msgstr "TMDB refuses the API key: check it in Preferences → General → Library"
 
-#: nausicaa/ui/library.py:360
+#: nausicaa/ui/library.py:411
 msgid "Retour"
 msgstr "Back"
 
-#: nausicaa/ui/library.py:452
+#: nausicaa/ui/library.py:503
 msgid "Image d'origine"
 msgstr "Original Image"
 
-#: nausicaa/ui/library.py:466
+#: nausicaa/ui/library.py:522
 msgid "Marquer comme non vu"
 msgstr "Mark as Unwatched"
 
-#: nausicaa/ui/library.py:468
+#: nausicaa/ui/library.py:524
 msgid "Marquer comme vu"
 msgstr "Mark as Watched"
 
-#: nausicaa/ui/library.py:76 nausicaa/ui/library.py:405
+#: nausicaa/ui/library.py:76 nausicaa/ui/library.py:456
 msgid "Vu"
 msgstr "Watched"
 
-#: nausicaa/ui/library.py:258
+#: nausicaa/ui/library.py:274
 msgid "Aucun dossier choisi"
 msgstr "No folder chosen"
 
-#: nausicaa/ui/library.py:344
+#: nausicaa/ui/library.py:350
+msgid "« {0} » retiré de « Reprendre »"
+msgstr "“{0}” removed from “Continue Watching”"
+
+#: nausicaa/ui/library.py:395
 msgid "TMDB ne répond pas : images tirées des vidéos en attendant"
 msgstr "TMDB is not answering: pictures taken from the videos in the meantime"
 
-#: nausicaa/ui/library.py:286
+#: nausicaa/ui/library.py:303
 msgid "{0} épisode"
 msgid_plural "{0} épisodes"
 msgstr[0] "{0} episode"
 msgstr[1] "{0} episodes"
 
-#: nausicaa/ui/library.py:384
+#: nausicaa/ui/library.py:435
 msgid "Reprendre {0}"
 msgstr "Resume {0}"
 
-#: nausicaa/ui/library.py:384
+#: nausicaa/ui/library.py:435
 msgid "Lire {0}"
 msgstr "Play {0}"
 
-#: nausicaa/ui/library.py:392
+#: nausicaa/ui/library.py:443
 msgid "Saison {0}"
 msgstr "Season {0}"
 
-#: nausicaa/ui/library.py:495
+#: nausicaa/ui/library.py:577
 msgid "Images"
 msgstr "Images"
 
-#: nausicaa/ui/library.py:377
+#: nausicaa/ui/library.py:428
 msgid "{0} épisode vu sur {1}"
 msgid_plural "{0} épisodes vus sur {1}"
 msgstr[0] "{0} of {1} episodes watched"
 msgstr[1] "{0} of {1} episodes watched"
 
-#: nausicaa/ui/library.py:285
+#: nausicaa/ui/library.py:302
 msgid "{0} saison"
 msgid_plural "{0} saisons"
 msgstr[0] "{0} season"
@@ -812,10 +824,6 @@ msgstr "Resume “{0}”"
 #: nausicaa/ui/window.py:470
 msgid "OpenGL n'est pas disponible sur cet ordinateur : {0}"
 msgstr "OpenGL is not available on this computer: {0}"
-
-#: nausicaa/ui/window.py:506
-msgid "Annuler"
-msgstr "Cancel"
 
 #: nausicaa/ui/window.py:506
 msgid "Ouvrir"

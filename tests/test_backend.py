@@ -104,6 +104,22 @@ class PositionsTest(unittest.TestCase):
         self.assertFalse(pos.remember(LIB["e1"], 2, 3))        # clip court
         self.assertFalse(pos.remember("https://exemple/flux", 100, 1000))
 
+    def test_hidden_from_resume(self):
+        """« Retirer de Reprendre » : la position reste ; regardée de nouveau, la vidéo revient dans la liste."""
+        pos = positions.Positions(os.path.join(TMP, "pos-cache.json"))
+        film = LIB["film"]
+        self.assertFalse(pos.hide(film), "rien de retenu : rien à cacher")
+        pos.remember(film, 40, 90)
+        self.assertTrue(pos.hide(film))
+        k = positions.key_for(film)
+        self.assertTrue(pos.entry(k).get("hidden"))
+        self.assertEqual(pos.get(film), 40, "la reprise marche toujours")
+        pos.remember(film, 50, 90)
+        self.assertFalse(pos.entry(k).get("hidden"), "regardée de nouveau : de retour dans « Reprendre »")
+        pos.hide(film)
+        self.assertTrue(pos.hide(film, False))
+        self.assertFalse(pos.entry(k).get("hidden"), "« Annuler »")
+
     def test_damaged_file(self):
         path = os.path.join(TMP, "abime.json")
         with open(path, "w") as fh:

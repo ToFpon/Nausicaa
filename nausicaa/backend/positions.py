@@ -91,6 +91,21 @@ class Positions:
             self.data[k] = {"pos": 0, "dur": round(duration or old.get("dur", 0), 1), "seen": True,
                             "time": int(time.time())}
 
+    def hide(self, path: str, hidden: bool = True) -> bool:
+        """« Retirer de Reprendre » (bibliothèque) : la vidéo quitte la liste mais garde sa position (la reprise
+        marche toujours) ; regardée de nouveau, elle y revient (remember écrit une entrée neuve)."""
+        k = key_for(path)
+        old = self.data.get(k) if k else None
+        if not old:
+            return False
+        new = dict(old)
+        if hidden:
+            new["hidden"] = True
+        else:
+            new.pop("hidden", None)
+        self.data[k] = new
+        return new != old
+
     def forget(self, path: str):
         """« Depuis le début » : position oubliée (une vidéo vue le reste)."""
         k = key_for(path)
