@@ -16,7 +16,7 @@ tests, paquet.
 - Dialogues : de vraies fenêtres (`common.AlertDialog`, `common.DialogWindow`, `Adw.PreferencesWindow`,
   `Adw.AboutWindow`).
 - Chaque fonctionnalité facultative est dans `nausicaa/features.py` (click_pause, wheel_volume,
-  minimize_pause, resume, next_episodes, mpris, hwdec, auto_fullscreen, file_titles, library) et se consulte au moment de l'usage.
+  minimize_pause, resume, next_episodes, mpris, hwdec, auto_fullscreen, file_titles, library, tmdb) et se consulte au moment de l'usage.
 - Tout texte visible passe par `tr()` / `ntr()`. Après modification : `python3.12 tools/update-pot.py`,
   compléter `data/locale/en.po` et `de.po`, puis `msgfmt -c --statistics` et `msgcmp`.
 - Toute fonction passée à `idle_add` / `timeout_add` renvoie False (sauf répétition voulue).
@@ -135,6 +135,19 @@ tests, paquet.
   à chaque relecture : un menu détruit après fermeture plantait GTK 4.14). Accueil = Gtk.Stack classique /
   bibliothèque (`_sync_welcome`, en direct). Préférences → Général → Bibliothèque : dossiers. Testé :
   `test_library`, `bibliotheque` d'ui_smoke ; capture `tools/screenshot.py --library [--show=NOM]`.
+  Saisons regroupées par `library.name_key` (casse ET ponctuation ignorées : « Hunting : Chasseurs » et
+  « Hunting - Chasseurs », vu chez Tof). Positions d'avant cette version : pas de durée → rien d'affiché (pas de
+  « presque fini » faux). Relecture demandée pendant une autre : refaite à la fin (`_again`), jamais perdue.
+- Affiches de TMDB (fonctionnalité `tmdb`, coupée par défaut, demande de Tof) : `backend/tmdb.py`, avec la clé
+  de L'UTILISATEUR (choix de Tof : rien lié à un compte de l'application ; réglage `tmdb_key`, Préférences →
+  Général → « Affiches de TMDB », Adw.PasswordEntryRow + lien vers la page des clés). Clé v3 (api_key=) ou jeton
+  v4 (eyJ…, en-tête Bearer). search/tv | search/movie (année d'un film ; titre entier puis la partie avant « : »
+  / « - »), puis /{tv,movie}/{id}/images : affiche dans la langue de Nausicaa (fr-FR / de-DE / en-US), puis sans
+  texte, puis anglaise, la mieux notée. Réponses (et « pas trouvé », 14 jours) dans ~/.cache/nausicaa/tmdb.json,
+  images dans …/tmdb/ ; clé changée → `forget_cache`. Ordre : image choisie > image à côté > TMDB > vignette GNOME
+  > image tirée de la vidéo. Clé refusée (401) / réseau : `last_error` → un toast par session (`_tmdb_trouble`).
+  Mention exigée par TMDB : groupe des Préférences + section légale d'« À propos ». Testé : `test_tmdb` (faux
+  serveur local ; `NAUSICAA_NET=1` : une fausse clé refusée par le vrai TMDB), étape TMDB de `bibliotheque`.
 - Fenêtre fermée maximisée : rouverte maximisée (`window_maximized`, `maximize()` avant l'affichage, comme
   Odysseus / Calypso) ; taille = `get_default_size()` (celle d'avant la maximisation ; `get_width()` perdait
   ~10 px à chaque ouverture sous openbox), aussi pour `_pip_saved`.

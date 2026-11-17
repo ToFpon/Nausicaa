@@ -55,6 +55,11 @@ FEATURES = [
                "épisodes vus) et films. Dossiers choisis dans Préférences → Général ; affiches trouvées à côté "
                "des vidéos ou tirées des vidéos elles-mêmes, sans Internet"),
             "view-grid-symbolic", default=False),
+    Feature("tmdb", tr("Affiches de TMDB"),
+            tr("Bibliothèque : pour les séries et les films sans image posée à côté, l'affiche de themoviedb.org, "
+               "dans la langue de Nausicaa. Les titres sont envoyés à TMDB ; demande votre propre clé d'API, "
+               "gratuite (Préférences → Général → Bibliothèque)"),
+            "image-x-generic-symbolic", default=False),
     Feature("hwdec", tr("Décodage matériel"),
             tr("La carte graphique décode la vidéo quand elle le peut : moins de travail pour le processeur"),
             "video-display-symbolic"),

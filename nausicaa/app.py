@@ -195,6 +195,9 @@ class NausicaaApp(Adw.Application):
                                 license_type=Gtk.License.GPL_3_0)
         about.add_credit_section(tr("Inspiré de"), ["Celluloid https://celluloid-player.github.io", "VLC"])
         about.add_acknowledgement_section(tr("Moteurs"), ["mpv https://mpv.io", "python-mpv"])
+        about.add_legal_section("TMDB", None, Gtk.License.CUSTOM,
+                                tr("Affiches (en option) : ce produit utilise l'API de TMDB mais n'est ni approuvé "
+                                   "ni certifié par TMDB. https://www.themoviedb.org"))
         about.present()
 
 

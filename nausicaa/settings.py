@@ -43,6 +43,7 @@ DEFAULTS: dict[str, Any] = {
     # images choisies à la main ({chemin de la série / du film: image})
     "library_dirs": [],
     "library_images": {},
+    "tmdb_key": "",                 # clé d'API TMDB de l'utilisateur (fonctionnalité « tmdb »), v3 ou jeton v4
     "previous_defaults": {},        # application par défaut d'avant, par type (defaultapp.py)
     "features": {},                 # fonctionnalités activées / désactivées (voir features.py)
 }

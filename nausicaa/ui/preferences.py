@@ -89,6 +89,7 @@ class PreferencesWindow(Adw.PreferencesWindow):
             langs.add(row)
         page.add(langs)
         page.add(self._library_group())
+        page.add(self._tmdb_group())
         return page
 
     def _library_group(self) -> Adw.PreferencesGroup:
@@ -104,6 +105,22 @@ class PreferencesWindow(Adw.PreferencesWindow):
         self.library_group = group
         self._library_rows = []
         self._fill_library_rows()
+        return group
+
+    def _tmdb_group(self) -> Adw.PreferencesGroup:
+        """Clé d'API TMDB de l'utilisateur (choix de Tof : rien n'est lié à un compte de l'application)."""
+        from ..backend import tmdb
+        group = Adw.PreferencesGroup(
+            title=tr("Affiches de TMDB"),
+            description=tr("Avec la fonctionnalité « Affiches de TMDB » : créez un compte gratuit sur "
+                           "themoviedb.org, puis copiez ici votre clé d'API (ou votre jeton de lecture). Ce produit "
+                           "utilise l'API de TMDB mais n'est ni approuvé ni certifié par TMDB."))
+        link = Gtk.LinkButton(uri=tmdb.KEY_PAGE, label=tr("Obtenir une clé"), valign=Gtk.Align.CENTER)
+        group.set_header_suffix(link)
+        row = Adw.PasswordEntryRow(title=tr("Clé d'API TMDB"), text=settings["tmdb_key"], show_apply_button=True)
+        row.connect("apply", lambda r: settings.__setitem__("tmdb_key", r.get_text().strip()))
+        group.add(row)
+        self.tmdb_row = row
         return group
 
     def _fill_library_rows(self):

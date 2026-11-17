@@ -634,8 +634,32 @@ def bibliotheque(win):
     check([i.path for i in c().queue.items] == [film], "film : lu seul (pas les autres vidéos du dossier)")
     c().stop()
     yield pump(0.3)
+    # affiches de TMDB (faux serveur de test_tmdb) : clé de l'utilisateur, refus signalé
+    import test_tmdb
+    from nausicaa.backend import tmdb
+    tmdb.API, tmdb.IMG = test_tmdb.BASE + "/3", test_tmdb.BASE + "/img"
+    media.video(os.path.join(root, "Malcolm saison 1", "Malcolm S01E01.mkv"), 2)
+    settings["tmdb_key"] = test_tmdb.KEY
+    features.set_enabled("tmdb", True)
+    from nausicaa.i18n import current_language
+    want = lambda: tmdb.poster("tv", "Malcolm", "", test_tmdb.KEY, current_language())  # noqa: E731
+    yield Wait(15, until=lambda: lib.posters.get("show:malcolm") == posters_cache(want()))
+    check(lib.posters.get("show:malcolm") == posters_cache(want()),
+          f"TMDB : affiche de la série ({lib.posters.get('show:malcolm')} / {posters_cache(want())})")
+    check(lib.posters.get("show:toto", "").endswith(".jpg"), "série inconnue de TMDB : image tirée de la vidéo")
+    settings["tmdb_key"] = "mauvaise"
+    yield Wait(10, until=lambda: "key" in lib._told)
+    check("key" in lib._told, "clé refusée : signalée (une fois)")
+    features.set_enabled("tmdb", False)
+    settings["tmdb_key"] = ""
+    yield pump(0.3)
     features.set_enabled("library", False)
     check(win.welcome_stack.get_visible_child_name() == "classic", "option coupée : accueil classique, en direct")
+
+
+def posters_cache(src):
+    from nausicaa.backend import posters
+    return posters.cache_path(src, "tmdb") if src else None
 
 
 def _all(widget, cls):

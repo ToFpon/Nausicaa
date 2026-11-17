@@ -15,11 +15,12 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Adw, Gio, GLib, Gtk  # noqa: E402
 
+from .. import features  # noqa: E402
 from .. import format as fmt  # noqa: E402
-from ..backend import library, positions, posters  # noqa: E402
-from ..i18n import ntr, tr  # noqa: E402
+from ..backend import library, positions, posters, tmdb  # noqa: E402
+from ..i18n import current_language, ntr, tr  # noqa: E402
 from ..settings import settings  # noqa: E402
-from .common import choose_files, clear_box, popup_menu, shown  # noqa: E402
+from .common import choose_files, clear_box, popup_menu, shown, toast  # noqa: E402
 
 CARD_W, CARD_H = 150, 225
 RESUME_MAX = 12
@@ -28,6 +29,11 @@ RESUME_MAX = 12
 def roots() -> list:
     dirs = [d for d in settings["library_dirs"] if isinstance(d, str) and d]
     return dirs or library.default_roots()
+
+
+def tmdb_on() -> bool:
+    """Affiches de TMDB : fonctionnalité active ET clé d'API de l'utilisateur."""
+    return features.enabled("tmdb") and bool(settings["tmdb_key"].strip())
 
 
 def show_key(show) -> str:
@@ -112,7 +118,10 @@ class LibraryView(Gtk.Stack):
         self._seq = 0
         self._scanned_at = 0.0
         self._scanning = False
+        self._again = False
         self.posters: dict = {}            # clé → fichier d'affiche déjà trouvé
+        self._told: set = set()            # problèmes TMDB déjà signalés
+        self._tmdb_was = tmdb_on()
         self.worker = posters.PosterWorker()
         self.cards: dict = {}              # clé → [Card…] affichées
         self._menu_card = None
@@ -176,7 +185,10 @@ class LibraryView(Gtk.Stack):
     # -- lecture des dossiers ------------------------------------------------------------------
     def refresh(self, force: bool = False):
         """Relue dans un fil (au retour sur l'accueil : de nouveaux épisodes vus, des fichiers ajoutés)."""
-        if self._scanning or (not force and time.monotonic() - self._scanned_at < 2.0):
+        if self._scanning:
+            self._again = self._again or force         # relue dès la fin de celle en cours (rien de perdu)
+            return
+        if not force and time.monotonic() - self._scanned_at < 2.0:
             return
         self._scanning = True
         self._seq += 1
@@ -205,6 +217,10 @@ class LibraryView(Gtk.Stack):
     def _arrived(self, seq, dirs, lib, entries):
         self._scanning = False
         self._scanned_at = time.monotonic()
+        if self._again:                                # demandée pendant la lecture : on recommence
+            self._again = False
+            self.refresh(force=True)
+            return
         self.loading.set_visible(False)
         self.loading.set_spinning(False)
         if seq != self._seq:
@@ -293,21 +309,45 @@ class LibraryView(Gtk.Stack):
 
     def _want_poster(self, key, kind, target):
         chosen = settings["library_images"].get(key, "")
+        query = None
         if kind == "show":
             folders, video, alone = target.folders, (target.episodes[0] if target.episodes else ""), False
             args = ("show", folders, video, alone, chosen)
+            title, year = target.name, ""
         else:
             folder = os.path.dirname(target)
             alone = folder not in [os.path.abspath(r) for r in roots()] and \
                 sum(1 for p in self.lib.films if os.path.dirname(p) == folder) == 1
             args = ("film", target, target, alone, chosen)
+            title, year = tmdb.split_year(library.clean_title(target))
+        if tmdb_on():
+            query = (title, year, settings["tmdb_key"].strip(), current_language())
 
         def got(path, k=key):
             if path:
                 self.posters[k] = path
                 for c in self.cards.get(k, []):
                     c.set_poster(path)
-        self.worker.request(key, lambda: posters.poster_for(*args), got)
+            self._tmdb_trouble()
+        self.worker.request(key, lambda: posters.poster_for(*args, tmdb_query=query), got)
+
+    def _tmdb_trouble(self):
+        """Clé refusée, TMDB injoignable : dit une fois par session (les images tirées des vidéos prennent
+        le relais)."""
+        code, tmdb.last_error = tmdb.last_error, ""
+        if not code or code in self._told:
+            return
+        self._told.add(code)
+        if code == "key":
+            toast(self.win, tr("TMDB refuse la clé d'API : vérifiez-la dans Préférences → Général → Bibliothèque"))
+        elif code == "network":
+            toast(self.win, tr("TMDB ne répond pas : images tirées des vidéos en attendant"))
+
+    def reset_posters(self):
+        """Source des affiches changée (TMDB activé / coupé, autre clé) : tout est redemandé."""
+        self.posters.clear()
+        self._told.clear()
+        self.refresh(force=True)
 
     # -- page d'une série ---------------------------------------------------------------------------
     def open_show(self, show):

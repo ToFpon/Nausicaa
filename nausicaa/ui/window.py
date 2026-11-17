@@ -244,6 +244,16 @@ class MainWindow(Adw.ApplicationWindow):
         else:
             self.welcome_stack.set_visible_child_name("classic")
 
+    def _sync_tmdb(self, force: bool = False):
+        """Affiches de TMDB activées / coupées (ou autre clé) : la bibliothèque les redemande."""
+        if self.library is None:
+            return
+        from .library import tmdb_on
+        on = tmdb_on()
+        if force or on != self.library._tmdb_was:
+            self.library._tmdb_was = on
+            self.library.reset_posters()
+
     def _build_classic_welcome(self) -> Gtk.Widget:
         page = Adw.StatusPage(icon_name=APP_ID, title=APP_NAME,
                               description=tr("Déposez des vidéos ici, ou ouvrez-les"))
@@ -1218,6 +1228,11 @@ class MainWindow(Adw.ApplicationWindow):
             self.split.set_sidebar_position(self._playlist_side())       # tout de suite, sans redémarrer
         elif key == "features":
             self._sync_welcome()                                          # bibliothèque activée / coupée
+            self._sync_tmdb()
+        elif key == "tmdb_key":
+            from ..backend import tmdb
+            tmdb.forget_cache()                                           # « pas trouvé » d'une autre clé
+            self._sync_tmdb(force=True)
         elif key in ("library_dirs", "library_images") and self.library is not None:
             self.library.refresh(force=True)
 

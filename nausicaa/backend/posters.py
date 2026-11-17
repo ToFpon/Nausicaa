@@ -3,6 +3,7 @@
   2. une image posée à côté (convention de Kodi / Jellyfin) : « poster », « folder », « cover », « front »
      dans le dossier de la série ou d'une saison ; « Film-poster.jpg » / « Film.jpg » à côté d'un film, ou
      « poster.jpg »… dans son dossier s'il y est seul ;
+  (2 bis. option « tmdb » : l'affiche de themoviedb.org, backend/tmdb.py ;)
   3. la vignette que GNOME a déjà faite (~/.cache/thumbnails, spécification freedesktop) ;
   4. une image tirée de la vidéo (20 % de la durée) par la libmpv de Nausicaa — rien de plus à installer.
 Chaque affiche est recadrée au format 2:3 et rangée dans ~/.cache/nausicaa/posters (clé : source + taille +
@@ -147,13 +148,24 @@ def cache_path(source: str, kind: str) -> Optional[str]:
     return os.path.join(POSTER_DIR, hashlib.sha1(key.encode("utf-8", "surrogateescape")).hexdigest() + ".jpg")
 
 
-def poster_for(kind: str, target, video: str, alone: bool = False, chosen: str = "") -> Optional[str]:
+def poster_for(kind: str, target, video: str, alone: bool = False, chosen: str = "",
+               tmdb_query: Optional[tuple] = None) -> Optional[str]:
     """Affiche (fichier du cache) d'une série (target = dossiers) ou d'un film (target = la vidéo). video =
-    la vidéo dont tirer une image s'il n'y a rien d'autre. Lent (disque, mpv) : dans un fil."""
+    la vidéo dont tirer une image s'il n'y a rien d'autre. tmdb_query = (titre, année, clé, langue) quand la
+    fonctionnalité « tmdb » est active : essayée après les images de l'utilisateur, avant les images tirées
+    des vidéos. Lent (disque, réseau, mpv) : dans un fil."""
     for src, how in ((chosen, "image") if chosen and os.path.isfile(chosen) else (None, ""),
                      (local_image(kind, target, alone), "image")):
         if src:
             dest = cache_path(src, how)
+            if dest and (os.path.exists(dest) or make_poster(src, dest)):
+                return dest
+    if tmdb_query is not None:
+        from . import tmdb
+        title, year, key, lang = tmdb_query
+        src = tmdb.poster("tv" if kind == "show" else "movie", title, year, key, lang)
+        if src:
+            dest = cache_path(src, "tmdb")
             if dest and (os.path.exists(dest) or make_poster(src, dest)):
                 return dest
     if not video:
