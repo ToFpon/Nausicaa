@@ -1,3 +1,13 @@
+nausicaa (1.1.1~noble1) noble; urgency=medium
+
+  * Bibliothèque : retirer une vidéo de « Reprendre » par la petite croix
+    de son affiche ou le clic droit (sa position est gardée).
+  * Bibliothèque : le menu du clic droit sur une affiche n'est plus
+    tronqué.
+  * À propos : remerciements à Ponce De Leon et à TMDB.
+
+ -- Tof <nourpon@gmail.com>  Tue, 17 Nov 2026 18:47:55 +0000
+
 nausicaa (1.1.0~noble1) noble; urgency=medium
 
   * Nouvelle bibliothèque sur l'accueil (en option) : vidéos à reprendre,

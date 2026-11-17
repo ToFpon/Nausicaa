@@ -73,6 +73,15 @@
   </requires>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.1.1" date="2026-11-17">
+      <description>
+        <ul>
+          <li>Library: remove a video from “Continue Watching” with the small cross on its poster or by right-clicking (its position is kept)</li>
+          <li>Library: the right-click menu of a poster is no longer cut off</li>
+          <li>About: thanks to Ponce De Leon and to TMDB</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.1.0" date="2026-11-17">
       <description>
         <ul>
