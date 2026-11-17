@@ -31,10 +31,13 @@ def roots() -> list:
 
 
 def show_key(show) -> str:
-    return "show:" + show.name.casefold()
+    return "show:" + library.name_key(show.name)
 
 
 def remaining_text(entry: dict) -> str:
+    """« reste 20 minutes » ; "" sans durée connue (positions retenues avant la 1.1 : pas de durée)."""
+    if not entry.get("dur"):
+        return ""
     left = max(0.0, float(entry.get("dur", 0)) - float(entry.get("pos", 0)))
     return tr("reste {0}").format(fmt.long_duration(left)) if left >= 60 else tr("presque fini")
 
@@ -209,7 +212,7 @@ class LibraryView(Gtk.Stack):
         self.lib, self.entries = lib, entries
         self._render_home(dirs)
         if self.show is not None:
-            same = next((s for s in lib.shows if s.name.casefold() == self.show.name.casefold()), None)
+            same = next((s for s in lib.shows if show_key(s) == show_key(self.show)), None)
             if same is None:
                 self.go_home()
             else:
@@ -248,7 +251,7 @@ class LibraryView(Gtk.Stack):
                 show = show_of.get(p)
                 if show is not None:
                     ep = library.episode_label(p) or library.clean_title(p)
-                    card = self._card(show_key(show), show.name, ep + " · " + remaining_text(e),
+                    card = self._card(show_key(show), show.name, " · ".join(x for x in (ep, remaining_text(e)) if x),
                                       self._progress(e), poster=("show", show))
                     card.connect("clicked", lambda _b, s=show, path=p: self.play_episode(s, path))
                 else:

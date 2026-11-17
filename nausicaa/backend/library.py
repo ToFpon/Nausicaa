@@ -157,7 +157,7 @@ def scan(roots: list, max_depth: int = MAX_DEPTH) -> Library:
     seen_dirs: set = set()
 
     def show_for(name: str, folder: str = "") -> Show:
-        key = name.casefold()
+        key = name_key(name)
         s = shows.get(key)
         if s is None:
             s = shows[key] = Show(name, folder=folder)
@@ -197,6 +197,12 @@ def scan(roots: list, max_depth: int = MAX_DEPTH) -> Library:
         s.seasons.sort(key=lambda x: (x.number is None, x.number or 0, media.name_key(x.label)))
     films.sort(key=lambda p: media.name_key(clean_title(p)))
     return Library(films=films, shows=sorted(shows.values(), key=lambda s: media.name_key(s.name)))
+
+
+def name_key(name: str) -> str:
+    """Nom d'une série pour regrouper ses saisons : casse, accents gardés, ponctuation ignorée — « Hunting :
+    Chasseurs » et « Hunting - Chasseurs » (un « : » remplacé à la copie sur une clé) sont la même série."""
+    return " ".join(re.sub(r"[\W_]+", " ", name.casefold()).split())
 
 
 def default_roots() -> list:

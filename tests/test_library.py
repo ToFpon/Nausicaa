@@ -86,6 +86,15 @@ class ScanTest(unittest.TestCase):
         self.assertEqual([s.number for s in shows["Dark"].seasons], [1, 2])
         self.assertEqual(shows["Série"].seasons[0].number, None)
 
+    def test_punctuation_ignored(self):
+        """« Hunting : Chasseurs » et « Hunting - Chasseurs » (vu chez Tof) : une seule série."""
+        r = tempfile.mkdtemp(dir=TMP)
+        touch(r, "Hunting - Chasseurs de criminels saison 1/e1.mkv")
+        touch(r, "Hunting _ Chasseurs de criminels saison 2/e1.mkv")
+        touch(r, "Hunting  Chasseurs de criminels Saison 3/e1.mkv")
+        lib = library.scan([r])
+        self.assertEqual([[x.number for x in s.seasons] for s in lib.shows], [[1, 2, 3]])
+
     def test_several_roots_and_missing(self):
         a, b = tempfile.mkdtemp(dir=TMP), tempfile.mkdtemp(dir=TMP)
         touch(a, "Toto saison 1/e1.mkv")
