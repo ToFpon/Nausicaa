@@ -8,6 +8,8 @@ tests, paquet.
 ## Règles
 
 - Répondre à Tof en français, tutoiement, avis francs. Messages de commit en français.
+- Dossiers des dépôts chez Tof (la casse compte, dans les commandes à lui donner) : ~/argos, ~/Calypso,
+  ~/Ithaca, ~/Nausicaa, ~/Odysseus, ~/Sirene, ~/Telemaque. Toujours donner les commandes complètes, `git pull` compris.
 - Cible : Zorin OS 18.1 (Ubuntu 24.04, GNOME 46, X11, GTK 4.14, libadwaita 1.5, libmpv2 0.37,
   python3-mpv 1.0.4, Python 3.12). Pas d'API plus récente (pas d'Adw.Dialog, Adw.AlertDialog…).
   Paquets apt seulement.
