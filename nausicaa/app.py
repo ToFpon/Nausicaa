@@ -124,9 +124,9 @@ class NausicaaApp(Adw.Application):
 
     def do_open(self, files, n, hint):
         paths = [f.get_path() or f.get_uri() for f in files]
+        if paths:                                # avant present : la fenêtre ne montre pas l'accueil
+            self._main_window().open_paths([p for p in paths if p])
         self.present()
-        if paths:
-            self.window.open_paths([p for p in paths if p])
 
     def do_command_line(self, cmd):
         opts = cmd.get_options_dict().end().unpack()
@@ -138,9 +138,9 @@ class NausicaaApp(Adw.Application):
         for a in cmd.get_arguments()[1:]:
             f = Gio.File.new_for_commandline_arg_and_cwd(a, cwd)
             paths.append(f.get_path() or f.get_uri())
-        self.present()
         if paths:
-            self.window.open_paths(paths, replace=not opts.get("enqueue"))
+            self._main_window().open_paths(paths, replace=not opts.get("enqueue"))
+        self.present()
         return 0
 
     def _close_window(self):

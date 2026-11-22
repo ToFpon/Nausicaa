@@ -98,6 +98,7 @@ class MainWindow(Adw.ApplicationWindow):
             self.maximize()                      # avant l'affichage : ouverte directement maximisée
         self.set_size_request(480, 320)
         self._click_toggled = False
+        self._opening = 0                        # ouvertures en cours : image noire, pas l'accueil
         self._fs_pending = False                 # « Plein écran à l'ouverture » : en attente de la piste vidéo
         self.pip = False                          # image dans l'image
         self._pip_target = (0, 0)
@@ -433,13 +434,26 @@ class MainWindow(Adw.ApplicationWindow):
 
     # -- ouverture --------------------------------------------------------------------------
     def open_paths(self, paths: list[str], replace: bool = True, start=None):
+        # en attendant la vidéo (contexte de rendu, lecture du dossier dans un fil) : image noire plutôt que
+        # l'accueil — ouverte de l'extérieur (Odysseus, « Ouvrir avec »), l'accueil passait une fraction de
+        # seconde avant (vu chez Tof, comme dans Argos) ; rien de lisible : retour à l'accueil
+        self._opening += 1
+        self._sync_page()
+
         def done(n):
+            self._opening -= 1
+            self._sync_page()
             if not n:
                 toast(self, tr("Aucune vidéo trouvée"))
+
+        def start_open():
+            if self._gl_failed():
+                done(1)                          # message déjà donné par _gl_failed
+            else:
+                self.c.open_paths(paths, replace=replace, on_done=done, start=start)
         if replace:
             self._want_fullscreen()
-        self.video.when_ready(lambda: self._gl_failed() or
-                              self.c.open_paths(paths, replace=replace, on_done=done, start=start))
+        self.video.when_ready(start_open)
 
     def _want_fullscreen(self):
         """Ouverture par l'utilisateur : plein écran dès que la piste vidéo est connue (option, comme VLC).
@@ -1128,7 +1142,7 @@ class MainWindow(Adw.ApplicationWindow):
 
     def _sync_page(self):
         if self.c.player.path is None:
-            name = "welcome"
+            name = "video" if self._opening else "welcome"
         elif self.c.player.get("vid") in (False, None) and self.c.player.tracks("audio") \
                 and not self.c.player.tracks("video"):
             name = "audio"
