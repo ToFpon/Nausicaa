@@ -1,3 +1,11 @@
+nausicaa (1.1.2~noble1) noble; urgency=medium
+
+  * Ouverte depuis Odysseus ou « Ouvrir avec », la vidéo s'affiche
+    directement : la page d'accueil ne passe plus une fraction de seconde
+    avant.
+
+ -- Tof <nourpon@gmail.com>  Sun, 22 Nov 2026 22:53:08 +0000
+
 nausicaa (1.1.1~noble1) noble; urgency=medium
 
   * Bibliothèque : retirer une vidéo de « Reprendre » par la petite croix
