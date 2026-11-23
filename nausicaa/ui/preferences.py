@@ -78,6 +78,9 @@ class PreferencesWindow(Adw.PreferencesWindow):
                          [ntr("{0} seconde", "{0} secondes", n).format(n) for n in (5, 10, 30)], [5, 10, 30]))
         play.add(_choice(tr("Cran de molette"), "wheel_step", ["2 %", "5 %", "10 %"], [2, 5, 10],
                          tr("Volume ajouté ou retiré à chaque cran de la molette")))
+        play.add(_choice(tr("Générique de fin"), "credits_auto",
+                         [tr("Proposer « Épisode suivant »"), tr("Passer tout seul")], [False, True],
+                         tr("Fonctionnalité « Passer le générique »")))
         page.add(play)
         langs = Adw.PreferencesGroup(title=tr("Langues préférées"),
                                      description=tr("Codes de langue séparés par des virgules, dans l'ordre de "

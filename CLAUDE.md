@@ -18,7 +18,7 @@ tests, paquet.
 - Dialogues : de vraies fenêtres (`common.AlertDialog`, `common.DialogWindow`, `Adw.PreferencesWindow`,
   `Adw.AboutWindow`).
 - Chaque fonctionnalité facultative est dans `nausicaa/features.py` (click_pause, wheel_volume,
-  minimize_pause, resume, next_episodes, mpris, hwdec, auto_fullscreen, file_titles, library, tmdb) et se consulte au moment de l'usage.
+  minimize_pause, resume, next_episodes, skip_credits, mpris, hwdec, auto_fullscreen, file_titles, library, tmdb) et se consulte au moment de l'usage.
 - Tout texte visible passe par `tr()` / `ntr()`. Après modification : `python3.12 tools/update-pot.py`,
   compléter `data/locale/en.po` et `de.po`, puis `msgfmt -c --statistics` et `msgcmp`.
 - Toute fonction passée à `idle_add` / `timeout_add` renvoie False (sauf répétition voulue).
@@ -162,6 +162,24 @@ tests, paquet.
   > image tirée de la vidéo. Clé refusée (401) / réseau : `last_error` → un toast par session (`_tmdb_trouble`).
   Mention exigée par TMDB : groupe des Préférences + section légale d'« À propos ». Testé : `test_tmdb` (faux
   serveur local ; `NAUSICAA_NET=1` : une fausse clé refusée par le vrai TMDB), étape TMDB de `bibliotheque`.
+- Passer le générique (fonctionnalité `skip_credits`, active par défaut, demande de Tof ; mpv-segment-linking écarté :
+  base en ligne, rien de sûr) : `backend/credits.py` (pur, testé `test_credits`). 1) CHAPITRES du fichier (idée du
+  script mpv « chapterskip ») : titre « Credits », « Ending », « ED », « Générique », « Abspann »… (`is_credits_title`,
+  titre ENTIER), seconde moitié de la vidéo seulement (un « Credits » du début = ouverture) ; un chapitre ordinaire
+  après lui (scène après le générique) → on y saute (« Passer le générique ») au lieu de l'épisode suivant ; l'aperçu
+  du suivant (« Preview ») compte comme générique. 2) Durée APPRISE par série : « Le générique commence ici » (G,
+  clic droit) → secondes avant la fin dans ~/.local/share/nausicaa/credits.json (`CreditsStore`, 5 s à 15 min,
+  seconde moitié, vidéos ≥ 5 min) ; clé = `series_key` (dossier ; dossier de saison → la série, `library.season_of`
+  + `name_key` : « Toto saison 1 » et « Toto/Season 02 » partagent). Chapitres d'abord. Interface (`window.py`) :
+  capsule `credits_revealer` en bas à droite de l'image (`.credits-skip`, au-dessus de la barre flottante en plein
+  écran), bouton « Épisode suivant » (s'il y a une suivante, pas en « Répéter la vidéo ») + croix « Continuer à
+  regarder » ; passé / refusé = une fois par ÉLÉMENT de la file (`_credits_done is _credits_path`, objets Item :
+  la même vidéo rouverte repropose). Réglage `credits_auto` (Préférences → Lecture → Générique de fin : proposer /
+  passer tout seul). « Oublier le générique de cette série » (clic droit), toasts « Annuler ». PIÈGE vu au test :
+  au changement d'élément, mpv a encore l'ANCIEN fichier (position, durée) → rien n'est calculé avant l'événement
+  « loaded » du contrôleur (file-loaded) ; sinon le passage automatique partait sur la fin de l'épisode d'avant.
+  Testé : `passer_le_generique` d'ui_smoke (`media.long_video` : 320 s en 64 × 36 à 1 image / s, chapitres par
+  ffmetadata ; copies sans chapitres par `-map_chapters -1`).
 - Fenêtre fermée maximisée : rouverte maximisée (`window_maximized`, `maximize()` avant l'affichage, comme
   Odysseus / Calypso) ; taille = `get_default_size()` (celle d'avant la maximisation ; `get_width()` perdait
   ~10 px à chaque ouverture sous openbox), aussi pour `_pip_saved`.

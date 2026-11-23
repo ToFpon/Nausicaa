@@ -496,6 +496,81 @@ def reprise(win):
 
 
 @step
+def passer_le_generique(win):
+    """« Passer le générique » : chapitre « Credits » → bouton « Épisode suivant » ; sans chapitres, durée apprise
+    par « Le générique commence ici » (G) pour toute la série (saisons comprises), croix, mode automatique, oubli."""
+    import subprocess
+    show = os.path.join(TMP, "generique")
+    e1 = media.long_video(os.path.join(show, "Show saison 1", "Show S01E01.mkv"), 320,
+                          [(0, "Intro"), (30, "Épisode"), (300, "Credits")])
+    plain = []
+    for name in ("Show saison 1/Show S01E02.mkv", "Show saison 2/Show S02E01.mkv", "Show saison 2/Show S02E02.mkv"):
+        out = os.path.join(show, name)
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", e1, "-map", "0", "-map_chapters", "-1",
+                        "-c", "copy", out], check=True)
+        plain.append(out)
+    e2, s2e1, s2e2 = plain
+    win.open_paths([e1])                                 # « Épisodes suivants » : E02 vient avec
+    yield Wait(10, until=lambda: basename() == "Show S01E01.mkv" and win._credits is not None)
+    found = win._credits
+    check(found is not None and abs(found.start - 300) < 0.5 and found.source == "chapters",
+          f"générique trouvé dans les chapitres (« Credits » à 5:00) : {found}")
+    c().seek_to(200)
+    yield pump(0.6)
+    check(not win.credits_showing(), "avant le générique : pas de bouton")
+    c().seek_to(301)
+    yield Wait(4, until=win.credits_showing)
+    check(win.credits_showing() and win.credits_button.get_label() == tr("Épisode suivant"),
+          "pendant le générique : bouton « Épisode suivant »")
+    win.credits_button.emit("clicked")
+    yield Wait(8, until=lambda: basename() == "Show S01E02.mkv")
+    check(basename() == "Show S01E02.mkv" and not win.credits_showing(), "clic : épisode suivant")
+
+    # sans chapitres : rien, jusqu'à ce qu'on l'apprenne
+    yield Wait(6, until=lambda: c().player.duration() > 0)
+    c().seek_to(80)
+    yield Wait(4, until=lambda: c().player.position() >= 80)
+    win.activate_action("win.credits-here", None)
+    check(win.credits_store.get(e2) is None, "« Le générique commence ici » au début de l'épisode : refusé")
+    c().seek_to(305)
+    yield Wait(4, until=lambda: c().player.position() >= 305)
+    check(win._credits is None and not win.credits_showing(), "sans chapitres ni durée apprise : pas de bouton")
+    win.activate_action("win.credits-here", None)
+    left = win.credits_store.get(e2) or 0
+    check(14 <= left <= 16, f"G : durée retenue pour la série ({left:.1f} s)")
+    yield pump(0.6)
+    check(not win.credits_showing(), "le générique qu'on vient de marquer : pas de bouton tout de suite")
+
+    # autre saison, même série : la durée apprise sert
+    win.open_paths([s2e1])
+    yield Wait(10, until=lambda: basename() == "Show S02E01.mkv" and win._credits is not None)
+    check(win._credits is not None and win._credits.source == "learned", "saison 2 : durée apprise reprise")
+    c().seek_to(306)
+    yield Wait(4, until=win.credits_showing)
+    check(win.credits_showing(), "saison 2 : bouton au même moment")
+    win._dismiss_credits()
+    c().seek_to(308)
+    yield pump(0.6)
+    check(not win.credits_showing(), "croix : on continue à regarder, le bouton ne revient pas")
+
+    # automatique (Préférences → Lecture → Générique de fin : Passer tout seul)
+    settings["credits_auto"] = True
+    before = c().item
+    win.open_paths([s2e1])                            # la même vidéo rouverte : le générique est reproposé
+    yield Wait(10, until=lambda: c().item is not before and c().player.duration() > 0 and win._credits is not None)
+    c().seek_to(306)
+    yield Wait(8, until=lambda: basename() == "Show S02E02.mkv")
+    check(basename() == "Show S02E02.mkv", "« Passer tout seul » : épisode suivant sans clic")
+    settings["credits_auto"] = False
+
+    win.activate_action("win.credits-forget", None)
+    check(win.credits_store.get(s2e2) is None, "« Oublier le générique de cette série »")
+    yield pump(0.3)
+    check(win._credits is None, "oublié : plus de générique pour cette série")
+
+
+@step
 def plein_ecran_a_l_ouverture(win):
     check(not win.is_fullscreen(), "fenêtré avant l'essai")
     features.set_enabled("auto_fullscreen", True)

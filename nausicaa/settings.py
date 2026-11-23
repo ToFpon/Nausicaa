@@ -25,6 +25,7 @@ DEFAULTS: dict[str, Any] = {
     "seek_short": 5,                # ← / → (secondes)
     "seek_long": 60,                # Ctrl+← / → (secondes)
     "wheel_step": 5,                # un cran de molette (% de volume)
+    "credits_auto": False,          # générique de fin : passer tout seul (sinon bouton « Épisode suivant »)
     "audio_language": "",           # langues préférées pour mpv (alang / slang), ex. « fr,fre,fra »
     "subtitle_language": "",
     # Fenêtre

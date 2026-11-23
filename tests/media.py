@@ -67,3 +67,28 @@ def library(root: str) -> dict:
         fh.write("x")
     files.update(fake=fake, serie=serie, root=root)
     return files
+
+
+def long_video(path: str, seconds: float, chapters=()) -> str:
+    """Vidéo longue mais légère (64 × 36, 1 image / s : quelques secondes à fabriquer), avec des chapitres
+    [(début en s, titre)…] — pour « Passer le générique », qui ne propose rien sous 5 minutes."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = path + ".nochap.mkv"
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i",
+                    f"testsrc2=size=64x36:rate=1:duration={seconds}", "-f", "lavfi", "-i",
+                    f"sine=duration={seconds}", "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p",
+                    "-c:a", "aac", "-b:a", "16k", tmp], check=True)
+    if not chapters:
+        os.replace(tmp, path)
+        return path
+    meta = path + ".chapters.txt"
+    bounds = list(chapters) + [(seconds, None)]
+    with open(meta, "w", encoding="utf-8") as fh:
+        fh.write(";FFMETADATA1\n")
+        for (start, title), (end, _t) in zip(bounds, bounds[1:]):
+            fh.write(f"[CHAPTER]\nTIMEBASE=1/1000\nSTART={int(start * 1000)}\nEND={int(end * 1000)}\ntitle={title}\n")
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", tmp, "-i", meta, "-map_metadata", "1",
+                    "-map_chapters", "1", "-c", "copy", path], check=True)
+    os.remove(tmp)
+    os.remove(meta)
+    return path

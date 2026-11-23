@@ -26,6 +26,7 @@ from gi.repository import Adw, Gdk, Gio, GLib, Gtk  # noqa: E402
 
 from .. import APP_ID, APP_NAME, features  # noqa: E402
 from ..format import duration as fmt  # noqa: E402
+from ..backend import credits as credits_mod  # noqa: E402
 from ..i18n import decimal, ntr, tr  # noqa: E402
 from ..settings import settings  # noqa: E402
 from .common import alert, choose_files, choose_folder, popup_menu, shown, toast  # noqa: E402
@@ -110,6 +111,12 @@ class MainWindow(Adw.ApplicationWindow):
         self._paused_by_minimize = False
         self._surface_handler = None
         self._last_motion = (0.0, 0.0)
+        # générique de fin (fonctionnalité « skip_credits ») : chapitres, sinon durée apprise par série
+        self.credits_store = credits_mod.CreditsStore()
+        self._credits = None                     # credits_mod.Credits de la vidéo en cours, ou None
+        self._credits_path = None
+        self._credits_loaded = False             # le fichier de l'élément courant est-il ouvert par mpv ?
+        self._credits_done = None                # vidéo dont le générique a été passé / refusé (une fois)
 
         # -- image -----------------------------------------------------------------------
         self.video = VideoView(self.c.player.mpv)
@@ -132,6 +139,7 @@ class MainWindow(Adw.ApplicationWindow):
                                            transition_duration=200, valign=Gtk.Align.END,
                                            halign=Gtk.Align.CENTER, margin_bottom=32, reveal_child=False)
         overlay.add_overlay(self.float_revealer)
+        self._build_credits_button(overlay)
         self._build_pip_overlays(overlay)
 
         # -- barres ----------------------------------------------------------------------
@@ -217,6 +225,122 @@ class MainWindow(Adw.ApplicationWindow):
             hover.connect("enter", lambda *_: setattr(self, "_over_bars", True))
             hover.connect("leave", lambda *_: setattr(self, "_over_bars", False))
             r.add_controller(hover)
+
+    def _build_credits_button(self, overlay: Gtk.Overlay):
+        """« Épisode suivant » en bas à droite de l'image pendant le générique de fin (comme les plateformes de
+        streaming), avec une croix pour continuer à regarder. Reste visible en plein écran, barres effacées."""
+        self.credits_button = Gtk.Button(label=tr("Épisode suivant"))
+        self.credits_button.add_css_class("suggested-action")
+        self.credits_button.add_css_class("pill")
+        self.credits_button.connect("clicked", lambda *_: self.skip_credits())
+        close = Gtk.Button(icon_name="window-close-symbolic", tooltip_text=tr("Continuer à regarder"),
+                           valign=Gtk.Align.CENTER)
+        close.add_css_class("flat")
+        close.add_css_class("circular")
+        close.connect("clicked", lambda *_: self._dismiss_credits())
+        box = Gtk.Box(spacing=6)
+        for cls in ("nausicaa-controls", "floating-controls", "credits-skip"):
+            box.add_css_class(cls)
+        box.append(self.credits_button)
+        box.append(close)
+        self.credits_revealer = Gtk.Revealer(transition_type=Gtk.RevealerTransitionType.CROSSFADE,
+                                             transition_duration=200, valign=Gtk.Align.END, halign=Gtk.Align.END,
+                                             margin_bottom=24, margin_end=24, reveal_child=False, child=box)
+        hover = Gtk.EventControllerMotion()
+        hover.connect("enter", lambda *_: setattr(self, "_over_bars", True))
+        hover.connect("leave", lambda *_: setattr(self, "_over_bars", False))
+        self.credits_revealer.add_controller(hover)
+        overlay.add_overlay(self.credits_revealer)
+
+    # -- générique de fin ---------------------------------------------------------------------
+    def _find_credits(self):
+        """Générique de la vidéo en cours (chapitres, sinon durée apprise pour la série)."""
+        item = self.c.item
+        path = item.path if item is not None and not item.stream else None
+        # « déjà passé / refusé » vaut pour CET élément de la file : la même vidéo rouverte repropose
+        self._credits_path = item if path is not None else None
+        self._credits = None
+        # juste après un changement d'élément, mpv a encore l'ANCIEN fichier (sa position, sa durée) : le
+        # bouton, ou le passage automatique, partait sur des valeurs périmées — on attend « loaded »
+        if path is not None and self._credits_loaded and features.enabled("skip_credits"):
+            self._credits = credits_mod.find(path, self.c.player.duration(), self.c.player.get("chapter-list"),
+                                             self.credits_store)
+        self._sync_credits(self.c.player.position())
+
+    def _credits_target(self) -> str:
+        """« seek » (scène après le générique), « next » (épisode suivant), "" (rien à proposer)."""
+        cr = self._credits
+        if cr is None:
+            return ""
+        if cr.resume is not None:
+            return "seek"
+        q = self.c.queue
+        return "next" if len(q) > 1 and q.next_index() is not None and q.repeat != "one" else ""
+
+    def credits_showing(self) -> bool:
+        return self.credits_revealer.get_reveal_child()
+
+    def _sync_credits(self, pos: float):
+        cr, target = self._credits, self._credits_target()
+        dur = self.c.player.duration()
+        show = (cr is not None and bool(target) and not self.pip and self._credits_done is not self._credits_path
+                and cr.start <= pos < (dur or 0) - 0.5)
+        if show and settings["credits_auto"]:
+            self.skip_credits()
+            return
+        if show:
+            self.credits_button.set_label(tr("Passer le générique") if target == "seek" else tr("Épisode suivant"))
+            self.credits_revealer.set_margin_bottom(110 if self.is_fullscreen() else 24)
+        if self.credits_revealer.get_reveal_child() != show:
+            self.credits_revealer.set_reveal_child(show)
+
+    def skip_credits(self):
+        target = self._credits_target()
+        self._credits_done = self._credits_path
+        self.credits_revealer.set_reveal_child(False)
+        if target == "seek":
+            self.c.seek_to(self._credits.resume)
+        elif target == "next":
+            self.c.next()
+
+    def _dismiss_credits(self):
+        self._credits_done = self._credits_path
+        self.credits_revealer.set_reveal_child(False)
+
+    def mark_credits(self):
+        """« Le générique commence ici » (G, clic droit) : la durée qui reste est retenue pour toute la série."""
+        item = self.c.item
+        if item is None or item.stream:
+            return
+        before = self.credits_store.get(item.path)
+        left = self.credits_store.learn(item.path, self.c.player.position(), self.c.player.duration())
+        if left is None:
+            toast(self, tr("Placez-vous au début du générique de fin, dans la seconde moitié de l'épisode"))
+            return
+        name = shown(credits_mod.series_name(item.path))
+        self._credits_done = self._credits_path       # on regarde ce générique-ci : pas de bouton tout de suite
+        self._find_credits()
+
+        def undo():
+            self.credits_store.put_back(item.path, before)
+            self._find_credits()
+        toast(self, tr("Générique retenu pour « {0} » : {1} avant la fin").format(name, fmt(left)),
+              tr("Annuler"), undo, timeout=6)
+
+    def forget_credits(self):
+        item = self.c.item
+        if item is None or item.stream:
+            return
+        old = self.credits_store.forget(item.path)
+        if old is None:
+            return
+        self._find_credits()
+
+        def undo():
+            self.credits_store.put_back(item.path, old)
+            self._find_credits()
+        toast(self, tr("Générique oublié pour « {0} »").format(shown(credits_mod.series_name(item.path))),
+              tr("Annuler"), undo, timeout=6)
 
     def _reveal_pip_overlays(self, reveal: bool):
         self.pip_controls.set_reveal_child(reveal and self.pip)
@@ -315,6 +439,9 @@ class MainWindow(Adw.ApplicationWindow):
             ("frame-previous", lambda: self.frame_step(True), ["comma"]),
             ("screenshot", self.screenshot, ["s"]),
             ("subtitles-visible", self.toggle_subtitles, ["v"]),
+            ("credits-here", self.mark_credits, ["g"]),
+            ("credits-forget", self.forget_credits, []),
+            ("credits-skip", self.skip_credits, []),
             ("add-subtitles", self.add_subtitles_dialog, []),
             ("save-playlist", self.panel.save_queue, ["<Control>s"]),
             ("clear-queue", c.clear, []),
@@ -865,6 +992,13 @@ class MainWindow(Adw.ApplicationWindow):
         play.append(tr("Quitter l'image dans l'image") if self.pip else tr("Image dans l'image"), "win.pip")
         menu.append_section(None, play)
         menu.append_section(None, self._tracks_menu())
+        item = self.c.item
+        if features.enabled("skip_credits") and item is not None and not item.stream:
+            credits = Gio.Menu()
+            credits.append(tr("Le générique commence ici"), "win.credits-here")
+            if self.credits_store.get(item.path) is not None:
+                credits.append(tr("Oublier le générique de cette série"), "win.credits-forget")
+            menu.append_section(None, credits)
         more = Gio.Menu()
         more.append(tr("Ouvrir des vidéos…"), "win.open")
         more.append(tr("Capture de l'image"), "win.screenshot")
@@ -1098,12 +1232,22 @@ class MainWindow(Adw.ApplicationWindow):
     def _on_event(self, event, *args):
         if event == "position":
             self.controls.set_position(args[0])
+            self._sync_credits(args[0])
         elif event == "duration":
             self.controls.set_duration(args[0])
+            self._find_credits()
+        elif event == "chapters":
+            self._find_credits()
         elif event == "state":
             self._sync_state()
         elif event in ("item", "title"):
             self._sync_item()
+            if event == "item":
+                self._credits_loaded = False
+                self._find_credits()
+        elif event == "loaded":
+            self._credits_loaded = True
+            self._find_credits()
         elif event == "video":
             self._sync_page()
             self._auto_fullscreen()
@@ -1122,6 +1266,7 @@ class MainWindow(Adw.ApplicationWindow):
         elif event == "queue":
             self._sync_buttons()
             self._sync_page()
+            self._sync_credits(self.c.player.position())
         elif event == "resumed":
             toast(self, tr("Reprise à {0}").format(fmt(args[0])), tr("Depuis le début"), self.c.restart, timeout=6)
         elif event == "error":
@@ -1139,6 +1284,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.controls.sync_volume()
         self.controls.set_duration(self.c.player.duration())
         self._sync_resume_button()
+        self._find_credits()
 
     def _sync_page(self):
         if self.c.player.path is None:
@@ -1243,6 +1389,7 @@ class MainWindow(Adw.ApplicationWindow):
         elif key == "features":
             self._sync_welcome()                                          # bibliothèque activée / coupée
             self._sync_tmdb()
+            self._find_credits()                                          # « Passer le générique »
         elif key == "tmdb_key":
             from ..backend import tmdb
             tmdb.forget_cache()                                           # « pas trouvé » d'une autre clé

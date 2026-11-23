@@ -77,6 +77,9 @@ bin/nausicaa                # try it without installing
 **Series and films**
 - **Following episodes**: open one episode and the other videos of its folder join the queue, in natural order
   ("Episode 2" before "Episode 10"), starting with the one you opened.
+- **Skip credits**: during an episode's end credits, a "Next episode" button (or skip automatically). The credits
+  are found in the video's chapters, otherwise learned: press G (or right-click → "The credits start here") once
+  and Nausicaa remembers it for the whole series, seasons included. No Internet, no database.
 - **Resume where you left off**: each video remembers its position ("From the start" if you prefer).
 - **Play queue** at the side (F9) — on the right or on the left, as you like (Preferences): shuffle, repeat, drag to reorder, Delete to remove, drop files to add; save it
   as a playlist (relative paths). `.m3u`, `.m3u8`, `.xspf`, `.pls` and addresses (streams) open too. The last
@@ -179,6 +182,10 @@ bin/nausicaa                # pour l'essayer sans l'installer
 **Séries et films**
 - **Épisodes suivants** : un épisode ouvert amène les autres vidéos de son dossier dans la file, dans l'ordre des
   noms (« Épisode 2 » avant « Épisode 10 »), en commençant par celui qu'on a ouvert.
+- **Passer le générique** : pendant le générique de fin d'un épisode, un bouton « Épisode suivant » (ou passage
+  automatique). Le générique est trouvé dans les chapitres de la vidéo, sinon appris : G (ou clic droit → « Le
+  générique commence ici ») une fois, et Nausicaa le retient pour toute la série, saisons comprises. Sans Internet,
+  sans base de données.
 - **Reprendre où on s'était arrêté** : chaque vidéo retient sa position (« Depuis le début » si on préfère).
 - **File de lecture** sur le côté (F9), à droite ou à gauche au choix (Préférences) : aléatoire, répétition, glisser pour réordonner, Suppr pour retirer,
   déposer des fichiers pour ajouter ; enregistrement en liste de lecture (chemins relatifs). Les `.m3u`, `.m3u8`,

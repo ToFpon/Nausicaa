@@ -39,6 +39,11 @@ FEATURES = [
             tr("Ouvrir une seule vidéo ajoute à la file les autres vidéos de son dossier, dans l'ordre "
                "des noms (« Épisode 2 » avant « Épisode 10 »)"),
             "view-list-symbolic"),
+    Feature("skip_credits", tr("Passer le générique"),
+            tr("Pendant le générique de fin d'un épisode, un bouton « Épisode suivant ». Le générique est trouvé "
+               "dans les chapitres de la vidéo, sinon appris : « Le générique commence ici » (clic droit ou G) "
+               "une fois, et Nausicaa le retient pour toute la série"),
+            "media-skip-forward-symbolic"),
     Feature("mpris", tr("Contrôle depuis le système"),
             tr("Panneau de GNOME, touches multimédia du clavier et boutons d'un casque Bluetooth (MPRIS)"),
             "input-keyboard-symbolic"),

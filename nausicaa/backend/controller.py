@@ -2,7 +2,7 @@
 
 Événements envoyés aux écouteurs (cb(event, *args)) : item (élément courant changé), state (lecture /
 pause), position, duration, queue (contenu ou ordre de la file), modes (aléatoire, répétition),
-volume, tracks (pistes audio / sous-titres), video (taille de l'image, présence d'une image),
+volume, tracks (pistes audio / sous-titres), chapters, loaded (fichier ouvert), video (taille de l'image, présence d'une image),
 title, resumed (position de reprise), ended (fin de la file), error (élément, message), loading.
 """
 
@@ -353,6 +353,8 @@ class Controller:
             self._emit("state")
         elif name == "track-list":
             self._emit("tracks")
+        elif name == "chapter-list":
+            self._emit("chapters")                  # générique de fin d'après les chapitres (credits.py)
         elif name in ("vid", "dwidth", "dheight"):
             self._emit("video")
         elif name == "media-title":
@@ -372,6 +374,7 @@ class Controller:
         elif name == "file-loaded":
             self._errors = 0
             self._emit("video")
+            self._emit("loaded")                    # le NOUVEAU fichier est ouvert (position, durée à lui)
         elif name == "end-file":
             reason, error, entry = value
             if entry is not None and self.player.entry_id is not None and entry != self.player.entry_id:

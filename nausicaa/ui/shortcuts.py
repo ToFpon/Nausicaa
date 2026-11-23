@@ -21,6 +21,7 @@ def _groups():
             ("<Control>Right <Control>Left", tr("Avancer / reculer d'une minute")),
             ("period comma", tr("Image suivante / précédente (en pause)")),
             ("n p", tr("Vidéo suivante / précédente")),
+            ("g", tr("Le générique commence ici")),
         ]),
         (tr("Son et image"), [
             ("Up Down", tr("Monter / baisser le volume")),
