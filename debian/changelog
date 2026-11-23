@@ -1,3 +1,16 @@
+nausicaa (1.2.0~noble1) noble; urgency=medium
+
+  * Passer le générique : pendant le générique de fin d'un épisode, un
+    bouton « Épisode suivant », ou passage automatique (Préférences,
+    Lecture).
+  * Le générique est trouvé dans les chapitres de la vidéo ; sinon, la
+    touche G (ou clic droit, « Le générique commence ici ») une fois, et
+    Nausicaa le retient pour toute la série, saisons comprises.
+  * Sans Internet ni base de données ; se coupe dans Préférences,
+    Fonctionnalités.
+
+ -- Tof <nourpon@gmail.com>  Mon, 23 Nov 2026 22:41:15 +0000
+
 nausicaa (1.1.2~noble1) noble; urgency=medium
 
   * Ouverte depuis Odysseus ou « Ouvrir avec », la vidéo s'affiche

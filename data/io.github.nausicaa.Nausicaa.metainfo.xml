@@ -73,6 +73,15 @@
   </requires>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.2.0" date="2026-11-23">
+      <description>
+        <ul>
+          <li>Skip credits: during an episode's end credits, a “Next episode” button, or skip automatically (Preferences → Playback)</li>
+          <li>The credits are found in the video's chapters; otherwise press G (or right-click → “The credits start here”) once and Nausicaa remembers it for the whole series, seasons included</li>
+          <li>No Internet, no database; can be turned off in Preferences → Features</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.1.2" date="2026-11-22">
       <description>
         <ul>
