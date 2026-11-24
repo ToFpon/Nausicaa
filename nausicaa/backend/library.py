@@ -29,6 +29,9 @@ _SEASON_ALONE = re.compile(r"^S(?P<num>\d{1,2})$", re.IGNORECASE)
 _EPISODE = re.compile(r"(?i)(?:\bs\d{1,2}[\s._-]?e\d{1,3}\b|\b\d{1,2}x\d{2,3}\b|[ée]pisode|\bep[\s._-]?\d|"
                       r"\be\d{2,3}\b|\bfolge\b)")
 _NUMBER = re.compile(r"(?<![\d])\d{1,3}(?![\d])")
+# « Série S01E02… », « Série.1x02… » : le nom de la série est ce qui précède
+_SHOW_EPISODE = re.compile(r"(?i)^(?P<name>.*?)[\s._\-–(\[]*(?:s(?P<s>\d{1,2})[\s._-]?e\d{1,3}|"
+                           r"(?<![\d])(?P<s2>\d{1,2})x\d{2,3})(?![\d])")
 _EPISODE_NUM = re.compile(r"(?i)(?:s(?P<s>\d{1,2})[\s._-]?e(?P<e>\d{1,3})|\b(?P<s2>\d{1,2})x(?P<e2>\d{2,3})\b)")
 # ce qui suit le titre dans un nom de fichier « de sortie » (« Film.2019.1080p.BluRay.x264-GRP »)
 _JUNK = re.compile(r"(?i)[\s._\-\[(]+(?:\d{3,4}p|4k|uhd|hdr\d*|x26[45]|h\.?26[45]|hevc|avc|bluray|blu-ray|bdrip|"
@@ -128,6 +131,34 @@ def _looks_like_episodes(videos: list) -> bool:
     return numbered * 3 >= len(names) * 2
 
 
+def _split_episodes(videos: list, folder_name: str = "") -> tuple[list, dict]:
+    """(films, {(nom de la série, saison): [épisodes]}) : un fichier « Série S01E02 » est un épisode où qu'il soit
+    — posé à la racine de la bibliothèque, ou seul dans son dossier (avant : compté comme un film, vu chez Tof :
+    accueil sans séries)."""
+    films, eps = [], {}
+    for v in videos:
+        stem = os.path.splitext(os.path.basename(v))[0]
+        m = _SHOW_EPISODE.match(stem)
+        name = (_tidy(_JUNK.sub("", m.group("name"))) or folder_name) if m else ""   # « Dark/S01E03.mkv »
+        if not name:
+            films.append(v)
+            continue
+        eps.setdefault((name, int(m.group("s") or m.group("s2"))), []).append(v)
+    return films, eps
+
+
+def _episode_order(path: str):
+    """Ordre de deux épisodes nommés différemment (« Toto 02 » et « Toto.S01E09 ») : leur numéro d'abord."""
+    stem = os.path.splitext(os.path.basename(path))[0]
+    m = _EPISODE_NUM.search(stem)
+    if m:
+        num = int(m.group("e") or m.group("e2"))
+    else:
+        found = _NUMBER.findall(re.sub(r"(?:19|20)\d\d", "", stem))
+        num = int(found[-1]) if found else 10 ** 6
+    return num, media.name_key(os.path.basename(path))
+
+
 def _videos(folder: str) -> tuple[list, list]:
     """(vidéos, sous-dossiers) d'un dossier, en ordre naturel, cachés ignorés, liens de dossiers non suivis."""
     try:
@@ -171,8 +202,15 @@ def scan(roots: list, max_depth: int = MAX_DEPTH) -> Library:
             return
         seen_dirs.add(real)
         videos, subs = _videos(folder)
+
+        def loose(files):
+            """Vidéos sans dossier de série : films, sauf les épisodes nommés « Série S01E02 »."""
+            rest, eps = _split_episodes(files, "" if is_root else _tidy(os.path.basename(folder)))
+            films.extend(rest)
+            for (name, num), found in eps.items():
+                show_for(name).seasons.append(Season(num, folder, found))
         if is_root:
-            films.extend(videos)
+            loose(videos)
         elif videos:
             base = os.path.basename(folder)
             name, num = season_of(base)
@@ -185,7 +223,7 @@ def scan(roots: list, max_depth: int = MAX_DEPTH) -> Library:
             elif _looks_like_episodes(videos):       # « Toto/ » plein d'épisodes
                 show_for(_tidy(base), folder).seasons.append(Season(None, folder, videos))
             else:
-                films.extend(videos)
+                loose(videos)
         for d in subs:
             walk(d, depth + 1, False)
 
@@ -194,6 +232,16 @@ def scan(roots: list, max_depth: int = MAX_DEPTH) -> Library:
         if os.path.isdir(r):
             walk(r, 0, True)
     for s in shows.values():
+        # une même saison trouvée à deux endroits (dossier « Toto saison 1 » + « Toto S01E09.mkv » posé à côté) :
+        # réunie, épisodes dans l'ordre des noms
+        merged: dict = {}
+        for season in s.seasons:
+            if season.number is not None and season.number in merged:
+                first = merged[season.number]
+                first.episodes = sorted(first.episodes + season.episodes, key=_episode_order)
+            else:
+                merged[season.number if season.number is not None else id(season)] = season
+        s.seasons = list(merged.values())
         s.seasons.sort(key=lambda x: (x.number is None, x.number or 0, media.name_key(x.label)))
     films.sort(key=lambda p: media.name_key(clean_title(p)))
     return Library(films=films, shows=sorted(shows.values(), key=lambda s: media.name_key(s.name)))

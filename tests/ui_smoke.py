@@ -521,7 +521,7 @@ def passer_le_generique(win):
     check(not win.credits_showing(), "avant le générique : pas de bouton")
     c().seek_to(301)
     yield Wait(4, until=win.credits_showing)
-    check(win.credits_showing() and win.credits_button.get_label() == tr("Épisode suivant"),
+    check(win.credits_showing() and win.credits_content.get_label() == tr("Épisode suivant"),
           "pendant le générique : bouton « Épisode suivant »")
     win.credits_button.emit("clicked")
     yield Wait(8, until=lambda: basename() == "Show S01E02.mkv")

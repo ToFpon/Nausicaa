@@ -122,7 +122,10 @@ tests, paquet.
   dans un fil à chaque retour sur l'accueil : films = vidéos à la racine, seules dans leur dossier, ou dans un
   dossier qui n'a pas l'air d'une série ; séries = « Toto saison 1 », « Toto saison 2 » (rangement de Tof)
   regroupées sans casse, aussi « Toto/Saison 1 », « Season 02 », « S03 », « Staffel », ou dossier d'épisodes
-  (S01E02, 1x02, « Épisode », numéros) ; ordre naturel ; `clean_title` (« Film.2019.1080p… » → « Film (2019) »,
+  (S01E02, 1x02, « Épisode », numéros) ; ordre naturel ; épisode « Série S01E02 » / « Série 1x02 » posé à la RACINE
+  ou seul dans un dossier = épisode de sa série (`_split_episodes`, nom = ce qui précède, sinon le dossier ; avant :
+  compté comme un film, vu chez Tof : accueil sans séries), même saison trouvée à deux endroits réunie
+  (`_episode_order` : numéro d'épisode, puis nom — « Toto.S01E09 » se triait avant « Toto 01 ») ; `clean_title` (« Film.2019.1080p… » → « Film (2019) »,
   dernière année gardée : « Blade Runner 2049 (2017) »). Affiches `backend/posters.py` : image choisie
   (`library_images`), image posée à côté (poster / folder / cover / front, « Film-poster.jpg »), vignette
   freedesktop de GNOME, sinon image à 20 % tirée par la LIBMPV (vo=image, frames=1 : 0,1 s, aucune dépendance
@@ -172,7 +175,8 @@ tests, paquet.
   seconde moitié, vidéos ≥ 5 min) ; clé = `series_key` (dossier ; dossier de saison → la série, `library.season_of`
   + `name_key` : « Toto saison 1 » et « Toto/Season 02 » partagent). Chapitres d'abord. Interface (`window.py`) :
   capsule `credits_revealer` en bas à droite de l'image (`.credits-skip`, au-dessus de la barre flottante en plein
-  écran), bouton « Épisode suivant » (s'il y a une suivante, pas en « Répéter la vidéo ») + croix « Continuer à
+  écran ; couleurs translucides du panneau du plein écran, bouton PLAT icône + texte `credits_content` — demande de
+  Tof, le bouton bleu plein tranchait trop), bouton « Épisode suivant » (s'il y a une suivante, pas en « Répéter la vidéo ») + croix « Continuer à
   regarder » ; passé / refusé = une fois par ÉLÉMENT de la file (`_credits_done is _credits_path`, objets Item :
   la même vidéo rouverte repropose). Réglage `credits_auto` (Préférences → Lecture → Générique de fin : proposer /
   passer tout seul). « Oublier le générique de cette série » (clic droit), toasts « Annuler ». PIÈGE vu au test :

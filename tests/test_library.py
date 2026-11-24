@@ -111,6 +111,32 @@ class ScanTest(unittest.TestCase):
         self.assertEqual(len(lib.shows), 1)
 
 
+class LooseEpisodesTest(unittest.TestCase):
+    def test_episodes_outside_series_folders(self):
+        """Épisodes « Série S01E02 » posés à la racine ou seuls dans un dossier : des séries, plus des films (vu chez
+        Tof : accueil sans séries). Même saison trouvée à deux endroits : réunie."""
+        r = tempfile.mkdtemp(dir=TMP)
+        for rel in ("Breaking.Bad.S01E02.720p.mkv", "Breaking.Bad.S01E01.720p.mkv", "Breaking Bad S02E01.mkv",
+                    "Alien.mkv", "Blade Runner 2049 (2017).mkv",
+                    "Dark/S01E03.mkv",                                   # seul dans son dossier, sans nom
+                    "Toto saison 1/Toto 01.mkv", "Toto saison 1/Toto 02.mkv", "Toto.S01E09.mkv",
+                    "Un film/Le Film.mkv"):
+            touch(r, rel)
+        lib = library.scan([r])
+        rel = lambda p: os.path.relpath(p, r)  # noqa: E731
+        self.assertEqual(sorted(rel(f) for f in lib.films),
+                         ["Alien.mkv", "Blade Runner 2049 (2017).mkv", "Un film/Le Film.mkv"])
+        shows = {s.name: s for s in lib.shows}
+        self.assertEqual(sorted(shows), ["Breaking Bad", "Dark", "Toto"])
+        bb = shows["Breaking Bad"]
+        self.assertEqual([x.number for x in bb.seasons], [1, 2])
+        self.assertEqual([rel(e) for e in bb.seasons[0].episodes],
+                         ["Breaking.Bad.S01E01.720p.mkv", "Breaking.Bad.S01E02.720p.mkv"])
+        toto = shows["Toto"]
+        self.assertEqual(len(toto.seasons), 1, "saison 1 réunie : dossier + épisode posé à côté")
+        self.assertEqual([os.path.basename(e) for e in toto.episodes], ["Toto 01.mkv", "Toto 02.mkv", "Toto.S01E09.mkv"])
+
+
 class PosterTest(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.mkdtemp(dir=TMP)

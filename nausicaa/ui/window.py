@@ -229,9 +229,11 @@ class MainWindow(Adw.ApplicationWindow):
     def _build_credits_button(self, overlay: Gtk.Overlay):
         """« Épisode suivant » en bas à droite de l'image pendant le générique de fin (comme les plateformes de
         streaming), avec une croix pour continuer à regarder. Reste visible en plein écran, barres effacées."""
-        self.credits_button = Gtk.Button(label=tr("Épisode suivant"))
-        self.credits_button.add_css_class("suggested-action")
-        self.credits_button.add_css_class("pill")
+        # discret (demande de Tof) : bouton plat dans la capsule translucide du panneau du plein écran, pas un
+        # bouton bleu plein ; icône « suivant » + texte
+        self.credits_content = Adw.ButtonContent(icon_name="media-skip-forward-symbolic", label=tr("Épisode suivant"))
+        self.credits_button = Gtk.Button(child=self.credits_content)
+        self.credits_button.add_css_class("flat")
         self.credits_button.connect("clicked", lambda *_: self.skip_credits())
         close = Gtk.Button(icon_name="window-close-symbolic", tooltip_text=tr("Continuer à regarder"),
                            valign=Gtk.Align.CENTER)
@@ -289,7 +291,7 @@ class MainWindow(Adw.ApplicationWindow):
             self.skip_credits()
             return
         if show:
-            self.credits_button.set_label(tr("Passer le générique") if target == "seek" else tr("Épisode suivant"))
+            self.credits_content.set_label(tr("Passer le générique") if target == "seek" else tr("Épisode suivant"))
             self.credits_revealer.set_margin_bottom(110 if self.is_fullscreen() else 24)
         if self.credits_revealer.get_reveal_child() != show:
             self.credits_revealer.set_reveal_child(show)
