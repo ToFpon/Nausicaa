@@ -1,3 +1,12 @@
+nausicaa (1.2.2~noble1) noble; urgency=medium
+
+  * Bibliothèque : « Reprendre » montre aussi les séries, une carte par
+    série ; l'épisode en cours, ou le suivant (« À suivre ») une fois un
+    épisode fini.
+  * La page d'une série propose le même épisode que l'accueil.
+
+ -- Tof <nourpon@gmail.com>  Tue, 24 Nov 2026 17:57:31 +0000
+
 nausicaa (1.2.1~noble1) noble; urgency=medium
 
   * Une flèche (et Alt+Début) ramène à l'accueil pendant la lecture ; la

@@ -73,6 +73,14 @@
   </requires>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.2.2" date="2026-11-24">
+      <description>
+        <ul>
+          <li>Library: “Resume” now shows your series, one card per series — the episode you stopped in, or the next one (“Up next”) once an episode is finished</li>
+          <li>A series page offers the same episode as the home page</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.2.1" date="2026-11-24">
       <description>
         <ul>
