@@ -1,3 +1,15 @@
+nausicaa (1.2.1~noble1) noble; urgency=medium
+
+  * Une flèche (et Alt+Début) ramène à l'accueil pendant la lecture ; la
+    position est gardée pour « Reprendre ».
+  * Bibliothèque : les épisodes nommés « Série S01E02 » posés à la racine
+    d'un dossier, ou seuls dans un dossier, rejoignent leur série au lieu
+    d'être rangés parmi les films.
+  * Le bouton « Épisode suivant » du générique est plus discret, aux
+    couleurs des commandes du plein écran.
+
+ -- Tof <nourpon@gmail.com>  Tue, 24 Nov 2026 09:56:50 +0000
+
 nausicaa (1.2.0~noble1) noble; urgency=medium
 
   * Passer le générique : pendant le générique de fin d'un épisode, un
