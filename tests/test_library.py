@@ -137,6 +137,53 @@ class LooseEpisodesTest(unittest.TestCase):
         self.assertEqual([os.path.basename(e) for e in toto.episodes], ["Toto 01.mkv", "Toto 02.mkv", "Toto.S01E09.mkv"])
 
 
+class ContinueWatchingTest(unittest.TestCase):
+    """« Reprendre » de l'accueil : une carte par série d'après sa dernière activité (vu chez Tof : une série
+    regardée épisode par épisode n'y apparaissait jamais, seuls les épisodes commencés et pas finis)."""
+
+    def setUp(self):
+        self.r = tempfile.mkdtemp(dir=TMP)
+        for rel in ("Film.mkv", "Autre film.mkv", "Toto saison 1/Toto S01E01.mkv", "Toto saison 1/Toto S01E02.mkv",
+                    "Toto saison 1/Toto S01E03.mkv", "Toto saison 2/Toto S02E01.mkv", "Titi/Titi S01E01.mkv",
+                    "Titi/Titi S01E02.mkv"):
+            touch(self.r, rel)
+        self.lib = library.scan([self.r])
+        self.p = lambda rel: os.path.join(self.r, rel)  # noqa: E731
+
+    def names(self, entries, **kw):
+        return [(os.path.basename(x.path), os.path.basename(x.hide), x.started)
+                for x in library.continue_watching(self.lib, entries, **kw)]
+
+    def test_next_episode_after_finished_one(self):
+        p = self.p
+        entries = {p("Toto saison 1/Toto S01E01.mkv"): {"pos": 0, "seen": True, "time": 100},
+                   p("Toto saison 1/Toto S01E02.mkv"): {"pos": 0, "seen": True, "time": 200},
+                   p("Film.mkv"): {"pos": 600, "time": 150}}
+        self.assertEqual(self.names(entries), [("Toto S01E03.mkv", "Toto S01E02.mkv", False),
+                                               ("Film.mkv", "Film.mkv", True)])
+
+    def test_one_card_per_show_last_activity_wins(self):
+        p = self.p
+        entries = {p("Toto saison 1/Toto S01E01.mkv"): {"pos": 300, "time": 100},     # abandonné
+                   p("Toto saison 1/Toto S01E02.mkv"): {"pos": 0, "seen": True, "time": 200},
+                   p("Toto saison 1/Toto S01E03.mkv"): {"pos": 500, "time": 300}}     # en cours
+        self.assertEqual(self.names(entries), [("Toto S01E03.mkv", "Toto S01E03.mkv", True)])
+
+    def test_next_season_and_finished_show(self):
+        p = self.p
+        entries = {p("Toto saison 1/Toto S01E03.mkv"): {"pos": 0, "seen": True, "time": 100},
+                   p("Titi/Titi S01E01.mkv"): {"pos": 0, "seen": True, "time": 50},
+                   p("Titi/Titi S01E02.mkv"): {"pos": 0, "seen": True, "time": 60}}        # série finie
+        self.assertEqual(self.names(entries), [("Toto S02E01.mkv", "Toto S01E03.mkv", False)])
+
+    def test_hidden(self):
+        p = self.p
+        entries = {p("Toto saison 1/Toto S01E01.mkv"): {"pos": 0, "seen": True, "time": 100, "hidden": True},
+                   p("Film.mkv"): {"pos": 600, "time": 150, "hidden": True}}
+        self.assertEqual(self.names(entries), [])
+        self.assertEqual(len(self.names(entries, hidden_too=True)), 2, "page de la série : la suite reste proposée")
+
+
 class PosterTest(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.mkdtemp(dir=TMP)

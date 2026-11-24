@@ -201,15 +201,15 @@ msgstr ""
 msgid "presque fini"
 msgstr ""
 
-#: nausicaa/ui/library.py:354 nausicaa/ui/window.py:334 nausicaa/ui/window.py:349 nausicaa/ui/window.py:654
+#: nausicaa/ui/library.py:353 nausicaa/ui/window.py:334 nausicaa/ui/window.py:349 nausicaa/ui/window.py:654
 msgid "Annuler"
 msgstr ""
 
-#: nausicaa/ui/library.py:505
+#: nausicaa/ui/library.py:501
 msgid "Choisir une image…"
 msgstr ""
 
-#: nausicaa/ui/library.py:583
+#: nausicaa/ui/library.py:579
 msgid "Choisir une image"
 msgstr ""
 
@@ -233,43 +233,43 @@ msgstr ""
 msgid "Aucune vidéo dans la bibliothèque"
 msgstr ""
 
-#: nausicaa/ui/library.py:299
+#: nausicaa/ui/library.py:298
 msgid "Reprendre"
 msgstr ""
 
-#: nausicaa/ui/library.py:311
+#: nausicaa/ui/library.py:310
 msgid "Séries"
 msgstr ""
 
-#: nausicaa/ui/library.py:320
+#: nausicaa/ui/library.py:319
 msgid "Films"
 msgstr ""
 
-#: nausicaa/ui/library.py:326 nausicaa/ui/library.py:514
+#: nausicaa/ui/library.py:325 nausicaa/ui/library.py:510
 msgid "Retirer de « Reprendre »"
 msgstr ""
 
-#: nausicaa/ui/library.py:397
+#: nausicaa/ui/library.py:396
 msgid "TMDB refuse la clé d'API : vérifiez-la dans Préférences → Général → Bibliothèque"
 msgstr ""
 
-#: nausicaa/ui/library.py:415
+#: nausicaa/ui/library.py:414
 msgid "Retour"
 msgstr ""
 
-#: nausicaa/ui/library.py:507
+#: nausicaa/ui/library.py:503
 msgid "Image d'origine"
 msgstr ""
 
-#: nausicaa/ui/library.py:526
+#: nausicaa/ui/library.py:522
 msgid "Marquer comme non vu"
 msgstr ""
 
-#: nausicaa/ui/library.py:528
+#: nausicaa/ui/library.py:524
 msgid "Marquer comme vu"
 msgstr ""
 
-#: nausicaa/ui/library.py:76 nausicaa/ui/library.py:460
+#: nausicaa/ui/library.py:76 nausicaa/ui/library.py:459
 msgid "Vu"
 msgstr ""
 
@@ -277,43 +277,47 @@ msgstr ""
 msgid "Aucun dossier choisi"
 msgstr ""
 
-#: nausicaa/ui/library.py:354
+#: nausicaa/ui/library.py:353
 msgid "« {0} » retiré de « Reprendre »"
 msgstr ""
 
-#: nausicaa/ui/library.py:399
+#: nausicaa/ui/library.py:398
 msgid "TMDB ne répond pas : images tirées des vidéos en attendant"
 msgstr ""
 
-#: nausicaa/ui/library.py:307
+#: nausicaa/ui/library.py:306
 msgid "{0} épisode"
 msgid_plural "{0} épisodes"
 msgstr[0] ""
 msgstr[1] ""
 
-#: nausicaa/ui/library.py:439
+#: nausicaa/ui/library.py:438
 msgid "Reprendre {0}"
 msgstr ""
 
-#: nausicaa/ui/library.py:439
+#: nausicaa/ui/library.py:438
 msgid "Lire {0}"
 msgstr ""
 
-#: nausicaa/ui/library.py:447
+#: nausicaa/ui/library.py:446
 msgid "Saison {0}"
 msgstr ""
 
-#: nausicaa/ui/library.py:584
+#: nausicaa/ui/library.py:580
 msgid "Images"
 msgstr ""
 
-#: nausicaa/ui/library.py:432
+#: nausicaa/ui/library.py:431
 msgid "{0} épisode vu sur {1}"
 msgid_plural "{0} épisodes vus sur {1}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: nausicaa/ui/library.py:306
+#: nausicaa/ui/library.py:288
+msgid "À suivre : {0}"
+msgstr ""
+
+#: nausicaa/ui/library.py:305
 msgid "{0} saison"
 msgid_plural "{0} saisons"
 msgstr[0] ""

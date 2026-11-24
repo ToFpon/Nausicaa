@@ -271,16 +271,16 @@ msgstr "Pause"
 msgid "presque fini"
 msgstr "fast fertig"
 
-#: nausicaa/ui/library.py:354 nausicaa/ui/window.py:334
+#: nausicaa/ui/library.py:353 nausicaa/ui/window.py:334
 #: nausicaa/ui/window.py:349 nausicaa/ui/window.py:654
 msgid "Annuler"
 msgstr "Abbrechen"
 
-#: nausicaa/ui/library.py:505
+#: nausicaa/ui/library.py:501
 msgid "Choisir une image…"
 msgstr "Bild wählen …"
 
-#: nausicaa/ui/library.py:583
+#: nausicaa/ui/library.py:579
 msgid "Choisir une image"
 msgstr "Bild wählen"
 
@@ -305,23 +305,23 @@ msgstr "Mediathek neu einlesen"
 msgid "Aucune vidéo dans la bibliothèque"
 msgstr "Keine Videos in der Mediathek"
 
-#: nausicaa/ui/library.py:299
+#: nausicaa/ui/library.py:298
 msgid "Reprendre"
 msgstr "Weiterschauen"
 
-#: nausicaa/ui/library.py:311
+#: nausicaa/ui/library.py:310
 msgid "Séries"
 msgstr "Serien"
 
-#: nausicaa/ui/library.py:320
+#: nausicaa/ui/library.py:319
 msgid "Films"
 msgstr "Filme"
 
-#: nausicaa/ui/library.py:326 nausicaa/ui/library.py:514
+#: nausicaa/ui/library.py:325 nausicaa/ui/library.py:510
 msgid "Retirer de « Reprendre »"
 msgstr "Aus „Weiterschauen“ entfernen"
 
-#: nausicaa/ui/library.py:397
+#: nausicaa/ui/library.py:396
 msgid ""
 "TMDB refuse la clé d'API : vérifiez-la dans Préférences → Général → "
 "Bibliothèque"
@@ -329,23 +329,23 @@ msgstr ""
 "TMDB lehnt den API-Schlüssel ab: bitte in Einstellungen → Allgemein → "
 "Mediathek prüfen"
 
-#: nausicaa/ui/library.py:415
+#: nausicaa/ui/library.py:414
 msgid "Retour"
 msgstr "Zurück"
 
-#: nausicaa/ui/library.py:507
+#: nausicaa/ui/library.py:503
 msgid "Image d'origine"
 msgstr "Ursprüngliches Bild"
 
-#: nausicaa/ui/library.py:526
+#: nausicaa/ui/library.py:522
 msgid "Marquer comme non vu"
 msgstr "Als ungesehen markieren"
 
-#: nausicaa/ui/library.py:528
+#: nausicaa/ui/library.py:524
 msgid "Marquer comme vu"
 msgstr "Als gesehen markieren"
 
-#: nausicaa/ui/library.py:76 nausicaa/ui/library.py:460
+#: nausicaa/ui/library.py:76 nausicaa/ui/library.py:459
 msgid "Vu"
 msgstr "Gesehen"
 
@@ -353,43 +353,47 @@ msgstr "Gesehen"
 msgid "Aucun dossier choisi"
 msgstr "Kein Ordner gewählt"
 
-#: nausicaa/ui/library.py:354
+#: nausicaa/ui/library.py:353
 msgid "« {0} » retiré de « Reprendre »"
 msgstr "„{0}“ aus „Weiterschauen“ entfernt"
 
-#: nausicaa/ui/library.py:399
+#: nausicaa/ui/library.py:398
 msgid "TMDB ne répond pas : images tirées des vidéos en attendant"
 msgstr "TMDB antwortet nicht: bis dahin Bilder aus den Videos"
 
-#: nausicaa/ui/library.py:307
+#: nausicaa/ui/library.py:306
 msgid "{0} épisode"
 msgid_plural "{0} épisodes"
 msgstr[0] "{0} Folge"
 msgstr[1] "{0} Folgen"
 
-#: nausicaa/ui/library.py:439
+#: nausicaa/ui/library.py:438
 msgid "Reprendre {0}"
 msgstr "{0} fortsetzen"
 
-#: nausicaa/ui/library.py:439
+#: nausicaa/ui/library.py:438
 msgid "Lire {0}"
 msgstr "{0} abspielen"
 
-#: nausicaa/ui/library.py:447
+#: nausicaa/ui/library.py:446
 msgid "Saison {0}"
 msgstr "Staffel {0}"
 
-#: nausicaa/ui/library.py:584
+#: nausicaa/ui/library.py:580
 msgid "Images"
 msgstr "Bilder"
 
-#: nausicaa/ui/library.py:432
+#: nausicaa/ui/library.py:431
 msgid "{0} épisode vu sur {1}"
 msgid_plural "{0} épisodes vus sur {1}"
 msgstr[0] "{0} von {1} Folgen gesehen"
 msgstr[1] "{0} von {1} Folgen gesehen"
 
-#: nausicaa/ui/library.py:306
+#: nausicaa/ui/library.py:288
+msgid "À suivre : {0}"
+msgstr "Als Nächstes: {0}"
+
+#: nausicaa/ui/library.py:305
 msgid "{0} saison"
 msgid_plural "{0} saisons"
 msgstr[0] "{0} Staffel"

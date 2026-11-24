@@ -276,26 +276,25 @@ class LibraryView(Gtk.Stack):
         self.empty.set_visible(lib.empty)
         if lib.empty:
             self.empty.set_description(shown("\n".join(dirs)) if dirs else tr("Aucun dossier choisi"))
-        show_of = {e: s for s in lib.shows for e in s.episodes}
-        # à reprendre : commencées, les plus récentes d'abord
-        started = sorted((p for p, e in self.entries.items() if float(e.get("pos") or 0) > 0 and not e.get("hidden")),
-                         key=lambda p: self.entries[p].get("time", 0), reverse=True)[:RESUME_MAX]
-        if started:
+        # à reprendre : films commencés, une carte par série (épisode commencé, ou la suite) — library.continue_watching
+        resume = library.continue_watching(lib, self.entries, RESUME_MAX)
+        if resume:
             flow = _flow()
-            for p in started:
-                e = self.entries[p]
-                show = show_of.get(p)
-                if show is not None:
-                    ep = library.episode_label(p) or library.clean_title(p)
-                    card = self._card(show_key(show), show.name, " · ".join(x for x in (ep, remaining_text(e)) if x),
-                                      self._progress(e), poster=("show", show))
-                    card.connect("clicked", lambda _b, s=show, path=p: self.play_episode(s, path))
+            for r in resume:
+                e = self._entry(r.path)
+                if r.show is not None:
+                    ep = library.episode_label(r.path) or library.clean_title(r.path)
+                    sub = (" · ".join(x for x in (ep, remaining_text(e)) if x) if r.started
+                           else tr("À suivre : {0}").format(ep))
+                    card = self._card(show_key(r.show), r.show.name, sub, self._progress(e) if r.started else 0.0,
+                                      poster=("show", r.show))
+                    card.connect("clicked", lambda _b, s=r.show, path=r.path: self.play_episode(s, path))
                 else:
-                    card = self._card(p, library.clean_title(p), remaining_text(e), self._progress(e),
-                                      poster=("film", p))
-                    card.connect("clicked", lambda _b, path=p: self.play_film(path))
-                card.resume_path = p
-                flow.append(self._with_close(card, p))
+                    card = self._card(r.path, library.clean_title(r.path), remaining_text(e), self._progress(e),
+                                      poster=("film", r.path))
+                    card.connect("clicked", lambda _b, path=r.path: self.play_film(path))
+                card.resume_path = r.hide
+                flow.append(self._with_close(card, r.hide))
             self._section(tr("Reprendre"), flow)
         if lib.shows:
             flow = _flow()
@@ -476,16 +475,13 @@ class LibraryView(Gtk.Stack):
         self.set_visible_child_name("home")
 
     def next_episode(self, show):
-        """Épisode commencé le plus récent, sinon le premier non vu après le dernier vu, sinon le premier."""
+        """Même règle que « Reprendre » de l'accueil (library.continue_watching : dernière activité — épisode
+        commencé, sinon le suivant du dernier vu), sinon le premier non vu, sinon le premier."""
         eps = show.episodes
-        started = [p for p in eps if float(self._entry(p).get("pos") or 0) > 0]
-        if started:
-            return max(started, key=lambda p: self._entry(p).get("time", 0))
-        last = max((i for i, p in enumerate(eps) if self._entry(p).get("seen")), default=-1)
-        for p in eps[last + 1:]:
-            if not self._entry(p).get("seen"):
-                return p
-        return eps[0] if eps else None
+        found = library.continue_watching(library.Library(shows=[show]), self.entries, 1, hidden_too=True)
+        if found:
+            return found[0].path
+        return next((p for p in eps if not self._entry(p).get("seen")), eps[0] if eps else None)
 
     # -- lecture -------------------------------------------------------------------------------
     def play_film(self, path: str):

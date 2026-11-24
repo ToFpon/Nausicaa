@@ -247,6 +247,47 @@ def scan(roots: list, max_depth: int = MAX_DEPTH) -> Library:
     return Library(films=films, shows=sorted(shows.values(), key=lambda s: media.name_key(s.name)))
 
 
+@dataclass
+class Resume:
+    """Une carte de « Reprendre » : un film commencé, ou une série (son épisode commencé, ou la suite)."""
+    path: str                      # ce qu'on lit en cliquant
+    hide: str                      # ce que la croix retire (positions.hide) : la dernière vidéo regardée
+    show: Optional["Show"] = None
+    started: bool = True           # False : épisode suivant, pas encore commencé (« À suivre »)
+    time: float = 0.0
+
+
+def continue_watching(lib: "Library", entries: dict, limit: int = 20, hidden_too: bool = False) -> list:
+    """« Reprendre », comme les plateformes : films commencés, et UNE carte par série d'après sa dernière activité —
+    épisode commencé → on le reprend ; épisode fini → le suivant non vu (avant : seuls les épisodes commencés et pas
+    finis apparaissaient, une série regardée épisode par épisode n'y était jamais — vu chez Tof). Série finie :
+    rien. Les plus récentes d'abord. entries : {chemin: {pos, seen, time, hidden}} (positions.json)."""
+    def e(p):
+        return entries.get(p) or {}
+    out = []
+    in_show = {ep for sh in lib.shows for ep in sh.episodes}
+    for p, x in entries.items():
+        if p not in in_show and float(x.get("pos") or 0) > 0 and (hidden_too or not x.get("hidden")):
+            out.append(Resume(p, p, None, True, float(x.get("time") or 0)))
+    for sh in lib.shows:
+        eps = sh.episodes
+        active = [p for p in eps if float(e(p).get("pos") or 0) > 0 or e(p).get("seen")]
+        if not active:
+            continue
+        last = max(active, key=lambda p: float(e(p).get("time") or 0))
+        if e(last).get("hidden") and not hidden_too:
+            continue
+        when = float(e(last).get("time") or 0)
+        if float(e(last).get("pos") or 0) > 0:
+            out.append(Resume(last, last, sh, True, when))
+            continue
+        nxt = next((p for p in eps[eps.index(last) + 1:] if not e(p).get("seen")), None)
+        if nxt is not None:
+            out.append(Resume(nxt, last, sh, float(e(nxt).get("pos") or 0) > 0, when))
+    out.sort(key=lambda r: r.time, reverse=True)
+    return out[:limit]
+
+
 def name_key(name: str) -> str:
     """Nom d'une série pour regrouper ses saisons : casse, accents gardés, ponctuation ignorée — « Hunting :
     Chasseurs » et « Hunting - Chasseurs » (un « : » remplacé à la copie sur une clé) sont la même série."""

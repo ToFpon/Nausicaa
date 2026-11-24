@@ -146,7 +146,12 @@ tests, paquet.
   « Retirer de Reprendre » (demande d'un utilisateur, validée par Tof ; PAS d'interrupteurs par section : c'est
   une bibliothèque, choix de Tof) : petite croix au survol / au focus clavier comme les récents de Calypso
   (`_with_close` : Gtk.Overlay carte + croix, pas de bouton dans le bouton) et entrée du clic droit ; toast
-  « Annuler ». `positions.hide` : drapeau `hidden`, la POSITION RESTE (la reprise marche) ; regardée de nouveau,
+  « Annuler ». « Reprendre » = `library.continue_watching` (pur, testé `ContinueWatchingTest`) : films commencés +
+  UNE carte par série d'après sa dernière activité (épisode commencé → on le reprend ; épisode fini → le suivant
+  non vu, « À suivre : S01E04 », saison suivante comprise ; série finie → rien) — avant, seuls les épisodes
+  commencés et pas finis y étaient : une série regardée épisode par épisode n'apparaissait jamais (capture de Tof).
+  La croix retire la DERNIÈRE vidéo regardée (`Resume.hide`). Le bouton de la page d'une série (`next_episode`)
+  suit la même règle (`hidden_too`). `positions.hide` : drapeau `hidden`, la POSITION RESTE (la reprise marche) ; regardée de nouveau,
   la vidéo revient (remember écrit une entrée neuve). Menus de la page : un par forme (`_popup`, clé = entrées
   du Gio.Menu, `_labels`), gardés, jamais détruits, détachés à l'unrealize. PIÈGE GTK 4.14 (menu tronqué avec
   barre de défilement, vu chez Tof, deux fois) : un Gtk.PopoverMenu accroché à la FENÊTRE, à un Gtk.Stack ou à
