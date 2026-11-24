@@ -496,6 +496,28 @@ def reprise(win):
 
 
 @step
+def revenir_a_l_accueil(win):
+    """Pendant la lecture : bouton ← « Revenir à l'accueil » (demande de Tof) ; file et position gardées."""
+    win.open_paths([LIB["film"]])
+    yield Wait(10, until=lambda: basename() == "Long film.mkv" and c().player.duration() > 0)
+    check(win.home_button.get_visible(), "en lecture : bouton « Revenir à l'accueil » visible")
+    c().seek_to(40)
+    yield Wait(4, until=lambda: c().player.position() >= 40)
+    win.fullscreen()
+    yield pump(0.5)
+    win.activate_action("win.home", None)
+    yield Wait(3, until=lambda: win.picture.get_visible_child_name() == "welcome")
+    check(win.picture.get_visible_child_name() == "welcome" and not win.home_button.get_visible(),
+          "← : accueil, bouton caché")
+    yield Wait(3, until=lambda: not win.is_fullscreen())
+    check(not win.is_fullscreen(), "← en plein écran : plein écran quitté")
+    check(c().positions.get(LIB["film"]) >= 39, "position retenue (Reprendre)")
+    check(len(c().queue) > 0 and c().player.path is None, "file gardée, lecture arrêtée")
+    data = c().saved_queue(c().queue_file)
+    check(bool(data and data.get("current")), "file enregistrée : « Reprendre » sur l'accueil")
+
+
+@step
 def passer_le_generique(win):
     """« Passer le générique » : chapitre « Credits » → bouton « Épisode suivant » ; sans chapitres, durée apprise
     par « Le générique commence ici » (G) pour toute la série (saisons comprises), croix, mode automatique, oubli."""

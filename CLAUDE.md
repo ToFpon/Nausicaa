@@ -188,6 +188,11 @@ tests, paquet.
   Odysseus / Calypso) ; taille = `get_default_size()` (celle d'avant la maximisation ; `get_width()` perdait
   ~10 px à chaque ouverture sous openbox), aussi pour `_pip_saved`.
 - Temps restant / durée totale (clic sur la durée) : réglage `show_remaining`, retenu (0.1.8).
+- Revenir à l'accueil (demande de Tof : en lecture, rien ne ramenait à la bibliothèque) : bouton ← en tête de
+  l'en-tête (`home_button`, visible hors accueil), Alt+Début, clic droit ; `go_home` = image dans l'image / plein
+  écran quittés, `c.save()` PUIS `c.stop()` (stop remet la position du lecteur à 0 : la file enregistrée après
+  aurait perdu sa position) → l'accueil propose « Reprendre », la bibliothèque sa section « Reprendre ». La file
+  reste en mémoire (Espace la relance). Testé : `revenir_a_l_accueil` d'ui_smoke.
 - `backend/mpris.py` (repris d'Ithaca, demandé par Tof) : `org.mpris.MediaPlayer2.nausicaa`. Le casque
   Bluetooth passe par là : BlueZ relaie l'AVRCP (double tape = PlayPause, écouteurs retirés = Pause) au
   lecteur MPRIS actif — Ithaca les recevait, Nausicaa 0.1.1 non. Pause / Stop = pause (vidéo gardée),

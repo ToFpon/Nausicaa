@@ -35,6 +35,7 @@ def _groups():
             ("F9", tr("Afficher la file de lecture")),
             ("<Control>p", tr("Image dans l'image")),
             ("<Control>o", tr("Ouvrir des vidéos")),
+            ("<Alt>Home", tr("Revenir à l'accueil")),
             ("<Control>u", tr("Ouvrir une adresse")),
             ("<Control>s", tr("Enregistrer la file")),
             ("<Control>comma", tr("Préférences")),

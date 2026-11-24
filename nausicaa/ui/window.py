@@ -148,6 +148,10 @@ class MainWindow(Adw.ApplicationWindow):
         self.header.set_title_widget(self.title_widget)
         open_button = Gtk.Button(icon_name="document-open-symbolic", tooltip_text=tr("Ouvrir des vidéos"),
                                  action_name="win.open")
+        # retour à l'accueil pendant la lecture (demande de Tof : rien ne ramenait à la bibliothèque)
+        self.home_button = Gtk.Button(icon_name="go-previous-symbolic", tooltip_text=tr("Revenir à l'accueil"),
+                                      action_name="win.home", visible=False)
+        self.header.pack_start(self.home_button)
         self.header.pack_start(open_button)
         self.main_menu_button = Gtk.MenuButton(icon_name="open-menu-symbolic", menu_model=self._main_menu(),
                                                tooltip_text=tr("Menu principal"), primary=True)
@@ -421,6 +425,7 @@ class MainWindow(Adw.ApplicationWindow):
         app = self.get_application()
         simple = (
             ("open", self.open_dialog, ["<Control>o"]),
+            ("home", self.go_home, ["<Alt>Home"]),
             ("open-folder", self.open_folder_dialog, ["<Control><Shift>o"]),
             ("open-location", self.open_location_dialog, ["<Control>u"]),
             ("restore-queue", lambda: (self._want_fullscreen(),
@@ -689,6 +694,19 @@ class MainWindow(Adw.ApplicationWindow):
             self.unfullscreen()
         else:
             self.fullscreen()
+
+    def go_home(self):
+        """Retour à l'accueil : file et position enregistrées (« Reprendre », section « Reprendre » de la
+        bibliothèque), lecture arrêtée, plein écran quitté. La file reste : Espace la relance."""
+        if self.c.player.path is None:
+            return
+        if self.pip:
+            self.leave_pip()
+        if self.is_fullscreen():
+            self.unfullscreen()
+        self.c.save()
+        self.c.stop()
+        self._sync_page()
 
     def leave_fullscreen(self):
         """Échap : quitte le plein écran, ou l'image dans l'image."""
@@ -1002,6 +1020,7 @@ class MainWindow(Adw.ApplicationWindow):
                 credits.append(tr("Oublier le générique de cette série"), "win.credits-forget")
             menu.append_section(None, credits)
         more = Gio.Menu()
+        more.append(tr("Revenir à l'accueil"), "win.home")
         more.append(tr("Ouvrir des vidéos…"), "win.open")
         more.append(tr("Capture de l'image"), "win.screenshot")
         more.append(tr("Afficher la file de lecture"), "win.playlist")
@@ -1297,6 +1316,7 @@ class MainWindow(Adw.ApplicationWindow):
         else:
             name = "video"
         self.picture.set_visible_child_name(name)
+        self.home_button.set_visible(name != "welcome")
         if name == "welcome":
             self._sync_resume_button()
             self._sync_welcome()
