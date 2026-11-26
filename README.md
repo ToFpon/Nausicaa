@@ -11,7 +11,7 @@
 |---|---|
 | ![Full screen](docs/captures/plein-ecran.png) | ![Picture in picture](docs/captures/image-dans-l-image.png) |
 
-| Library / Bibliothèque (1.1) |
+| Library / Bibliothèque |
 |---|
 | ![Library](docs/captures/bibliotheque.png) |
 
@@ -53,7 +53,8 @@ bin/nausicaa                # try it without installing
 ### Features
 
 **The mouse, like VLC — but better**
-- A click on the picture **pauses at once**; a **double-click goes full screen without pausing**.
+- A click on the picture **pauses at once**, with a discreet ⏸ / ▶ sign in the middle; a **double-click goes full
+  screen without pausing**.
 - The **mouse wheel sets the volume**, shown over the picture (up to 150 % if you allow it).
 - In full screen, **compact rounded controls** float over the picture and fade away when the mouse rests.
 - Optionally, **videos open straight in full screen**, like VLC (Preferences → Features).
@@ -61,6 +62,9 @@ bin/nausicaa                # try it without installing
 
 **Library on the start page** (optional, Preferences → Features)
 - Your videos on the start page: **Continue watching**, **TV shows** (one poster per show) and **movies**.
+- **Continue watching** follows your shows: one card per show, on the episode you stopped in, or on the next one
+  (“Up next: S01E04”) once an episode is finished. A small cross removes a card (Undo in the notification).
+- The **←** button at the top left (or Alt+Home) brings you back to the start page during playback, position kept.
 - Shows stored one folder per season (“Show season 1”, “Show season 2”… or “Show/Season 1”) are grouped
   together; a show’s page lists its seasons with the **watched** episodes and a button to resume or play the next one.
 - Posters **without the Internet**: an image next to the videos (poster.jpg, folder.jpg, Movie-poster.jpg…), the
@@ -117,6 +121,8 @@ Every feature can be turned off in **Preferences → Features**, without restart
 | Ctrl+P | Picture in picture |
 | F9 | Play queue |
 | V / S | Show / hide subtitles · picture capture |
+| G | The credits start here (learned for the series) |
+| Alt+Home | Back to the start page |
 | Ctrl+O / Ctrl+U | Open videos / open an address |
 | F1 | All the shortcuts |
 
@@ -154,7 +160,8 @@ bin/nausicaa                # pour l'essayer sans l'installer
 ### Fonctionnalités
 
 **La souris comme VLC, en mieux**
-- Un clic sur l'image **met en pause tout de suite** ; un **double-clic passe en plein écran sans mettre en pause**.
+- Un clic sur l'image **met en pause tout de suite**, avec un signe ⏸ / ▶ discret au centre ; un **double-clic passe
+  en plein écran sans mettre en pause**.
 - La **molette règle le volume**, affiché sur l'image (jusqu'à 150 % si on l'autorise).
 - En plein écran, des **commandes compactes et arrondies** flottent sur l'image et s'effacent quand la souris ne
   bouge plus.
@@ -164,6 +171,9 @@ bin/nausicaa                # pour l'essayer sans l'installer
 
 **Bibliothèque sur l'accueil** (en option, Préférences → Fonctionnalités)
 - Vos vidéos sur l'accueil : **à reprendre**, **séries** (une affiche par série) et **films**.
+- **Reprendre** suit vos séries : une carte par série, sur l'épisode commencé, ou sur le suivant (« À suivre :
+  S01E04 ») une fois un épisode fini. Une petite croix retire une carte (« Annuler » dans la notification).
+- Le bouton **←** en haut à gauche (ou Alt+Début) ramène à l'accueil pendant la lecture, position retenue.
 - Les séries rangées par saison (« Série saison 1 », « Série saison 2 »… ou « Série/Saison 1 ») sont regroupées ;
   la page d'une série montre ses saisons, les épisodes **vus**, et un bouton pour reprendre ou lire la suite.
 - Affiches **sans Internet** : image posée à côté des vidéos (poster.jpg, folder.jpg, Film-poster.jpg…), vignette
@@ -223,6 +233,8 @@ Chaque fonctionnalité se coupe dans **Préférences → Fonctionnalités**, san
 | Ctrl+P | Image dans l'image |
 | F9 | File de lecture |
 | V / S | Afficher / masquer les sous-titres · capture de l'image |
+| G | Le générique commence ici (retenu pour la série) |
+| Alt+Début | Revenir à l'accueil |
 | Ctrl+O / Ctrl+U | Ouvrir des vidéos / ouvrir une adresse |
 | F1 | Tous les raccourcis |
 

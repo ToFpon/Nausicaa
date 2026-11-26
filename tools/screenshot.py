@@ -74,7 +74,10 @@ def demo_from(source: str, episode: int) -> str:
     os.makedirs(folder)
     for i, (start, title) in enumerate(BBB_CUTS, 1):
         path = os.path.join(folder, f"Big Buck Bunny - {i} - {title}.mkv")
-        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-ss", str(start), "-i", source, "-t", "16",
+        # -map_metadata -1 : sans le titre du film entier (« Big Buck Bunny, Sunflower version »), que Nausicaa
+        # afficherait à la place du nom de l'épisode (fonctionnalité file_titles)
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-ss", str(start), "-i", source, "-map_metadata", "-1",
+                        "-t", "16",
                         "-vf", "scale=1280:-2", "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
                         "-pix_fmt", "yuv420p", "-c:a", "aac", path], check=True)
     i = max(1, min(episode, len(BBB_CUTS)))
@@ -139,7 +142,8 @@ def demo_history(win, root):
     for rel, entry in (("Phaeacia saison 1/Phaeacia S01E01.mkv", {"pos": 0, "dur": 2700, "seen": True}),
                        ("Phaeacia saison 1/Phaeacia S01E02.mkv", {"pos": 1500, "dur": 2700}),
                        ("Calypso (2021).mkv", {"pos": 2400, "dur": 6300}),
-                       ("Les Sirènes.mkv", {"pos": 0, "dur": 5400, "seen": True})):
+                       ("Les Sirènes.mkv", {"pos": 0, "dur": 5400, "seen": True}),
+                       ("Ithaque saison 1/Ithaque S01E01.mkv", {"pos": 0, "dur": 2700, "seen": True})):
         k = positions.key_for(os.path.join(root, rel))
         if k:
             pos.data[k] = dict(entry, time=now)

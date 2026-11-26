@@ -280,7 +280,7 @@
     <div class="copy">
       <div class="ftag">Mouse <span class="kbd">F</span><span class="kbd">↑</span><span class="kbd">↓</span></div>
       <h3>Your hand already knows what to do.</h3>
-      <p class="intro">The gestures you learned with VLC, without its quirks. A click pauses right away; a double-click goes full screen and the video keeps playing.</p>
+      <p class="intro">The gestures you learned with VLC, without its quirks. A click pauses right away, with a discreet ⏸ / ▶ sign in the middle; a double-click goes full screen and the video keeps playing.</p>
       <div class="gestures">
         <div class="g"><div class="gi">🖱️</div><b>Click</b><span>pause / play</span></div>
         <div class="g"><div class="gi">⛶</div><b>Double-click</b><span>full screen, no pause</span></div>
@@ -332,6 +332,7 @@
       <p class="intro">Double-click “Episode 2” in your file manager: the other episodes of the folder join the queue, in the right order, and playback starts where you asked.</p>
       <div class="flist">
         <div class="fi"><span class="chk">✓</span><span><b>Natural order</b> — Episode 2 before Episode 10, like in your file manager.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>Skip the credits</b> — during the end credits, a discreet “Next episode” button (or skip by itself). Found in the chapters, or learned once with G for the whole series. No Internet, no database.</span></div>
         <div class="fi"><span class="chk">✓</span><span><b>Resume where you left off</b>, for every video. “From the start” is one click away.</span></div>
         <div class="fi"><span class="chk">✓</span><span><b>A real queue</b>, on the right or on the left: shuffle, repeat, drag to reorder, Delete to remove, drop files to add.</span></div>
         <div class="fi"><span class="chk">✓</span><span><b>Playlists</b> — M3U, M3U8, XSPF, PLS, and the queue saved as a playlist with relative paths.</span></div>
@@ -348,14 +349,16 @@
 <section class="feature alt flip">
   <div class="wrap">
     <div class="copy">
-      <div class="ftag">New in 1.1 · Library</div>
+      <div class="ftag">Library</div>
       <h3>Your videos, on the start page.</h3>
       <p class="intro">Turn on the library and the start page shows what you were watching, your TV shows with one poster each, and your movies. Click a show: its seasons, the episodes you have seen, and a button to carry on.</p>
       <div class="flist">
         <div class="fi"><span class="chk">✓</span><span><b>Seasons grouped</b> — “Show season 1”, “Show season 2”… or “Show/Season 1” become one show.</span></div>
         <div class="fi"><span class="chk">✓</span><span><b>Posters without the Internet</b> — poster.jpg next to the videos, the GNOME thumbnail, or a picture taken from the video.</span></div>
         <div class="fi"><span class="chk">✓</span><span><b>Optional TMDB posters</b>, in your language, with your own free API key.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>Continue watching</b> follows your shows — the episode you stopped in, or “Up next: S01E04” once one is finished. A cross removes a card.</span></div>
         <div class="fi"><span class="chk">✓</span><span><b>Watched</b> episodes and movies ticked; right-click to choose a poster or mark as watched.</span></div>
+        <div class="fi"><span class="chk">✓</span><span><b>Back home</b> during playback with ← (or Alt+Home): the position is kept, the card is waiting for you.</span></div>
       </div>
     </div>
     <div class="visual reveal tabbed" data-tabs>
@@ -428,7 +431,7 @@
     <div class="sec-head">
       <div class="sec-tag">Everything</div>
       <h2>All you need to watch. Nothing to manage.</h2>
-      <p>No library, no database, no account: your videos stay in your folders, Nausicaa just plays them.</p>
+      <p>No database, no account: your videos stay in your folders, Nausicaa just plays them.</p>
     </div>
     <div class="egrid">
       <div class="ecard reveal"><div class="ei">🎞️</div><h4>The mpv engine</h4><p>Almost every format and streams too (Ctrl+U), smooth playback, the picture drawn straight into the window.</p><code>libmpv</code></div>
