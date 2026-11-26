@@ -26,6 +26,9 @@ FEATURES = [
             tr("Un clic gauche sur l'image met en pause ou relance, comme VLC ; un double-clic passe en "
                "plein écran sans mettre en pause"),
             "input-mouse-symbolic"),
+    Feature("play_flash", tr("Signe de pause et de lecture"),
+            tr("Une icône ⏸ ou ▶ apparaît brièvement au centre de l'image quand on met en pause ou qu'on reprend"),
+            "media-playback-pause-symbolic"),
     Feature("wheel_volume", tr("Volume à la molette"),
             tr("La molette de la souris sur l'image règle le volume, affiché par-dessus la vidéo"),
             "audio-volume-high-symbolic"),

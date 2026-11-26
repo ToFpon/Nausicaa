@@ -69,3 +69,6 @@
 .playlist-panel { background-color: @sidebar_bg_color; }
 .playlist-panel row.current label { font-weight: 700; color: @accent_color; }
 .playlist-panel row.current label.dim-label { font-weight: normal; }
+
+/* Signe ⏸ / ▶ au centre de l'image (PlayFlash) : rond, couleurs de l'encart du volume */
+.nausicaa-osd.play-flash { border-radius: 999px; padding: 22px; min-width: 0; min-height: 0; }

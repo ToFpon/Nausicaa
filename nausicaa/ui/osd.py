@@ -67,3 +67,45 @@ class Osd(Gtk.Revealer):
         if self._timer:
             GLib.source_remove(self._timer)
             self._timer = 0
+
+
+class PlayFlash(Gtk.Revealer):
+    """Signe ⏸ / ▶ au centre de l'image à la pause et à la reprise, qui s'efface tout seul (demande de Tof, comme
+    YouTube / les plateformes) : rond aux couleurs translucides de l'encart du volume (thème), jamais cliquable."""
+
+    SHOWN_MS = 550
+
+    def __init__(self):
+        super().__init__(transition_type=Gtk.RevealerTransitionType.CROSSFADE, transition_duration=180,
+                         halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, can_target=False, reveal_child=False)
+        self.icon = Gtk.Image(pixel_size=40)
+        box = Gtk.Box(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER)
+        box.add_css_class("nausicaa-osd")
+        box.add_css_class("play-flash")
+        box.append(self.icon)
+        self.set_child(box)
+        self._timer = 0
+
+    def flash(self, playing: bool):
+        self.icon.set_from_icon_name("media-playback-start-symbolic" if playing else "media-playback-pause-symbolic")
+        self.set_reveal_child(True)
+        if self._timer:
+            GLib.source_remove(self._timer)
+        self._timer = GLib.timeout_add(self.SHOWN_MS, self._hide)
+
+    def cancel(self):
+        """Double-clic (plein écran) : la pause du 1er clic est annulée, rien à montrer."""
+        if self._timer:
+            GLib.source_remove(self._timer)
+            self._timer = 0
+        self.set_reveal_child(False)
+
+    def _hide(self):
+        self._timer = 0
+        self.set_reveal_child(False)
+        return False
+
+    def dispose_timer(self):
+        if self._timer:
+            GLib.source_remove(self._timer)
+            self._timer = 0

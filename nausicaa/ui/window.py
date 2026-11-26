@@ -31,7 +31,7 @@ from ..i18n import decimal, ntr, tr  # noqa: E402
 from ..settings import settings  # noqa: E402
 from .common import alert, choose_files, choose_folder, popup_menu, shown, toast  # noqa: E402
 from .controls import Controls, volume_icon  # noqa: E402
-from .osd import Osd  # noqa: E402
+from .osd import Osd, PlayFlash  # noqa: E402
 from .playlist_panel import PlaylistPanel  # noqa: E402
 from .video import VideoView  # noqa: E402
 
@@ -99,6 +99,8 @@ class MainWindow(Adw.ApplicationWindow):
             self.maximize()                      # avant l'affichage : ouverte directement maximisée
         self.set_size_request(480, 320)
         self._click_toggled = False
+        self._flash_playing = None               # dernier état montré par le signe ⏸ / ▶ (None : rien encore)
+        self._loaded_at = 0.0                    # ouverture d'un fichier : sa mise en route ne fait pas de signe
         self._opening = 0                        # ouvertures en cours : image noire, pas l'accueil
         self._fs_pending = False                 # « Plein écran à l'ouverture » : en attente de la piste vidéo
         self.pip = False                          # image dans l'image
@@ -129,6 +131,8 @@ class MainWindow(Adw.ApplicationWindow):
         overlay = Gtk.Overlay()
         overlay.set_child(self.picture)
         overlay.add_overlay(self.osd)
+        self.play_flash = PlayFlash()                 # ⏸ / ▶ au centre à la pause / reprise (demande de Tof)
+        overlay.add_overlay(self.play_flash)
         self.drop_hint = Adw.StatusPage(icon_name="video-x-generic-symbolic", title=tr("Déposez pour lire"),
                                         visible=False, can_target=False)
         self.drop_hint.add_css_class("drop-hint")
@@ -932,6 +936,8 @@ class MainWindow(Adw.ApplicationWindow):
 
     def _undo_click_pause(self):
         if self._click_toggled:
+            self.play_flash.cancel()             # double-clic : ni ⏸ ni ▶, seulement le plein écran
+            self._flash_quiet_until = GLib.get_monotonic_time() + 400_000
             self.c.toggle()
             self._click_toggled = False
 
@@ -1267,6 +1273,7 @@ class MainWindow(Adw.ApplicationWindow):
                 self._credits_loaded = False
                 self._find_credits()
         elif event == "loaded":
+            self._loaded_at = GLib.get_monotonic_time()
             self._credits_loaded = True
             self._find_credits()
         elif event == "video":
@@ -1377,8 +1384,22 @@ class MainWindow(Adw.ApplicationWindow):
         self.lookup_action("save-playlist").set_enabled(len(q) > 0)
         self.lookup_action("clear-queue").set_enabled(len(q) > 0)
 
+    def _flash_state(self, playing: bool):
+        """Signe ⏸ / ▶ au centre de l'image quand la lecture s'arrête ou reprend — par l'utilisateur (clic, Espace,
+        bouton, casque Bluetooth…), pas à l'ouverture d'un fichier ni à la pause de fin de vidéo."""
+        before, self._flash_playing = self._flash_playing, playing
+        p = self.c.player
+        now = GLib.get_monotonic_time()
+        if (before is None or before == playing or not features.enabled("play_flash") or p.path is None
+                or p.get("eof-reached") or now - self._loaded_at < 1_000_000
+                or now < getattr(self, "_flash_quiet_until", 0) or self.pip
+                or self.picture.get_visible_child_name() != "video"):
+            return
+        self.play_flash.flash(playing)
+
     def _sync_state(self):
         playing = self.c.playing
+        self._flash_state(playing)
         self.controls.set_playing(playing)
         self.pip_play.set_icon_name("media-playback-pause-symbolic" if playing else "media-playback-start-symbolic")
         self.pip_play.set_tooltip_text(tr("Pause") if playing else tr("Lire"))
@@ -1438,6 +1459,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.c.disconnect(self.panel._on_event)
         settings.disconnect(self._on_setting)
         self.osd.dispose_timer()
+        self.play_flash.dispose_timer()
         if self._hide_timer:
             GLib.source_remove(self._hide_timer)
             self._hide_timer = 0

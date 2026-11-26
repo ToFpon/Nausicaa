@@ -17,7 +17,7 @@ tests, paquet.
   derrière l'image (bandes autour d'un film), comme tout lecteur vidéo.
 - Dialogues : de vraies fenêtres (`common.AlertDialog`, `common.DialogWindow`, `Adw.PreferencesWindow`,
   `Adw.AboutWindow`).
-- Chaque fonctionnalité facultative est dans `nausicaa/features.py` (click_pause, wheel_volume,
+- Chaque fonctionnalité facultative est dans `nausicaa/features.py` (click_pause, play_flash, wheel_volume,
   minimize_pause, resume, next_episodes, skip_credits, mpris, hwdec, auto_fullscreen, file_titles, library, tmdb) et se consulte au moment de l'usage.
 - Tout texte visible passe par `tr()` / `ntr()`. Après modification : `python3.12 tools/update-pot.py`,
   compléter `data/locale/en.po` et `de.po`, puis `msgfmt -c --statistics` et `msgcmp`.
@@ -193,6 +193,13 @@ tests, paquet.
   Odysseus / Calypso) ; taille = `get_default_size()` (celle d'avant la maximisation ; `get_width()` perdait
   ~10 px à chaque ouverture sous openbox), aussi pour `_pip_saved`.
 - Temps restant / durée totale (clic sur la durée) : réglage `show_remaining`, retenu (0.1.8).
+- Signe ⏸ / ▶ au centre de l'image à la pause et à la reprise (fonctionnalité `play_flash`, active par défaut,
+  demande de Tof, comme YouTube) : `osd.PlayFlash` (rond `.nausicaa-osd.play-flash`, couleurs de l'encart du volume,
+  fondu 180 ms, effacé après 550 ms, jamais cliquable). Déclenché par le CHANGEMENT d'état (`_flash_state` dans
+  `_sync_state`) : clic, Espace, bouton, casque Bluetooth (MPRIS) ; PAS à l'ouverture d'un fichier (1 s après
+  l'événement « loaded »), ni à la pause de fin de vidéo (eof-reached), ni en image dans l'image, ni hors de la page
+  vidéo. Double-clic (plein écran) : la pause du 1er clic est annulée → signe retiré, rien pendant 0,4 s.
+  Testé : `clic_pause_double_clic` d'ui_smoke.
 - Revenir à l'accueil (demande de Tof : en lecture, rien ne ramenait à la bibliothèque) : bouton ← en tête de
   l'en-tête (`home_button`, visible hors accueil), Alt+Début, clic droit ; `go_home` = image dans l'image / plein
   écran quittés, `c.save()` PUIS `c.stop()` (stop remet la position du lecteur à 0 : la file enregistrée après
